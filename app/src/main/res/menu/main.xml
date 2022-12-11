@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/maps"
+        android:orderInCategory="100"
+        android:title="Карта"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/mapOsmItem"
+                android:title="Open Street Map" />
+            <item
+                android:id="@+id/mapGoogleItem"
+                android:title="Google карта" />
+            <item
+                android:id="@+id/mapGoogleSatteliteItem"
+                android:title="Google спутник" />
+            <item
+                android:id="@+id/mapGoogleHybridItem"
+                android:title="Google гибрид" />
+            <item
+                android:id="@+id/mapGridItem"
+                android:checkable="true"
+                android:title="Сетка" />
+            <item
+                android:id="@+id/mapSearchItem"
+                android:title="Поиск" />
+            <item
+                android:id="@+id/mapOfflineItem"
+                android:title="Оффлайн карта" />
+            <item
+                android:id="@+id/mapCacheDownloadItem"
+                android:title="Скачать район" />
+        </menu>
+    </item>
+    <item
+        android:id="@+id/abonents"
+        android:orderInCategory="102"
+        android:title="Абоненты"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/abonentListItem"
+                android:title="Список" />
+            <item
+                android:id="@+id/abonentAddItem"
+                android:title="Добавить" />
+        </menu>
+    </item>
+    <item
+        android:id="@+id/targets"
+        android:orderInCategory="103"
+        android:title="Цели"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/breachs"
+        android:orderInCategory="104"
+        android:title="Разрывы"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/pasteBuffer"
+        android:orderInCategory="105"
+        android:title="Вставить из буфера"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/removeAll"
+        android:orderInCategory="106"
+        android:title="Удалить все"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/about"
+        android:orderInCategory="107"
+        android:title="О программе"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/actionGeoLocation"
+        android:icon="@drawable/ic_action_geolocation"
+        android:orderInCategory="300"
+        android:title="Геолокация"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/actionConnect"
+        android:icon="@drawable/no_wifi"
+        android:orderInCategory="300"
+        android:title="Р-187-П1"
+        app:showAsAction="ifRoom" />
+</menu>

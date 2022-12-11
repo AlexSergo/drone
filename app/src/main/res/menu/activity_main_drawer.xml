@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/targ01"
+            android:icon="@drawable/ic_01"
+            android:title="ПУСК УСТ" />
+        <item
+            android:id="@+id/targ04"
+            android:icon="@drawable/ic_04"
+            android:title="БАТР СХ" />
+        <item
+            android:id="@+id/targ08"
+            android:icon="@drawable/ic_08"
+            android:title="БАТР АРТ" />
+        <item
+            android:id="@+id/targ10"
+            android:icon="@drawable/ic_10"
+            android:title="БАТР РЕАКТ" />
+        <item
+            android:id="@+id/targ12"
+            android:icon="@drawable/ic_12"
+            android:title="БАТР МИН" />
+        <item
+            android:id="@+id/targ14"
+            android:icon="@drawable/ic_14"
+            android:title="БАТР ЗУР" />
+        <item
+            android:id="@+id/targ17"
+            android:icon="@drawable/ic_17"
+            android:title="РЛС" />
+        <item
+            android:id="@+id/targ19"
+            android:icon="@drawable/ic_19"
+            android:title="ПЕХОТА" />
+        <item
+            android:id="@+id/targ20"
+            android:icon="@drawable/ic_20"
+            android:title="О ПУНКТ" />
+        <item
+            android:id="@+id/targ21"
+            android:icon="@drawable/ic_21"
+            android:title="КНП" />
+        <item
+            android:id="@+id/targ22"
+            android:icon="@drawable/ic_22"
+            android:title="ТАНКИ" />
+        <item
+            android:id="@+id/targ23"
+            android:icon="@drawable/ic_23"
+            android:title="БТР" />
+        <item
+            android:id="@+id/targ24"
+            android:icon="@drawable/ic_24"
+            android:title="БМП" />
+        <item
+            android:id="@+id/targ25"
+            android:icon="@drawable/ic_25"
+            android:title="ВЕРТ" />
+        <item
+            android:id="@+id/targ27"
+            android:icon="@drawable/ic_27"
+            android:title="ПТРК" />
+        <item
+            android:id="@+id/targ29"
+            android:icon="@drawable/ic_29"
+            android:title="КЛН ПЕШ" />
+        <item
+            android:id="@+id/targ30"
+            android:icon="@drawable/ic_30"
+            android:title="КЛН БР" />
+        <item
+            android:id="@+id/targ31"
+            android:icon="@drawable/ic_31"
+            android:title="ТАНК" />
+        <item
+            android:id="@+id/targ99"
+            android:icon="@drawable/ic_99"
+            android:title="ДРУГАЯ" />
+        <item
+            android:id="@+id/breach"
+            android:icon="@drawable/ic_breach"
+            android:title="Разрыв" />
+    </group>
+</menu>
