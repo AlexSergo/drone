@@ -6,6 +6,6 @@
 
     <fragment
         android:id="@+id/mapFragment"
-        android:name="com.example.dronevision.MapFragment"
+        android:name="com.example.dronevision.presentation.MapFragment"
         android:label="MapFragment" />
 </navigation>
