@@ -13,4 +13,12 @@ class RepositoryImpl(private val dao: Dao): Repository {
     override suspend fun getTechnics(): List<TechnicEntity> {
        return dao.getTechnics()
     }
+
+    override suspend fun deleteTechnic(technic: TechnicEntity) {
+        dao.deleteTechnic(technic)
+    }
+
+    override suspend fun deleteAll() {
+        dao.deleteAll()
+    }
 }

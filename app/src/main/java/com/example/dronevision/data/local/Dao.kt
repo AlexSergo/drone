@@ -1,5 +1,6 @@
 package com.example.dronevision.data.local
 
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -12,4 +13,10 @@ interface Dao {
 
     @Query("SELECT * FROM technics")
     suspend fun getTechnics(): List<TechnicEntity>
+
+    @Delete
+    suspend fun deleteTechnic(technic: TechnicEntity)
+
+    @Query("DELETE FROM technics")
+    suspend fun  deleteAll()
 }

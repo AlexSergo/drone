@@ -5,6 +5,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.dronevision.domain.Repository
 import com.example.dronevision.domain.model.Technic
+import com.example.dronevision.domain.use_cases.DeleteAllUseCase
+import com.example.dronevision.domain.use_cases.DeleteTechnicUseCase
 import com.example.dronevision.domain.use_cases.GetTechnicsUseCase
 import com.example.dronevision.domain.use_cases.SaveTechnicUseCase
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +24,14 @@ class TechnicViewModel(repository: Repository): androidx.lifecycle.ViewModel() {
         SaveTechnicUseCase(repository)
     }
 
+    private val deleteAllUseCase by lazy(LazyThreadSafetyMode.NONE){
+        DeleteAllUseCase(repository)
+    }
+
+    private val deleteTechnicUseCase by lazy(LazyThreadSafetyMode.NONE){
+        DeleteTechnicUseCase(repository)
+    }
+
     fun getLiveData(): LiveData<List<Technic>>{
         return liveData
     }
@@ -32,5 +42,13 @@ class TechnicViewModel(repository: Repository): androidx.lifecycle.ViewModel() {
 
     fun saveTechnic(technic: Technic) = viewModelScope.launch(Dispatchers.IO){
         saveTechnicUseCase.execute(technic)
+    }
+
+    fun deleteAll() = viewModelScope.launch(Dispatchers.IO){
+        deleteAllUseCase.execute()
+    }
+
+    fun deleteTechnic(technic: Technic) = viewModelScope.launch(Dispatchers.IO){
+        deleteTechnicUseCase.execute(technic)
     }
 }
