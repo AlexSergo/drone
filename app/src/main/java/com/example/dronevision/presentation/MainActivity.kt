@@ -3,15 +3,19 @@ package com.example.dronevision.presentation
 import android.Manifest
 import android.app.ProgressDialog
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.AsyncTask
 import android.os.Bundle
+import android.util.AttributeSet
 import android.util.Log
 import android.view.Menu
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -38,16 +42,23 @@ class MainActivity : AppCompatActivity() {
     
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private var dialog: SelectBluetoothFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     
         MapKitFactory.setApiKey("21d592db-23af-489e-a87f-cf284dd7d62e")
         MapKitFactory.initialize(this)
-    
+
+        val bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
+        val bluetoothAdapter = bluetoothManager.adapter
+        dialog = SelectBluetoothFragment(bluetoothAdapter)
+        
         binding = ActivityMainBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+
+
+
+        setContentView(binding.root)
     
         /*if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
@@ -79,9 +90,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.main, menu)
+        dialog?.show(supportFragmentManager, "ActionBottomDialog")
         return true
     }
-    
+
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()

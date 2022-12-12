@@ -49,6 +49,11 @@
         </menu>
     </item>
     <item
+        android:id="@+id/bluetooth"
+        android:orderInCategory="103"
+        android:title="Bluetooth"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/targets"
         android:orderInCategory="103"
         android:title="Цели"
