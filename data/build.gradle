@@ -36,6 +36,7 @@ dependencies {
     implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.7.20'
 
     implementation "androidx.room:room-runtime:2.4.3"
+    implementation 'androidx.room:room-common:2.4.3'
     kapt  "androidx.room:room-compiler:2.4.3"
     implementation 'androidx.room:room-ktx:2.4.3'
 

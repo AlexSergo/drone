@@ -1,13 +1,13 @@
 package com.example.dronevision.domain
 
-import com.example.dronevision.domain.model.TechnicEntity
+import com.example.dronevision.domain.model.TechnicDTO
 
 interface Repository {
-    suspend fun saveTechnic(technic: TechnicEntity)
+    suspend fun saveTechnic(technicDTO: TechnicDTO)
 
-    suspend fun getTechnics(): List<TechnicEntity>
+    suspend fun getTechnics(): List<TechnicDTO>
 
-    suspend fun deleteTechnic(technic: TechnicEntity)
+    suspend fun deleteTechnic(technicDTO: TechnicDTO)
 
     suspend fun  deleteAll()
 }

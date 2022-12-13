@@ -1,4 +1,4 @@
-package com.example.dronevision.data
+package com.example.dronevision.data.repository
 
 import android.content.Context
 import com.example.dronevision.data.local.Dao
