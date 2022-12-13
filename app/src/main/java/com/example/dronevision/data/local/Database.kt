@@ -3,7 +3,7 @@ package com.example.dronevision.data.local
 import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.dronevision.data.model.TechnicEntity
+import com.example.dronevision.domain.model.TechnicEntity
 
 @androidx.room.Database(entities = [TechnicEntity::class], version = 1, exportSchema = false)
 abstract class Database: RoomDatabase() {

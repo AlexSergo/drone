@@ -17,6 +17,7 @@ import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.ContextCompat.getSystemServiceName
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dronevision.databinding.FragmentSelectBluetoothBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -29,22 +30,20 @@ class SelectBluetoothFragment(private var bluetoothAdapter: BluetoothAdapter?) :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = FragmentSelectBluetoothBinding.inflate(layoutInflater)
-        recyclerViewAdapter = BluetoothRecyclerViewAdapter()
-        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        binding.recyclerView.adapter = recyclerViewAdapter
-        getPairedDevices()
     }
 
     private fun getPairedDevices(){
-        val pairedDevices: Set<BluetoothDevice>?
-            pairedDevices = bluetoothAdapter?.bondedDevices
+        if (ActivityCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter?.bondedDevices
             val tempList = ArrayList<BluetoothListItem>()
             pairedDevices?.forEach {
-                Log.d("MyLog", "Name ${it.name}")
                 tempList.add(BluetoothListItem(name = it.name, mac = it.address))
         }
-            recyclerViewAdapter.submitList(tempList)
+            recyclerViewAdapter.setData(tempList)
     }
 
     override fun onCreateView(
@@ -52,7 +51,10 @@ class SelectBluetoothFragment(private var bluetoothAdapter: BluetoothAdapter?) :
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentSelectBluetoothBinding.inflate(layoutInflater)
-
+        binding.recyclerView.layoutManager = GridLayoutManager(requireActivity(), 1)
+        recyclerViewAdapter = BluetoothRecyclerViewAdapter()
+        binding.recyclerView.adapter = recyclerViewAdapter
+        getPairedDevices()
         return binding.root
     }
 }

@@ -1,6 +1,6 @@
 package com.example.dronevision.domain.use_cases
 
-import com.example.dronevision.data.model.TechnicEntity
+import com.example.dronevision.domain.model.TechnicEntity
 import com.example.dronevision.domain.Repository
 import com.example.dronevision.domain.model.Technic
 

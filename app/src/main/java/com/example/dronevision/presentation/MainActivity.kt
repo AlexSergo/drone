@@ -1,25 +1,15 @@
 package com.example.dronevision.presentation
 
-import android.Manifest
-import android.app.ProgressDialog
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
-import android.bluetooth.BluetoothSocket
-import android.content.Context
-import android.content.pm.PackageManager
-import android.os.AsyncTask
 import android.os.Bundle
-import android.util.AttributeSet
-import android.util.Log
 import android.view.Menu
-import android.view.View
+import android.view.MenuInflater
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.loader.content.AsyncTaskLoader
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -27,12 +17,6 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.dronevision.R
 import com.example.dronevision.databinding.ActivityMainBinding
-import com.example.dronevision.data.RepositoryInitializer
-import com.example.dronevision.domain.model.Coordinates
-import com.example.dronevision.domain.model.Technic
-import com.example.dronevision.domain.model.TechnicTypes
-import com.example.dronevision.presentation.view_model.TechnicViewModel
-import com.example.dronevision.presentation.view_model.ViewModelFactory
 import com.google.android.material.navigation.NavigationView
 import com.yandex.mapkit.MapKitFactory
 import java.io.IOException
@@ -57,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
 
 
-
+        setupOptionsMenu()
         setContentView(binding.root)
     
         /*if (savedInstanceState == null) {
@@ -90,13 +74,30 @@ class MainActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.main, menu)
-        dialog?.show(supportFragmentManager, "ActionBottomDialog")
         return true
     }
 
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    private fun setupOptionsMenu() {
+        val menuHost: MenuHost = this
+        menuHost.addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.main, menu)
+            }
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.bluetooth -> {
+                        dialog?.show(supportFragmentManager, "ActionBottomDialog")
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }, this, Lifecycle.State.RESUMED)
     }
     
 }

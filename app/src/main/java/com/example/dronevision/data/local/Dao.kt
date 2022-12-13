@@ -4,7 +4,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.dronevision.data.model.TechnicEntity
+import com.example.dronevision.domain.model.TechnicEntity
 
 @androidx.room.Dao
 interface Dao {

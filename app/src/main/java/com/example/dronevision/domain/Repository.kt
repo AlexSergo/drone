@@ -1,6 +1,6 @@
 package com.example.dronevision.domain
 
-import com.example.dronevision.data.model.TechnicEntity
+import com.example.dronevision.domain.model.TechnicEntity
 
 interface Repository {
     suspend fun saveTechnic(technic: TechnicEntity)

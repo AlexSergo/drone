@@ -11,10 +11,16 @@ import com.example.dronevision.R
 import com.example.dronevision.databinding.BluetoothListItemBinding
 
 class BluetoothRecyclerViewAdapter()
-    : ListAdapter<BluetoothListItem, BluetoothRecyclerViewAdapter.ItemHolder>(ItemComparator()) {
+    : RecyclerView.Adapter<BluetoothRecyclerViewAdapter.ItemHolder>() {
 
-    class ItemHolder(view: View)
-        : RecyclerView.ViewHolder(view){
+    private var items = mutableListOf<BluetoothListItem>()
+
+    fun setData(items: List<BluetoothListItem>){
+        this.items = items.toMutableList()
+        notifyDataSetChanged()
+    }
+
+    class ItemHolder(view: View) : RecyclerView.ViewHolder(view){
 
         private val binding = BluetoothListItemBinding.bind(view)
 
@@ -57,6 +63,12 @@ class BluetoothRecyclerViewAdapter()
     }
 
     override fun onBindViewHolder(holder: ItemHolder, position: Int) {
-        holder.setData(getItem(position))
+        items.getOrNull(position)?.let {
+            holder.setData(it)
+        }
+    }
+
+    override fun getItemCount(): Int {
+        return items.size
     }
 }
