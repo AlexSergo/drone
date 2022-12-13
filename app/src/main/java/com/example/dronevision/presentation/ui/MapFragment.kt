@@ -1,4 +1,4 @@
-package com.example.dronevision.presentation
+package com.example.dronevision.presentation.ui
 
 import android.bluetooth.BluetoothAdapter
 import android.os.Bundle

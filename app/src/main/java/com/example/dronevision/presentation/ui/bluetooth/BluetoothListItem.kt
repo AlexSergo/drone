@@ -1,4 +1,4 @@
-package com.example.dronevision.presentation
+package com.example.dronevision.presentation.ui.bluetooth
 
 data class BluetoothListItem(
     val name: String,

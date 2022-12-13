@@ -30,7 +30,7 @@
         android:theme="@style/Theme.DroneVision"
         tools:targetApi="31">
         <activity
-            android:name=".presentation.MainActivity"
+            android:name=".presentation.ui.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.DroneVision.NoActionBar">
             <intent-filter>

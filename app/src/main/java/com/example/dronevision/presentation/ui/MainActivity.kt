@@ -1,10 +1,11 @@
-package com.example.dronevision.presentation
+package com.example.dronevision.presentation.ui
 
 import android.bluetooth.BluetoothManager
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -17,10 +18,11 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.dronevision.R
 import com.example.dronevision.databinding.ActivityMainBinding
+import com.example.dronevision.presentation.ui.bluetooth.BluetoothCallback
+import com.example.dronevision.presentation.ui.bluetooth.BluetoothListItem
+import com.example.dronevision.presentation.ui.bluetooth.SelectBluetoothFragment
 import com.google.android.material.navigation.NavigationView
 import com.yandex.mapkit.MapKitFactory
-import java.io.IOException
-import java.util.*
 
 class MainActivity : AppCompatActivity() {
     
@@ -36,7 +38,13 @@ class MainActivity : AppCompatActivity() {
 
         val bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
         val bluetoothAdapter = bluetoothManager.adapter
-        dialog = SelectBluetoothFragment(bluetoothAdapter)
+        dialog = SelectBluetoothFragment(bluetoothAdapter, object : BluetoothCallback{
+            override fun onClick(item: BluetoothListItem) {
+                Toast.makeText(applicationContext, "connected!", Toast.LENGTH_SHORT).show()
+                dialog?.dismiss()
+            }
+
+        })
         
         binding = ActivityMainBinding.inflate(layoutInflater)
 

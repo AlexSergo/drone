@@ -1,16 +1,15 @@
-package com.example.dronevision.presentation
+package com.example.dronevision.presentation.ui.bluetooth
 
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.dronevision.R
 import com.example.dronevision.databinding.BluetoothListItemBinding
 
-class BluetoothRecyclerViewAdapter()
+class BluetoothRecyclerViewAdapter(private val bluetoothCallback: BluetoothCallback)
     : RecyclerView.Adapter<BluetoothRecyclerViewAdapter.ItemHolder>() {
 
     private var items = mutableListOf<BluetoothListItem>()
@@ -24,16 +23,17 @@ class BluetoothRecyclerViewAdapter()
 
         private val binding = BluetoothListItemBinding.bind(view)
 
-        fun setData(item: BluetoothListItem){
+        fun setData(item: BluetoothListItem, bluetoothCallback: BluetoothCallback){
             binding.name.text = item.name
             binding.mac.text = item.mac
 
-            binding.cardView.setOnClickListener {
+            binding.bluetoothGadget.setOnClickListener {
+                bluetoothCallback.onClick(BluetoothListItem(name = item.name, mac = item.mac))
             }
         }
 
         companion object{
-            fun create(parent: ViewGroup): ItemHolder{
+            fun create(parent: ViewGroup): ItemHolder {
                 return ItemHolder(LayoutInflater.from(parent.context)
                     .inflate(R.layout.bluetooth_list_item, parent, false))
             }
@@ -64,7 +64,7 @@ class BluetoothRecyclerViewAdapter()
 
     override fun onBindViewHolder(holder: ItemHolder, position: Int) {
         items.getOrNull(position)?.let {
-            holder.setData(it)
+            holder.setData(it, bluetoothCallback)
         }
     }
 
