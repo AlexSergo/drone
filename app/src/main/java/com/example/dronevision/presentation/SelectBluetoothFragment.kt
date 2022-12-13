@@ -49,7 +49,7 @@ class SelectBluetoothFragment(private var bluetoothAdapter: BluetoothAdapter?) :
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentSelectBluetoothBinding.inflate(layoutInflater)
         binding.recyclerView.layoutManager = GridLayoutManager(requireActivity(), 1)
         recyclerViewAdapter = BluetoothRecyclerViewAdapter()
