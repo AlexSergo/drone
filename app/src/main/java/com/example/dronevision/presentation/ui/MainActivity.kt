@@ -23,9 +23,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.dronevision.R
 import com.example.dronevision.databinding.ActivityMainBinding
-import com.example.dronevision.presentation.ui.bluetooth.BluetoothCallback
-import com.example.dronevision.presentation.ui.bluetooth.BluetoothListItem
-import com.example.dronevision.presentation.ui.bluetooth.SelectBluetoothFragment
+import com.example.dronevision.presentation.ui.bluetooth.*
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
@@ -37,12 +35,14 @@ import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
 import java.io.IOException
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener {
     
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var locationRequest: LocationRequest
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+
+    lateinit var bluetoothConnection: BluetoothConnection
     private var dialog: SelectBluetoothFragment? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,9 +92,15 @@ class MainActivity : AppCompatActivity() {
     private fun setupBluetooth() {
         val bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
         val bluetoothAdapter = bluetoothManager.adapter
+        bluetoothConnection = BluetoothConnection(bluetoothAdapter,
+            context = this, listener = this)
+
         dialog = SelectBluetoothFragment(bluetoothAdapter, object : BluetoothCallback {
             override fun onClick(item: BluetoothListItem) {
-                Toast.makeText(applicationContext, "connected!", Toast.LENGTH_SHORT).show()
+                item.let {
+                    bluetoothConnection.connect(it.mac)
+                   // bluetoothConnection.sendMessage("Тест")
+                }
                 dialog?.dismiss()
             }
         })
@@ -260,5 +266,11 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         binding.mapView.onStart()
         MapKitFactory.getInstance().onStart()
+    }
+
+    override fun onReceive(message: String) {
+        runOnUiThread {
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        }
     }
 }
