@@ -21,6 +21,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.example.dronevision.AbonentDialogFragment
 import com.example.dronevision.R
 import com.example.dronevision.databinding.ActivityMainBinding
 import com.example.dronevision.presentation.ui.bluetooth.*
@@ -130,6 +131,11 @@ class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener {
                     }
                     R.id.actionGeoLocation -> {
                         showLocationDialog()
+                        true
+                    }
+                    R.id.abonentAddItem ->{
+                        val abonentDialogFragment = AbonentDialogFragment()
+                        abonentDialogFragment.show(supportFragmentManager, "myDialog")
                         true
                     }
                     else -> false

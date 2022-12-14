@@ -9,7 +9,7 @@ import java.io.OutputStream
 class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
                         private val listener: MessageListener): Thread() {
 
-    private val BUFFER_SIZE = 256
+    private val BUFFER_SIZE = 1024
     private var inputStream: InputStream? = null
     private var outputStream: OutputStream? = null
 

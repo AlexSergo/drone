@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.pm.PackageManager
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import java.io.IOException
 import java.util.*
@@ -40,10 +39,11 @@ class ConnectThread(private val device: BluetoothDevice,
                     Manifest.permission.BLUETOOTH_CONNECT
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                socket?.connect()
-                listener.onReceive("Подключено!")
                 receiveThread = BluetoothReceiver(socket!!, listener)
                 receiveThread.start()
+             //   socket?.connect()
+                listener.onReceive("Подключено!")
+
             }
         }catch (_: IOException){
             listener.onReceive("Невозможно подключиться!")
