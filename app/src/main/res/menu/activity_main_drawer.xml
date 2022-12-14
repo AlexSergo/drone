@@ -74,12 +74,12 @@
             android:icon="@drawable/ic_31"
             android:title="ТАНК" />
         <item
-            android:id="@+id/targ99"
-            android:icon="@drawable/ic_99"
-            android:title="ДРУГАЯ" />
-        <item
             android:id="@+id/breach"
             android:icon="@drawable/ic_breach"
             android:title="Разрыв" />
+        <item
+            android:id="@+id/targ99"
+            android:icon="@drawable/ic_99"
+            android:title="ДРУГАЯ" />
     </group>
 </menu>
