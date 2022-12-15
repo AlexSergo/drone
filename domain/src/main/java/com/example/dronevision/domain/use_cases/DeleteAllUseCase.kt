@@ -1,10 +1,10 @@
 package com.example.dronevision.domain.use_cases
 
-import com.example.dronevision.domain.Repository
+import com.example.dronevision.domain.repository.TechnicRepository
 
-class DeleteAllUseCase(private val repository: Repository) {
+class DeleteAllUseCase(private val technicRepository: TechnicRepository) {
 
     suspend fun execute(){
-        repository.deleteAll()
+        technicRepository.deleteAll()
     }
 }

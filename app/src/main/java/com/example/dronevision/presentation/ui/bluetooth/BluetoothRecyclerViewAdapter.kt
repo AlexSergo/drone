@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.dronevision.R
 import com.example.dronevision.databinding.BluetoothListItemBinding
+import com.example.dronevision.presentation.model.BluetoothListItem
 
 class BluetoothRecyclerViewAdapter(private val bluetoothCallback: BluetoothCallback)
     : RecyclerView.Adapter<BluetoothRecyclerViewAdapter.ItemHolder>() {

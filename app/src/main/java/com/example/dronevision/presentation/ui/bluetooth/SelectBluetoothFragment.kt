@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.dronevision.databinding.FragmentSelectBluetoothBinding
+import com.example.dronevision.presentation.model.BluetoothListItem
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 

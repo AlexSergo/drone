@@ -1,4 +1,4 @@
-package com.example.dronevision.data.local.model
+package com.example.dronevision.data.source.local.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

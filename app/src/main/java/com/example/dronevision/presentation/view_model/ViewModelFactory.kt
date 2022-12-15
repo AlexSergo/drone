@@ -2,13 +2,27 @@ package com.example.dronevision.presentation.view_model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.dronevision.domain.Repository
+import com.example.dronevision.domain.use_cases.DeleteAllUseCase
+import com.example.dronevision.domain.use_cases.DeleteTechnicUseCase
+import com.example.dronevision.domain.use_cases.GetTechnicsUseCase
+import com.example.dronevision.domain.use_cases.SaveTechnicUseCase
 
-class ViewModelFactory(private val repository: Repository): ViewModelProvider.Factory {
-
+class ViewModelFactory(
+    private val getTechnicsUseCase: GetTechnicsUseCase,
+    private val saveTechnicUseCase: SaveTechnicUseCase,
+    private val deleteAllUseCase: DeleteAllUseCase,
+    private val deleteTechnicUseCase: DeleteTechnicUseCase
+) : ViewModelProvider.Factory {
+    
+    @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TechnicViewModel::class.java))
-            return TechnicViewModel(repository) as T
+            return TechnicViewModel(
+                getTechnicsUseCase = getTechnicsUseCase,
+                saveTechnicUseCase = saveTechnicUseCase,
+                deleteAllUseCase = deleteAllUseCase,
+                deleteTechnicUseCase = deleteTechnicUseCase
+            ) as T
         throw IllegalAccessException("ViewModel not found!")
     }
 }

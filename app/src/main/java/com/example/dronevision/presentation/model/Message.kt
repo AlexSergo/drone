@@ -1,4 +1,4 @@
-package com.example.dronevision.presentation.ui.bluetooth
+package com.example.dronevision.presentation.model
 
 data class Message(
     val message: String,

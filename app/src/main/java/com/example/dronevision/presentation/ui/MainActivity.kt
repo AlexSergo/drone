@@ -18,7 +18,6 @@ import androidx.core.view.MenuProvider
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -26,13 +25,18 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.dronevision.AbonentDialogFragment
+import com.example.dronevision.App
 import com.example.dronevision.R
-import com.example.dronevision.data.repository.RepositoryInitializer
 import com.example.dronevision.databinding.ActivityMainBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
+import com.example.dronevision.presentation.model.BluetoothListItem
+import com.example.dronevision.presentation.model.Message
 import com.example.dronevision.presentation.model.Technic
-import com.example.dronevision.presentation.ui.bluetooth.*
+import com.example.dronevision.presentation.ui.bluetooth.BluetoothCallback
+import com.example.dronevision.presentation.ui.bluetooth.BluetoothConnection
+import com.example.dronevision.presentation.ui.bluetooth.BluetoothReceiver
+import com.example.dronevision.presentation.ui.bluetooth.SelectBluetoothFragment
 import com.example.dronevision.presentation.view_model.TechnicViewModel
 import com.example.dronevision.presentation.view_model.ViewModelFactory
 import com.google.android.gms.common.api.ApiException
@@ -44,16 +48,13 @@ import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
-import com.yandex.mapkit.location.FilteringMode
-import com.yandex.mapkit.location.Location
-import com.yandex.mapkit.location.LocationStatus
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.IconStyle
-import com.yandex.mapkit.map.MapObject
 import com.yandex.mapkit.map.PlacemarkMapObject
 import com.yandex.mapkit.map.RotationType
 import com.yandex.runtime.image.ImageProvider
 import java.io.IOException
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener,
     NavigationView.OnNavigationItemSelectedListener {
@@ -69,10 +70,13 @@ class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener,
     private var dialog: SelectBluetoothFragment? = null
 
     private lateinit var viewModel: TechnicViewModel
-    private lateinit var viewModelFactory: ViewModelFactory
+    
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        (applicationContext as App).appComponent.inject(this)
         
         setupBluetooth()
         
@@ -94,29 +98,25 @@ class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener,
             it?.let { list ->
                 list.forEach { technic->
                     val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                    val mark = mapObjCollection.addPlacemark(
+                    mapObjCollection.addPlacemark(
                         Point(technic.coords.x, technic.coords.y),
-                        ImageProvider.fromResource(applicationContext, ImageTypes.imageMap[technic.type]!!)
+                        ImageProvider.fromResource(
+                            applicationContext,
+                            ImageTypes.imageMap[technic.type]!!
+                        )
                     )
                 }
             }
         })
     }
 
-    private fun initViewModel(){
-        viewModelFactory = ViewModelFactory(RepositoryInitializer.getRepository(this))
-        viewModel = ViewModelProvider(this, viewModelFactory)
-            .get(TechnicViewModel::class.java)
+    private fun initViewModel() {
+        viewModel = ViewModelProvider(this, viewModelFactory)[TechnicViewModel::class.java]
     }
     
     private fun initMap() {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         mapKit = MapKitFactory.getInstance()
-        val location = mapKit.createUserLocationLayer(binding.mapView.mapWindow)
-        location.isVisible = true
-    
-        // Создание пользователя на карте пока не отображаем ибо надо TODO: создать отдельное активити с запросами на разрешение
-//        MapKitFactory.getInstance().createUserLocationLayer(binding.mapView.mapWindow).isVisible = true
     }
 
     private fun initMarker(){
@@ -254,17 +254,14 @@ class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener,
             }
         })
     }
-
-    fun addMarker(
+    
+    private fun addMarker(
         latitude: Double,
         longitude: Double,
         asim: Float,
-        @DrawableRes imageRes: Int,
-        userData: Any? = null
     ): PlacemarkMapObject {
         marker.direction = asim
         marker.geometry = Point(latitude, longitude)
-        marker.userData = userData
         marker.isVisible = true
         marker.addTapListener { mapObject, point ->
             return@addTapListener true
@@ -272,11 +269,6 @@ class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener,
        // markerTapListener?.let { marker.addTapListener(it) }
         return marker
     }
-    
-    /* override fun onCreateOptionsMenu(menu: Menu): Boolean {
-         menuInflater.inflate(R.menu.main, menu)
-         return true
-     }*/
     
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
@@ -378,7 +370,7 @@ class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener,
                 task.getResult(
                     ApiException::class.java
                 )
-                getUserLocation()
+                getMarkerLocation()
             } catch (e: ApiException) {
                 // when the GPS is OFF
                 e.printStackTrace()
@@ -398,47 +390,18 @@ class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener,
             }
         }
     }
-
-    private fun showLocationFromDrone(message: String){
+    
+    private fun showLocationFromDrone(message: String) {
         val array = message.split(",")
         val lat = array[0].toDouble()
         val lon = array[1].toDouble()
         val alt = array[2].toDouble()
         val asim = array[3].toFloat()
-
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return
-        }
-       /* fusedLocationProviderClient.lastLocation.addOnCompleteListener { task ->
-            val location = task.result
-
-            if (location != null) {
-                try {
-                    binding.mapView.map.move(
-                        CameraPosition(
-                            Point(lat, lon),
-                            12.0f,
-                            asim,
-                            0.0f
-                        ),
-                        Animation(Animation.Type.SMOOTH, 1.0f), null
-                    )
-                } catch (e: IOException) {
-
-                }
-            }
-        }*/
-        addMarker(lat, lon,asim, R.drawable.gps_tacker2)
+        
+        addMarker(lat, lon, asim)
     }
     
-    private fun getUserLocation() {
+    private fun getMarkerLocation() {
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -466,9 +429,17 @@ class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener,
                         Animation(Animation.Type.SMOOTH, 1.0f), null
                     )
                 } catch (e: IOException) {
-                
+    
                 }
             }
+        }
+    }
+    
+    override fun onReceive(message: Message) {
+        runOnUiThread {
+            Toast.makeText(this, message.message, Toast.LENGTH_LONG).show()
+            if (!message.isSystem)
+                showLocationFromDrone(message.message)
         }
     }
     
@@ -482,13 +453,5 @@ class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener,
         super.onStart()
         binding.mapView.onStart()
         MapKitFactory.getInstance().onStart()
-    }
-
-    override fun onReceive(message: Message) {
-        runOnUiThread {
-            Toast.makeText(this, message.message, Toast.LENGTH_LONG).show()
-            if (!message.isSystem)
-                showLocationFromDrone(message.message)
-        }
     }
 }

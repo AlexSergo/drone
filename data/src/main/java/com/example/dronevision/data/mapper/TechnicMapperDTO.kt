@@ -1,12 +1,12 @@
 package com.example.dronevision.data.mapper
 
-import com.example.dronevision.data.local.model.TechnicEntity
+import com.example.dronevision.data.source.local.model.TechnicEntity
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicDTO
 import com.example.dronevision.domain.model.TechnicTypes
 
 object TechnicMapperDTO {
-    fun mapTechnicDTOtoEntity(technicDTO: TechnicDTO): TechnicEntity{
+    fun mapTechnicDTOtoEntity(technicDTO: TechnicDTO): TechnicEntity {
         return TechnicEntity(
             id = technicDTO.id,
             type = technicDTO.type.name,

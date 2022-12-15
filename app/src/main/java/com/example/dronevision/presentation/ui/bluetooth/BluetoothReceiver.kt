@@ -2,6 +2,7 @@ package com.example.dronevision.presentation.ui.bluetooth
 
 import android.bluetooth.BluetoothSocket
 import android.util.Log
+import com.example.dronevision.presentation.model.Message
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
