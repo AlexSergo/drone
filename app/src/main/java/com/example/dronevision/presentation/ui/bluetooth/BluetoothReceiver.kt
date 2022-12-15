@@ -29,9 +29,9 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
                 val size = inputStream?.read(buffer)
                 val message = String(buffer, 0, size!!)
                 Log.d("MyLog", "Message $message")
-                listener.onReceive(message)
+                listener.onReceive(Message(message, false))
             }catch (e: IOException){
-                listener.onReceive("Ошибка, сбой соединения!")
+                listener.onReceive(Message("Ошибка, сбой соединения!", true))
                 return
             }
         }
@@ -46,6 +46,6 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
     }
 
     interface MessageListener{
-        fun onReceive(message: String)
+        fun onReceive(message: Message)
     }
 }

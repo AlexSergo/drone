@@ -10,12 +10,16 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -23,17 +27,31 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.dronevision.AbonentDialogFragment
 import com.example.dronevision.R
+import com.example.dronevision.data.repository.RepositoryInitializer
 import com.example.dronevision.databinding.ActivityMainBinding
+import com.example.dronevision.domain.model.Coordinates
+import com.example.dronevision.domain.model.TechnicTypes
+import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.bluetooth.*
+import com.example.dronevision.presentation.view_model.TechnicViewModel
+import com.example.dronevision.presentation.view_model.ViewModelFactory
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
 import com.yandex.mapkit.Animation
+import com.yandex.mapkit.MapKit
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.location.FilteringMode
+import com.yandex.mapkit.location.Location
+import com.yandex.mapkit.location.LocationStatus
 import com.yandex.mapkit.map.CameraPosition
+import com.yandex.mapkit.map.IconStyle
+import com.yandex.mapkit.map.MapObject
+import com.yandex.mapkit.map.PlacemarkMapObject
+import com.yandex.mapkit.map.RotationType
 import com.yandex.runtime.image.ImageProvider
 import java.io.IOException
 
@@ -44,10 +62,15 @@ class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener,
     private lateinit var binding: ActivityMainBinding
     private lateinit var locationRequest: LocationRequest
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var mapKit: MapKit
+    private lateinit var marker: PlacemarkMapObject
     
     lateinit var bluetoothConnection: BluetoothConnection
     private var dialog: SelectBluetoothFragment? = null
-    
+
+    private lateinit var viewModel: TechnicViewModel
+    private lateinit var viewModelFactory: ViewModelFactory
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -57,16 +80,52 @@ class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener,
         setContentView(binding.root)
         
         initMap()
+        initMarker()
+        initViewModel()
+        initTechnic()
         
         setupOptionsMenu()
         setupNavController()
     }
+
+    private fun initTechnic() {
+        viewModel.getTechnics()
+        viewModel.getLiveData().observe(this, Observer {
+            it?.let { list ->
+                list.forEach { technic->
+                    val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
+                    val mark = mapObjCollection.addPlacemark(
+                        Point(technic.coords.x, technic.coords.y),
+                        ImageProvider.fromResource(applicationContext, ImageTypes.imageMap[technic.type]!!)
+                    )
+                }
+            }
+        })
+    }
+
+    private fun initViewModel(){
+        viewModelFactory = ViewModelFactory(RepositoryInitializer.getRepository(this))
+        viewModel = ViewModelProvider(this, viewModelFactory)
+            .get(TechnicViewModel::class.java)
+    }
     
     private fun initMap() {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+        mapKit = MapKitFactory.getInstance()
+        val location = mapKit.createUserLocationLayer(binding.mapView.mapWindow)
+        location.isVisible = true
     
         // Создание пользователя на карте пока не отображаем ибо надо TODO: создать отдельное активити с запросами на разрешение
 //        MapKitFactory.getInstance().createUserLocationLayer(binding.mapView.mapWindow).isVisible = true
+    }
+
+    private fun initMarker(){
+        marker = binding.mapView.map.mapObjects.addPlacemark(
+            Point(0.0, 0.0),
+            ImageProvider.fromResource(this, R.drawable.gps_tacker2)
+        )
+        marker.setIconStyle(IconStyle().setRotationType(RotationType.ROTATE))
+        marker.isVisible = false
     }
     
     private fun setupNavController() {
@@ -89,168 +148,89 @@ class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener,
     
         navView.setNavigationItemSelectedListener(this)
     }
+
+    private fun spawnTechnic( @DrawableRes imageRes: Int, type: TechnicTypes){
+        val cameraPositionTarget = binding.mapView.map.cameraPosition.target
+        val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
+        val mark = mapObjCollection.addPlacemark(
+            Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
+            ImageProvider.fromResource(applicationContext, imageRes)
+        )
+        viewModel.getTechnics()
+        var count = 0
+        viewModel.getLiveData().observe(this, Observer {
+            it?.let {
+                count = it.size + 1
+            viewModel.saveTechnic(Technic(
+                id = count,
+                type = type,
+                Coordinates(x = mark.geometry.latitude, y = mark.geometry.longitude)
+            ))
+            }
+        })
+    }
     
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.targ01 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_01)
-                )
+                spawnTechnic(R.drawable.ic_01, TechnicTypes.LAUNCHER)
             }
             R.id.targ04 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_04)
-                )
+                spawnTechnic(R.drawable.ic_04, TechnicTypes.OVERLAND)
             }
             R.id.targ08 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_08)
-                )
+                spawnTechnic(R.drawable.ic_08, TechnicTypes.ARTILLERY)
             }
             R.id.targ10 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_10)
-                )
+                spawnTechnic(R.drawable.ic_10, TechnicTypes.REACT)
             }
             R.id.targ12 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_12)
-                )
+                spawnTechnic(R.drawable.ic_12, TechnicTypes.MINES)
             }
             R.id.targ14 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_14)
-                )
+                spawnTechnic(R.drawable.ic_14, TechnicTypes.ZUR)
             }
             R.id.targ17 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_17)
-                )
+                spawnTechnic(R.drawable.ic_17, TechnicTypes.RLS)
             }
             R.id.targ19 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_19)
-                )
+                spawnTechnic(R.drawable.ic_19, TechnicTypes.INFANTRY)
             }
             R.id.targ20 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_20)
-                )
+                spawnTechnic(R.drawable.ic_20, TechnicTypes.O_POINT)
             }
             R.id.targ21 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_21)
-                )
+                spawnTechnic(R.drawable.ic_21, TechnicTypes.KNP)
             }
             R.id.targ22 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_22)
-                )
+                spawnTechnic(R.drawable.ic_22, TechnicTypes.TANKS)
             }
             R.id.targ23 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_23)
-                )
+                spawnTechnic(R.drawable.ic_23, TechnicTypes.BTR)
             }
             R.id.targ24 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_24)
-                )
+                spawnTechnic(R.drawable.ic_24, TechnicTypes.BMP)
             }
             R.id.targ25 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_25)
-                )
+                spawnTechnic(R.drawable.ic_25, TechnicTypes.HELICOPTER)
             }
             R.id.targ27 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_27)
-                )
+                spawnTechnic(R.drawable.ic_27, TechnicTypes.PTRK)
             }
             R.id.targ29 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_29)
-                )
+                spawnTechnic(R.drawable.ic_29, TechnicTypes.KLN_PESH)
             }
             R.id.targ30 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_30)
-                )
+                spawnTechnic(R.drawable.ic_30, TechnicTypes.KLN_BR)
             }
             R.id.targ31 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_31)
-                )
+                spawnTechnic(R.drawable.ic_31, TechnicTypes.TANK)
             }
             R.id.targ99 -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_99)
-                )
+                spawnTechnic(R.drawable.ic_99, TechnicTypes.ANOTHER)
             }
             R.id.breach -> {
-                val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-                val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                mapObjCollection.addPlacemark(
-                    Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-                    ImageProvider.fromResource(applicationContext, R.drawable.ic_breach)
-                )
+                spawnTechnic(R.drawable.ic_breach, TechnicTypes.GAP)
             }
         }
         return true
@@ -273,6 +253,24 @@ class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener,
                 dialog?.dismiss()
             }
         })
+    }
+
+    fun addMarker(
+        latitude: Double,
+        longitude: Double,
+        asim: Float,
+        @DrawableRes imageRes: Int,
+        userData: Any? = null
+    ): PlacemarkMapObject {
+        marker.direction = asim
+        marker.geometry = Point(latitude, longitude)
+        marker.userData = userData
+        marker.isVisible = true
+        marker.addTapListener { mapObject, point ->
+            return@addTapListener true
+        }
+       // markerTapListener?.let { marker.addTapListener(it) }
+        return marker
     }
     
     /* override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -304,6 +302,12 @@ class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener,
                     R.id.abonentAddItem ->{
                         val abonentDialogFragment = AbonentDialogFragment()
                         abonentDialogFragment.show(supportFragmentManager, "myDialog")
+                        true
+                    }
+                    R.id.removeAll ->{
+                        binding.mapView.map.mapObjects.clear()
+                        viewModel.deleteAll()
+                        initMarker()
                         true
                     }
                     else -> false
@@ -394,6 +398,45 @@ class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener,
             }
         }
     }
+
+    private fun showLocationFromDrone(message: String){
+        val array = message.split(",")
+        val lat = array[0].toDouble()
+        val lon = array[1].toDouble()
+        val alt = array[2].toDouble()
+        val asim = array[3].toFloat()
+
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+       /* fusedLocationProviderClient.lastLocation.addOnCompleteListener { task ->
+            val location = task.result
+
+            if (location != null) {
+                try {
+                    binding.mapView.map.move(
+                        CameraPosition(
+                            Point(lat, lon),
+                            12.0f,
+                            asim,
+                            0.0f
+                        ),
+                        Animation(Animation.Type.SMOOTH, 1.0f), null
+                    )
+                } catch (e: IOException) {
+
+                }
+            }
+        }*/
+        addMarker(lat, lon,asim, R.drawable.gps_tacker2)
+    }
     
     private fun getUserLocation() {
         if (ActivityCompat.checkSelfPermission(
@@ -415,7 +458,7 @@ class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener,
                     Log.d("location", "${location.latitude} ${location.longitude}")
                     binding.mapView.map.move(
                         CameraPosition(
-                            Point(location.latitude, location.longitude),
+                            Point(marker.geometry.latitude, marker.geometry.longitude),
                             12.0f,
                             0.0f,
                             0.0f
@@ -441,9 +484,11 @@ class MainActivity : AppCompatActivity(), BluetoothReceiver.MessageListener,
         MapKitFactory.getInstance().onStart()
     }
 
-    override fun onReceive(message: String) {
+    override fun onReceive(message: Message) {
         runOnUiThread {
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, message.message, Toast.LENGTH_LONG).show()
+            if (!message.isSystem)
+                showLocationFromDrone(message.message)
         }
     }
 }

@@ -9,7 +9,7 @@ import androidx.fragment.app.DialogFragment
 import com.example.dronevision.databinding.FragmentAbonentDialogBinding
 
 
-class AbonentDialogFragment : DialogFragment() {
+class AbonentDialogFragment() : DialogFragment() {
 
     lateinit var binding: FragmentAbonentDialogBinding
 

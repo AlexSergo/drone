@@ -33,20 +33,20 @@ class ConnectThread(private val device: BluetoothDevice,
 
     override fun run() {
         try {
-            listener.onReceive("Подключение...")
+            listener.onReceive(Message("Подключение...", true))
             if (ActivityCompat.checkSelfPermission(
                     context,
                     Manifest.permission.BLUETOOTH_CONNECT
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
+                socket?.connect()
                 receiveThread = BluetoothReceiver(socket!!, listener)
                 receiveThread.start()
-             //   socket?.connect()
-                listener.onReceive("Подключено!")
+                listener.onReceive(Message("Подключено!", true))
 
             }
-        }catch (_: IOException){
-            listener.onReceive("Невозможно подключиться!")
+        }catch (e: IOException){
+            listener.onReceive(Message("Невозможно подключиться!", true))
             closeConnection()
         }
     }

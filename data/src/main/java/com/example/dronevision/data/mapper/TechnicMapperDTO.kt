@@ -8,6 +8,7 @@ import com.example.dronevision.domain.model.TechnicTypes
 object TechnicMapperDTO {
     fun mapTechnicDTOtoEntity(technicDTO: TechnicDTO): TechnicEntity{
         return TechnicEntity(
+            id = technicDTO.id,
             type = technicDTO.type.name,
             x = technicDTO.coords.x,
             y = technicDTO.coords.y
@@ -18,6 +19,7 @@ object TechnicMapperDTO {
         val result = mutableListOf<TechnicDTO>()
         technics.forEach {
             result.add(TechnicDTO(
+                id = it.id,
                 type = TechnicTypes.valueOf(it.type),
                 coords = Coordinates(x = it.x, y = it.y)
             ))

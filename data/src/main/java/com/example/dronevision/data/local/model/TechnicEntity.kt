@@ -6,8 +6,8 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "technics")
 data class TechnicEntity(
     @PrimaryKey
-    val id: Int = 0,
+    val id: Int,
     val type: String,
-    val x: Float,
-    val y: Float
+    val x: Double,
+    val y: Double
 )

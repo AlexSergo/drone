@@ -18,6 +18,7 @@ object TechnicMapperUI {
 
     fun mapTechnicUIToTechnicDTO(technic: Technic): TechnicDTO{
         return TechnicDTO(
+            id = technic.id,
             type = technic.type,
             coords = technic.coords
         )
