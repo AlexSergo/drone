@@ -14,35 +14,7 @@ import com.example.dronevision.utils.SpawnTechnicModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class TechnicViewModel(
-    private val getTechnicsUseCase: GetTechnicsUseCase,
-    private val saveTechnicUseCase: SaveTechnicUseCase,
-    private val deleteAllUseCase: DeleteAllUseCase,
-    private val deleteTechnicUseCase: DeleteTechnicUseCase
-) : androidx.lifecycle.ViewModel() {
-    
-    private val liveData = MutableLiveData<List<Technic>>()
-
-    fun getLiveData(): LiveData<List<Technic>>{
-        return liveData
-    }
-
-    fun getTechnics() = viewModelScope.launch(Dispatchers.IO) {
-        liveData.postValue(TechnicMapperUI.mapTechnicsDTOToTechnicUI(getTechnicsUseCase.execute()))
-    }
-
-    fun saveTechnic(technic: Technic) = viewModelScope.launch(Dispatchers.IO){
-        saveTechnicUseCase.execute(TechnicMapperUI.mapTechnicUIToTechnicDTO(technic))
-    }
-    
-    fun deleteAll() = viewModelScope.launch(Dispatchers.IO) {
-        deleteAllUseCase.execute()
-    }
-    
-    fun deleteTechnic(technic: Technic) = viewModelScope.launch(Dispatchers.IO) {
-        deleteTechnicUseCase.execute(TechnicMapperUI.mapTechnicUIToTechnicDTO(technic))
-    }
-    
+class TechnicViewModel() : androidx.lifecycle.ViewModel() {
     fun spawnTechnic(spawnTechnicModel: SpawnTechnicModel) = viewModelScope.launch {
         SpawnTechnic.spawnTechnicLiveData.postValue(spawnTechnicModel)
     }

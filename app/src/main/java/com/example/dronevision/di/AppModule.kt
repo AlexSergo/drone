@@ -17,18 +17,7 @@ class AppModule(val context: Context) {
     fun provideContext(): Context = context
     
     @Provides
-    fun provideViewModelFactory(
-        getTechnicsUseCase: GetTechnicsUseCase,
-        saveTechnicUseCase: SaveTechnicUseCase,
-        deleteAllUseCase: DeleteAllUseCase,
-        deleteTechnicUseCase: DeleteTechnicUseCase,
-    ): ViewModelFactory =
-        ViewModelFactory(
-            getTechnicsUseCase = getTechnicsUseCase,
-            saveTechnicUseCase = saveTechnicUseCase,
-            deleteAllUseCase = deleteAllUseCase,
-            deleteTechnicUseCase = deleteTechnicUseCase
-        )
+    fun provideViewModelFactory(): ViewModelFactory = ViewModelFactory()
     
     @Provides
     fun provideYandexMapViewModelFactory(

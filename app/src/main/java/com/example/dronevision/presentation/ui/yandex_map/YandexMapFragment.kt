@@ -3,6 +3,7 @@ package com.example.dronevision.presentation.ui.yandex_map
 import android.bluetooth.BluetoothManager
 import android.content.Context.BLUETOOTH_SERVICE
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.annotation.DrawableRes
@@ -25,18 +26,17 @@ import com.example.dronevision.presentation.ui.bluetooth.BluetoothCallback
 import com.example.dronevision.presentation.ui.bluetooth.BluetoothConnection
 import com.example.dronevision.presentation.ui.bluetooth.BluetoothReceiver
 import com.example.dronevision.presentation.ui.bluetooth.SelectBluetoothFragment
+import com.example.dronevision.presentation.ui.targ.TargFragment
 import com.example.dronevision.utils.SpawnTechnic
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.geometry.Point
-import com.yandex.mapkit.map.CameraPosition
-import com.yandex.mapkit.map.IconStyle
-import com.yandex.mapkit.map.PlacemarkMapObject
-import com.yandex.mapkit.map.RotationType
+import com.yandex.mapkit.map.*
+import com.yandex.mapkit.map.Map
 import com.yandex.runtime.image.ImageProvider
 import javax.inject.Inject
 
-class YandexMapFragment : Fragment(), BluetoothReceiver.MessageListener {
+class YandexMapFragment : Fragment(), BluetoothReceiver.MessageListener, CameraListener {
     
     private lateinit var binding: FragmentYandexMapBinding
     private lateinit var marker: PlacemarkMapObject
@@ -69,6 +69,7 @@ class YandexMapFragment : Fragment(), BluetoothReceiver.MessageListener {
     ): View {
         binding = FragmentYandexMapBinding.inflate(inflater, container, false)
         
+        binding.mapView.map.addCameraListener(this)
         setupBluetooth()
         initMarker()
         setupOptionsMenu()
@@ -87,13 +88,14 @@ class YandexMapFragment : Fragment(), BluetoothReceiver.MessageListener {
             it?.let { list ->
                 list.forEach { technic ->
                     val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-                    mapObjCollection.addPlacemark(
+                    val mark = mapObjCollection.addPlacemark(
                         Point(technic.coords.x, technic.coords.y),
                         ImageProvider.fromResource(
                             requireContext(),
                             ImageTypes.imageMap[technic.type]!!
                         )
                     )
+                    addClickListenerToMark(mark)
                 }
             }
         }
@@ -106,6 +108,7 @@ class YandexMapFragment : Fragment(), BluetoothReceiver.MessageListener {
             Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
             ImageProvider.fromResource(requireContext(), imageRes)
         )
+        addClickListenerToMark(mark)
         viewModel.getTechnics()
         var count = 0
         viewModel.technicListLiveData.observe(viewLifecycleOwner) {
@@ -119,6 +122,15 @@ class YandexMapFragment : Fragment(), BluetoothReceiver.MessageListener {
                     )
                 )
             }
+        }
+    }
+    
+    private fun addClickListenerToMark(mark: PlacemarkMapObject) {
+        mark.addTapListener { mapObject, point ->
+            Toast.makeText(requireContext(), "${point.latitude} ${point.longitude}", Toast.LENGTH_SHORT).show()
+            val targFragment = TargFragment(point)
+            targFragment.show(parentFragmentManager, "targFragment")
+            true
         }
     }
     
@@ -253,5 +265,17 @@ class YandexMapFragment : Fragment(), BluetoothReceiver.MessageListener {
             ),
             Animation(Animation.Type.SMOOTH, 1.0f), null
         )
+    }
+    
+    override fun onCameraPositionChanged(
+        map: Map,
+        cameraPosition: CameraPosition,
+        cameraUpdateReason: CameraUpdateReason,
+        finished: Boolean
+    ) {
+        val latitude = String.format("%.6f", cameraPosition.target.latitude)
+        val longitude = String.format("%.6f", cameraPosition.target.longitude)
+        binding.latitude.text = "Широта = $latitude"
+        binding.longitude.text = "Долгота = $longitude"
     }
 }

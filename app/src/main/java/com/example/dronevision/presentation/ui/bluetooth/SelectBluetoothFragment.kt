@@ -15,13 +15,15 @@ import com.example.dronevision.presentation.model.BluetoothListItem
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 
-class SelectBluetoothFragment(private var bluetoothAdapter: BluetoothAdapter?,
-                              private val bluetoothCallback: BluetoothCallback) :
+class SelectBluetoothFragment(
+    private var bluetoothAdapter: BluetoothAdapter?,
+    private val bluetoothCallback: BluetoothCallback
+) :
     BottomSheetDialogFragment() {
-
+    
     private lateinit var binding: FragmentSelectBluetoothBinding
     private lateinit var recyclerViewAdapter: BluetoothRecyclerViewAdapter
-
+    
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

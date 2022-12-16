@@ -69,63 +69,63 @@ class MainActivity : AppCompatActivity(),
             R.id.targ01 -> {
                 viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_01, TechnicTypes.LAUNCHER))
             }
-            /*R.id.targ04 -> {
-                spawnTechnic(R.drawable.ic_04, TechnicTypes.OVERLAND)
+            R.id.targ04 -> {
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_04, TechnicTypes.OVERLAND))
             }
             R.id.targ08 -> {
-                spawnTechnic(R.drawable.ic_08, TechnicTypes.ARTILLERY)
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_08, TechnicTypes.ARTILLERY))
             }
             R.id.targ10 -> {
-                spawnTechnic(R.drawable.ic_10, TechnicTypes.REACT)
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_10, TechnicTypes.REACT))
             }
             R.id.targ12 -> {
-                spawnTechnic(R.drawable.ic_12, TechnicTypes.MINES)
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_12, TechnicTypes.MINES))
             }
             R.id.targ14 -> {
-                spawnTechnic(R.drawable.ic_14, TechnicTypes.ZUR)
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_14, TechnicTypes.ZUR))
             }
             R.id.targ17 -> {
-                spawnTechnic(R.drawable.ic_17, TechnicTypes.RLS)
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_17, TechnicTypes.RLS))
             }
             R.id.targ19 -> {
-                spawnTechnic(R.drawable.ic_19, TechnicTypes.INFANTRY)
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_19, TechnicTypes.INFANTRY))
             }
             R.id.targ20 -> {
-                spawnTechnic(R.drawable.ic_20, TechnicTypes.O_POINT)
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_20, TechnicTypes.O_POINT))
             }
             R.id.targ21 -> {
-                spawnTechnic(R.drawable.ic_21, TechnicTypes.KNP)
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_21, TechnicTypes.KNP))
             }
             R.id.targ22 -> {
-                spawnTechnic(R.drawable.ic_22, TechnicTypes.TANKS)
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_22, TechnicTypes.TANKS))
             }
             R.id.targ23 -> {
-                spawnTechnic(R.drawable.ic_23, TechnicTypes.BTR)
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_23, TechnicTypes.BTR))
             }
             R.id.targ24 -> {
-                spawnTechnic(R.drawable.ic_24, TechnicTypes.BMP)
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_24, TechnicTypes.BMP))
             }
             R.id.targ25 -> {
-                spawnTechnic(R.drawable.ic_25, TechnicTypes.HELICOPTER)
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_25, TechnicTypes.HELICOPTER))
             }
             R.id.targ27 -> {
-                spawnTechnic(R.drawable.ic_27, TechnicTypes.PTRK)
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_27, TechnicTypes.PTRK))
             }
             R.id.targ29 -> {
-                spawnTechnic(R.drawable.ic_29, TechnicTypes.KLN_PESH)
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_29, TechnicTypes.KLN_PESH))
             }
             R.id.targ30 -> {
-                spawnTechnic(R.drawable.ic_30, TechnicTypes.KLN_BR)
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_30, TechnicTypes.KLN_BR))
             }
             R.id.targ31 -> {
-                spawnTechnic(R.drawable.ic_31, TechnicTypes.TANK)
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_31, TechnicTypes.TANK))
             }
             R.id.targ99 -> {
-                spawnTechnic(R.drawable.ic_99, TechnicTypes.ANOTHER)
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_99, TechnicTypes.ANOTHER))
             }
             R.id.breach -> {
-                spawnTechnic(R.drawable.ic_breach, TechnicTypes.GAP)
-            }*/
+                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_breach, TechnicTypes.GAP))
+            }
         }
         return true
     }
