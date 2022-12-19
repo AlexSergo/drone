@@ -19,16 +19,6 @@ import com.example.dronevision.presentation.view_model.TechnicViewModel
 import com.example.dronevision.presentation.view_model.ViewModelFactory
 import com.example.dronevision.utils.SpawnTechnicModel
 import com.google.android.material.navigation.NavigationView
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.websocket.*
-import io.ktor.http.*
-import io.ktor.http.HttpMethod.Companion.Get
-import io.ktor.websocket.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import okhttp3.*
-import org.json.JSONObject
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(),
@@ -51,48 +41,6 @@ class MainActivity : AppCompatActivity(),
         
         setupNavController()
 
-/*        val request = Request.Builder()
-            .url("https://127.0.0.1/chat")
-            .build()
-        val listener = object: WebSocketListener() {
-            override fun onMessage(ws: WebSocket, mess: String) {
-
-            }
-        }
-        val ws = OkHttpClient()
-            .newWebSocket(request, listener)
-
-        ws.send(
-            JSONObject()
-            .put("action", "sendmessage")
-            .put("data", "Hello from Android!")
-            .toString())*/
-
-        connect()
-    }
-
-    private fun connect() {
-        val url = Url("127.0.0.1/chat")
-        val ktor = HttpClient(CIO) {
-            install(WebSockets)
-        }
-        lifecycleScope.launch(Dispatchers.IO) {
-            connect(ktor, url)
-        }
-    }
-
-    private suspend fun connect(ktor: HttpClient, u: Url) {
-        ktor.webSocket(Get, host = "127.0.0.1", port = 8080, path = "/chat") {
-            while(true) {
-                val othersMessage = incoming.receive() as? Frame.Text
-                println(othersMessage?.readText())
-                val myMessage = "Hello!"
-                if(myMessage != null) {
-                    send(myMessage)
-                }
-            }
-        }
-        ktor.close()
     }
 
     private fun setupNavController() {

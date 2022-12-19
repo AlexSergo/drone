@@ -3,7 +3,6 @@ package com.example.dronevision.presentation.ui.yandex_map
 import android.bluetooth.BluetoothManager
 import android.content.Context.BLUETOOTH_SERVICE
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.annotation.DrawableRes
@@ -29,6 +28,12 @@ import com.example.dronevision.presentation.ui.bluetooth.SelectBluetoothFragment
 import com.example.dronevision.presentation.ui.targ.TargFragment
 import com.example.dronevision.utils.SpawnTechnic
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
@@ -37,7 +42,8 @@ import com.yandex.mapkit.map.Map
 import com.yandex.runtime.image.ImageProvider
 import javax.inject.Inject
 
-class YandexMapFragment : Fragment(), BluetoothReceiver.MessageListener, CameraListener {
+class YandexMapFragment : Fragment(), BluetoothReceiver.MessageListener, CameraListener,
+TargFragment.TargetFragmentCallback{
     
     private lateinit var binding: FragmentYandexMapBinding
     private lateinit var marker: PlacemarkMapObject
@@ -46,6 +52,7 @@ class YandexMapFragment : Fragment(), BluetoothReceiver.MessageListener, CameraL
     private var dialog: SelectBluetoothFragment? = null
     
     private lateinit var viewModel: YandexMapViewModel
+    private lateinit var databaseRef: DatabaseReference
     
     @Inject
     lateinit var viewModelFactory: YandexMapViewModelFactory
@@ -79,6 +86,11 @@ class YandexMapFragment : Fragment(), BluetoothReceiver.MessageListener, CameraL
         SpawnTechnic.spawnTechnicLiveData.observe(viewLifecycleOwner) {
             spawnTechnic(it.imageRes, it.type)
         }
+
+
+        val database = Firebase.database("https://drone-6c66c-default-rtdb.asia-southeast1.firebasedatabase.app")
+        databaseRef = database.getReference("message")
+        onChangeListener(databaseRef)
         
         return binding.root
     }
@@ -96,20 +108,42 @@ class YandexMapFragment : Fragment(), BluetoothReceiver.MessageListener, CameraL
                             ImageTypes.imageMap[technic.type]!!
                         )
                     )
-                    addClickListenerToMark(mark)
+                    addClickListenerToMark(mark, technic.type)
                 }
             }
         }
     }
-    
-    private fun spawnTechnic(@DrawableRes imageRes: Int, type: TechnicTypes) {
+
+    private fun onChangeListener(dRef: DatabaseReference){
+        dRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val str = snapshot.value.toString().split(" ")
+                spawnTechnic(ImageTypes.imageMap[TechnicTypes.valueOf(str[0])]!!,
+                    TechnicTypes.valueOf(str[0]), Coordinates(x = str[1].toDouble(), y = str[2].toDouble())
+                )
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+        })
+    }
+
+    private fun spawnTechnic(@DrawableRes imageRes: Int, type: TechnicTypes, coords: Coordinates? = null) {
         val cameraPositionTarget = binding.mapView.map.cameraPosition.target
         val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
-        val mark = mapObjCollection.addPlacemark(
-            Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
-            ImageProvider.fromResource(requireContext(), imageRes)
-        )
-        addClickListenerToMark(mark)
+        var mark: PlacemarkMapObject
+        if (coords != null)
+            mark = mapObjCollection.addPlacemark(
+                Point(coords.x, coords.y),
+                ImageProvider.fromResource(requireContext(), imageRes)
+            )
+        else
+            mark = mapObjCollection.addPlacemark(
+                Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
+                ImageProvider.fromResource(requireContext(), imageRes)
+            )
+        addClickListenerToMark(mark, type)
         viewModel.getTechnics()
         var count = 0
         viewModel.technicListLiveData.observe(viewLifecycleOwner) {
@@ -126,13 +160,25 @@ class YandexMapFragment : Fragment(), BluetoothReceiver.MessageListener, CameraL
         }
     }
     
-    private fun addClickListenerToMark(mark: PlacemarkMapObject) {
+    private fun addClickListenerToMark(mark: PlacemarkMapObject, type: TechnicTypes) {
         mark.addTapListener { mapObject, point ->
             Toast.makeText(requireContext(), "${point.latitude} ${point.longitude}", Toast.LENGTH_SHORT).show()
-            val targFragment = TargFragment(point)
+            val targFragment = TargFragment(
+                Technic(coords = Coordinates(x= point.latitude, y = point.longitude), type = type),
+            this)
             targFragment.show(parentFragmentManager, "targFragment")
             true
         }
+    }
+
+   override fun onBroadcastButtonClick(technic: Technic){
+       val sb = StringBuilder()
+       sb.append(technic.type.name)
+       sb.append(" ")
+       sb.append(technic.coords.x)
+       sb.append(" ")
+       sb.append(technic.coords.y)
+        databaseRef.setValue(sb.toString())
     }
     
     private fun addMarker(

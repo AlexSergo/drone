@@ -7,9 +7,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.example.dronevision.databinding.FragmentTargBinding
-import com.yandex.mapkit.geometry.Point
+import com.example.dronevision.presentation.model.Technic
 
-class TargFragment(private val point: Point) : DialogFragment() {
+class TargFragment(private val technic: Technic, private val targetFragmentCallback: TargetFragmentCallback) : DialogFragment() {
     
     private lateinit var binding: FragmentTargBinding
     
@@ -18,17 +18,21 @@ class TargFragment(private val point: Point) : DialogFragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentTargBinding.inflate(inflater, container, false)
-        binding.latitudeValue.text = point.latitude.toString()
-        binding.longitudeValue.text = point.longitude.toString()
+        binding.latitudeValue.text = technic.coords.x.toString()
+        binding.longitudeValue.text = technic.coords.y.toString()
         binding.findBtn.setOnClickListener {
             Toast.makeText(requireContext(), "Кнопки пока не работают", Toast.LENGTH_SHORT).show()
         }
         binding.broadcastBtn.setOnClickListener {
-            Toast.makeText(requireContext(), "Кнопки пока не работают", Toast.LENGTH_SHORT).show()
+            targetFragmentCallback.onBroadcastButtonClick(technic)
         }
         binding.deleteBtn.setOnClickListener {
             Toast.makeText(requireContext(), "Кнопки пока не работают", Toast.LENGTH_SHORT).show()
         }
         return binding.root
+    }
+
+    interface TargetFragmentCallback{
+        fun onBroadcastButtonClick(technic: Technic)
     }
 }

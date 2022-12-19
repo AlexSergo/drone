@@ -5,6 +5,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'androidx.navigation.safeargs.kotlin'
     id 'kotlinx-serialization'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -64,6 +65,7 @@ dependencies {
 
     // room db
     implementation "androidx.room:room-runtime:2.4.3"
+    implementation 'com.google.firebase:firebase-database-ktx:20.0.4'
     kapt  "androidx.room:room-compiler:2.4.3"
     implementation 'androidx.room:room-ktx:2.4.3'
 
@@ -80,12 +82,7 @@ dependencies {
     implementation "com.google.dagger:dagger:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
 
-    implementation 'io.ktor:ktor-client-android:1.5.0'
-    implementation 'io.ktor:ktor-client-serialization:1.5.0'
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1'
-    implementation 'io.ktor:ktor-client-logging-jvm:1.5.0'
-    implementation "io.ktor:ktor-client-core-jvm:2.2.1"
-    implementation  "io.ktor:ktor-client-cio-jvm:2.2.1"
+    implementation platform('com.google.firebase:firebase-bom:31.1.1')
 
     implementation project(path:':data')
     implementation project(path:':domain')
