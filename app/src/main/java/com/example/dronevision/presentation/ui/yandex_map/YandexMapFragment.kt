@@ -30,6 +30,7 @@ import com.example.dronevision.presentation.ui.targ.TargFragment
 import com.example.dronevision.utils.SpawnTechnic
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.yandex.mapkit.Animation
+import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.*
 import com.yandex.mapkit.map.Map
@@ -277,5 +278,17 @@ class YandexMapFragment : Fragment(), BluetoothReceiver.MessageListener, CameraL
         val longitude = String.format("%.6f", cameraPosition.target.longitude)
         binding.latitude.text = "Широта = $latitude"
         binding.longitude.text = "Долгота = $longitude"
+    }
+
+    override fun onStart() {
+        super.onStart()
+        MapKitFactory.getInstance().onStart()
+        binding.mapView.onStart()
+    }
+
+    override fun onStop() {
+        binding.mapView.onStop()
+        MapKitFactory.getInstance().onStop()
+        super.onStop()
     }
 }
