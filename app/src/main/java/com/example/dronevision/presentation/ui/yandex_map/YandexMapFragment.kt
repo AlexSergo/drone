@@ -80,6 +80,8 @@ TargFragment.TargetFragmentCallback, IMap {
         SpawnTechnic.spawnTechnicLiveData.observe(viewLifecycleOwner) {
             spawnTechnic(it.imageRes, it.type)
         }
+        
+        setupZoomButtons()
     
     
         val database =
@@ -88,6 +90,28 @@ TargFragment.TargetFragmentCallback, IMap {
         onChangeListener(databaseRef)
         
         return binding.root
+    }
+    
+    private fun setupZoomButtons() {
+        binding.zoomInButton.setOnClickListener {
+            val cameraPosition = binding.mapView.map.cameraPosition
+            binding.mapView.map.move(
+                CameraPosition(
+                    cameraPosition.target,
+                    cameraPosition.zoom + 1, 0.0f, 0.0f
+                ), Animation(Animation.Type.SMOOTH, 1.0f), null
+            )
+        }
+        
+        binding.zoomOutButton.setOnClickListener {
+            val cameraPosition = binding.mapView.map.cameraPosition
+            binding.mapView.map.move(
+                CameraPosition(
+                    cameraPosition.target,
+                    cameraPosition.zoom - 1, 0.0f, 0.0f
+                ), Animation(Animation.Type.SMOOTH, 1.0f), null
+            )
+        }
     }
     
     private fun initTechnic() {
