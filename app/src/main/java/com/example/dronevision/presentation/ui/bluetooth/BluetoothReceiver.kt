@@ -29,7 +29,6 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
         while (true){
             try {
                 val size = inputStream?.read(buffer)
-              //  Deserializer.deserialize(buffer)
                 val message = String(buffer, 0, size!!)
                 val entities = Gson().fromJson(message, Entities::class.java)
                 listener.onReceive(Message("Данные получены!", false), entities.entities)
@@ -44,7 +43,6 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
         try {
             outputStream?.write(byteArray)
         }catch (_: IOException){
-
         }
     }
 

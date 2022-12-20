@@ -187,11 +187,7 @@ TargFragment.TargetFragmentCallback, IMap {
         databaseRef.setValue(sb.toString())
     }
     
-    private fun addMarker(
-        latitude: Double,
-        longitude: Double,
-        asim: Float,
-    ): PlacemarkMapObject {
+    private fun addMarker(latitude: Double, longitude: Double, asim: Float): PlacemarkMapObject {
         marker.direction = asim
         marker.geometry = Point(latitude, longitude)
         marker.isVisible = true
