@@ -79,6 +79,11 @@
         android:title="О программе"
         app:showAsAction="never" />
     <item
+        android:id="@+id/addHeightMaps"
+        android:orderInCategory="108"
+        android:title="Загрузить высоты"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/actionGeoLocation"
         android:icon="@drawable/ic_action_geolocation"
         android:orderInCategory="300"

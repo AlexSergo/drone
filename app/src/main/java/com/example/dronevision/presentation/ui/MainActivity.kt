@@ -199,6 +199,10 @@ class MainActivity : AppCompatActivity(),
                         map.deleteAll()
                         true
                     }
+                    R.id.addHeightMaps -> {
+                        //  Вставить код для загрузки карт
+                        true
+                    }
                     else -> false
                 }
             }
