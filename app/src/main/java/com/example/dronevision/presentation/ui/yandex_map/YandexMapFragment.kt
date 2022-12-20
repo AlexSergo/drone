@@ -1,7 +1,5 @@
 package com.example.dronevision.presentation.ui.yandex_map
 
-import android.bluetooth.BluetoothManager
-import android.content.Context.BLUETOOTH_SERVICE
 import android.os.Bundle
 import android.view.*
 import android.widget.Toast
@@ -17,8 +15,6 @@ import com.example.dronevision.R
 import com.example.dronevision.databinding.FragmentYandexMapBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
-import com.example.dronevision.presentation.model.BluetoothListItem
-import com.example.dronevision.presentation.model.Message
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.ImageTypes
 import com.example.dronevision.presentation.ui.bluetooth.*
@@ -39,17 +35,17 @@ import com.yandex.mapkit.map.Map
 import com.yandex.runtime.image.ImageProvider
 import javax.inject.Inject
 
-class YandexMapFragment : Fragment(), BluetoothReceiver.MessageListener, CameraListener,
-TargFragment.TargetFragmentCallback{
+class YandexMapFragment : Fragment(), CameraListener,
+TargFragment.TargetFragmentCallback,
+    com.example.dronevision.presentation.ui.yandex_map.Map {
     
     private lateinit var binding: FragmentYandexMapBinding
     private lateinit var marker: PlacemarkMapObject
     
-    lateinit var bluetoothConnection: BluetoothConnection
-    private var dialog: SelectBluetoothFragment? = null
-    
     private lateinit var viewModel: YandexMapViewModel
     private lateinit var databaseRef: DatabaseReference
+
+    private val listOfObjects = mutableListOf<PlacemarkMapObject>()
     
     @Inject
     lateinit var viewModelFactory: YandexMapViewModelFactory
@@ -75,9 +71,8 @@ TargFragment.TargetFragmentCallback{
         binding = FragmentYandexMapBinding.inflate(inflater, container, false)
         
         binding.mapView.map.addCameraListener(this)
-        setupBluetooth()
+
         initMarker()
-        setupOptionsMenu()
         initTechnic()
         
         SpawnTechnic.spawnTechnicLiveData.observe(viewLifecycleOwner) {
@@ -105,6 +100,9 @@ TargFragment.TargetFragmentCallback{
                             ImageTypes.imageMap[technic.type]!!
                         )
                     )
+                    mark.geometry.latitude
+                    mark.geometry.longitude
+                    listOfObjects.add(mark)
                     addClickListenerToMark(mark, technic.type)
                 }
             }
@@ -114,14 +112,21 @@ TargFragment.TargetFragmentCallback{
     private fun onChangeListener(dRef: DatabaseReference){
         dRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
+                if (null == snapshot.value) return
                 val str = snapshot.value.toString().split(" ")
+                val lat = str[1].toDouble()
+                val lon = str[2].toDouble()
+                val objects = binding.mapView.map.mapObjects
+                for (mark in listOfObjects)
+                    if (mark.geometry.longitude == lon && mark.geometry.latitude == lat)
+                        return
+
                 spawnTechnic(ImageTypes.imageMap[TechnicTypes.valueOf(str[0])]!!,
                     TechnicTypes.valueOf(str[0]), Coordinates(x = str[1].toDouble(), y = str[2].toDouble())
                 )
             }
 
             override fun onCancelled(error: DatabaseError) {
-
             }
         })
     }
@@ -140,6 +145,10 @@ TargFragment.TargetFragmentCallback{
                 Point(cameraPositionTarget.latitude, cameraPositionTarget.longitude),
                 ImageProvider.fromResource(requireContext(), imageRes)
             )
+
+        mark.geometry.latitude
+        mark.geometry.longitude
+        listOfObjects.add(mark)
         addClickListenerToMark(mark, type)
         viewModel.getTechnics()
         var count = 0
@@ -193,78 +202,16 @@ TargFragment.TargetFragmentCallback{
         return marker
     }
     
-    private fun showLocationFromDrone(entities: List<Entity>) {
-     /*   val array = message.split(",")
-        val lat = array[0].toDouble()
-        val lon = array[1].toDouble()
-        val alt = array[2].toDouble()
-        val asim = array[3].toFloat()*/
-
+    override fun showLocationFromDrone(entities: List<Entity>) {
         val drone = entities[0]
-        
         addMarker(drone.lat, drone.lon, drone.asim.toFloat())
     }
-    
-    private fun setupBluetooth() {
-        val bluetoothManager = activity?.getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
-        val bluetoothAdapter = bluetoothManager.adapter
-        bluetoothConnection = BluetoothConnection(
-            bluetoothAdapter,
-            context = requireContext(), listener = this
-        )
-        
-        dialog = SelectBluetoothFragment(bluetoothAdapter, object : BluetoothCallback {
-            override fun onClick(item: BluetoothListItem) {
-                item.let {
-                    bluetoothConnection.connect(it.mac)
-                    // bluetoothConnection.sendMessage("Тест")
-                }
-                dialog?.dismiss()
-            }
-        })
-    }
-    
-    override fun onReceive(message: Message, entities: List<Entity>?) {
-        activity?.runOnUiThread {
-            Toast.makeText(requireContext(), message.message, Toast.LENGTH_LONG).show()
-            if (entities != null)
-                showLocationFromDrone(entities)
-        }
-    }
-    
-    private fun setupOptionsMenu() {
-        val menuHost: MenuHost = requireActivity()
-        menuHost.addMenuProvider(object : MenuProvider {
-            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                menuInflater.inflate(R.menu.main, menu)
-            }
-            
-            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                return when (menuItem.itemId) {
-                    R.id.bluetooth -> {
-                        dialog?.show(parentFragmentManager, "ActionBottomDialog")
-                        true
-                    }
-                    R.id.actionGeoLocation -> {
-                        showLocationDialog()
-                        Toast.makeText(requireContext(), "fragment", Toast.LENGTH_LONG).show()
-                        true
-                    }
-                    R.id.abonentAddItem -> {
-                        val abonentDialogFragment = AbonentDialogFragment()
-                        abonentDialogFragment.show(parentFragmentManager, "myDialog")
-                        true
-                    }
-                    R.id.removeAll -> {
-                        binding.mapView.map.mapObjects.clear()
-                        viewModel.deleteAll()
-                        initMarker()
-                        true
-                    }
-                    else -> false
-                }
-            }
-        }, requireActivity(), Lifecycle.State.RESUMED)
+
+    override fun deleteAll() {
+        binding.mapView.map.mapObjects.clear()
+        viewModel.deleteAll()
+        listOfObjects.clear()
+        initMarker()
     }
     
     private fun initMarker() {
@@ -276,7 +223,7 @@ TargFragment.TargetFragmentCallback{
         marker.isVisible = false
     }
     
-    private fun showLocationDialog() {
+    override fun showLocationDialog() {
         val locationDialogArray = arrayOf(
             "Запросить у Р-187-П1",
             "Запросить у Android",
@@ -336,4 +283,10 @@ TargFragment.TargetFragmentCallback{
         MapKitFactory.getInstance().onStop()
         super.onStop()
     }
+}
+
+interface Map{
+    fun showLocationFromDrone(entities: List<Entity>)
+    fun showLocationDialog()
+    fun deleteAll()
 }

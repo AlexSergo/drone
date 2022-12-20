@@ -1,20 +1,32 @@
 package com.example.dronevision.presentation.ui
 
+import android.bluetooth.BluetoothManager
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.example.dronevision.AbonentDialogFragment
 import com.example.dronevision.App
 import com.example.dronevision.R
 import com.example.dronevision.databinding.ActivityMainBinding
 import com.example.dronevision.domain.model.TechnicTypes
+import com.example.dronevision.presentation.model.BluetoothListItem
+import com.example.dronevision.presentation.model.Message
+import com.example.dronevision.presentation.ui.bluetooth.*
+import com.example.dronevision.presentation.ui.yandex_map.Map
+import com.example.dronevision.presentation.ui.yandex_map.YandexMapFragment
 import com.example.dronevision.presentation.view_model.TechnicViewModel
 import com.example.dronevision.presentation.view_model.ViewModelFactory
 import com.example.dronevision.utils.SpawnTechnicModel
@@ -22,11 +34,13 @@ import com.google.android.material.navigation.NavigationView
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(),
-    NavigationView.OnNavigationItemSelectedListener {
+    NavigationView.OnNavigationItemSelectedListener,  BluetoothReceiver.MessageListener {
     
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: TechnicViewModel
+    private lateinit var map: Map
+    private var dialog: SelectBluetoothFragment? = null
     
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
@@ -38,9 +52,10 @@ class MainActivity : AppCompatActivity(),
         
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
-        setupNavController()
 
+        setupOptionsMenu()
+        setupBluetooth()
+        setupNavController()
     }
 
     private fun setupNavController() {
@@ -62,6 +77,33 @@ class MainActivity : AppCompatActivity(),
         navView.setupWithNavController(navController)
     
         navView.setNavigationItemSelectedListener(this)
+    }
+
+    private fun setupBluetooth() {
+        val bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
+        val bluetoothAdapter = bluetoothManager.adapter
+        val bluetoothConnection = BluetoothConnection(
+            bluetoothAdapter,
+            context = this, listener = this
+        )
+
+        dialog = SelectBluetoothFragment(bluetoothAdapter, object : BluetoothCallback {
+            override fun onClick(item: BluetoothListItem) {
+                item.let {
+                    bluetoothConnection.connect(it.mac)
+                    // bluetoothConnection.sendMessage("Тест")
+                }
+                dialog?.dismiss()
+            }
+        })
+    }
+
+    override fun onReceive(message: Message, entities: List<Entity>?) {
+        runOnUiThread {
+            Toast.makeText(this, message.message, Toast.LENGTH_LONG).show()
+            if (entities != null)
+                map.showLocationFromDrone(entities)
+        }
     }
     
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -129,9 +171,42 @@ class MainActivity : AppCompatActivity(),
         }
         return true
     }
+
+    private fun setupOptionsMenu() {
+        val menuHost: MenuHost = this
+        menuHost.addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.main, menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.bluetooth -> {
+                        dialog?.show(supportFragmentManager, "ActionBottomDialog")
+                        true
+                    }
+                    R.id.actionGeoLocation -> {
+                        map.showLocationDialog()
+                        true
+                    }
+                    R.id.abonentAddItem -> {
+                        val abonentDialogFragment = AbonentDialogFragment()
+                        abonentDialogFragment.show(supportFragmentManager, "myDialog")
+                        true
+                    }
+                    R.id.removeAll -> {
+                        map.deleteAll()
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }, this, Lifecycle.State.RESUMED)
+    }
     
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
+        map = supportFragmentManager.findFragmentById(R.id.yandexMapFragment) as YandexMapFragment
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 }

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "19968131155",
+    "firebase_url": "https://drone-6c66c-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "drone-6c66c",
+    "storage_bucket": "drone-6c66c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:19968131155:android:2b7d7ecf646e11d46606a6",
+        "android_client_info": {
+          "package_name": "com.example.dronevision"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "19968131155-8dotba554tejkfjs9rbnalthslhd84gu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCy7ixQtvefWMkiXm7JZbiAUgzrOkEeYqw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "19968131155-8dotba554tejkfjs9rbnalthslhd84gu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
