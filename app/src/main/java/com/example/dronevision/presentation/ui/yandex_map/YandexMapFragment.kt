@@ -1,15 +1,13 @@
 package com.example.dronevision.presentation.ui.yandex_map
 
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.DrawableRes
-import androidx.core.view.MenuHost
-import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
-import com.example.dronevision.AbonentDialogFragment
 import com.example.dronevision.App
 import com.example.dronevision.R
 import com.example.dronevision.databinding.FragmentYandexMapBinding
@@ -18,8 +16,9 @@ import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.IMap
 import com.example.dronevision.presentation.ui.ImageTypes
-import com.example.dronevision.presentation.ui.bluetooth.*
+import com.example.dronevision.presentation.ui.bluetooth.Entity
 import com.example.dronevision.presentation.ui.targ.TargFragment
+import com.example.dronevision.utils.MapTools
 import com.example.dronevision.utils.SpawnTechnic
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.database.DataSnapshot
@@ -31,6 +30,7 @@ import com.google.firebase.ktx.Firebase
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.geometry.Polyline
 import com.yandex.mapkit.map.*
 import com.yandex.mapkit.map.Map
 import com.yandex.runtime.image.ImageProvider
@@ -40,11 +40,13 @@ class YandexMapFragment : Fragment(), CameraListener,
 TargFragment.TargetFragmentCallback, IMap {
     
     private lateinit var binding: FragmentYandexMapBinding
-    private lateinit var marker: PlacemarkMapObject
+    private lateinit var droneMarker: PlacemarkMapObject
+    
+    private lateinit var polylineONMap: PolylineMapObject
     
     private lateinit var viewModel: YandexMapViewModel
     private lateinit var databaseRef: DatabaseReference
-
+    
     private val listOfObjects = mutableListOf<PlacemarkMapObject>()
     
     @Inject
@@ -69,18 +71,19 @@ TargFragment.TargetFragmentCallback, IMap {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentYandexMapBinding.inflate(inflater, container, false)
-        
+    
         binding.mapView.map.addCameraListener(this)
-
-        initMarker()
+    
+        initDroneMarker()
         initTechnic()
-        
+    
         SpawnTechnic.spawnTechnicLiveData.observe(viewLifecycleOwner) {
             spawnTechnic(it.imageRes, it.type)
         }
-
-
-        val database = Firebase.database("https://drone-6c66c-default-rtdb.asia-southeast1.firebasedatabase.app")
+    
+    
+        val database =
+            Firebase.database("https://drone-6c66c-default-rtdb.asia-southeast1.firebasedatabase.app")
         databaseRef = database.getReference("message")
         onChangeListener(databaseRef)
         
@@ -127,6 +130,7 @@ TargFragment.TargetFragmentCallback, IMap {
             }
 
             override fun onCancelled(error: DatabaseError) {
+
             }
         })
     }
@@ -168,55 +172,77 @@ TargFragment.TargetFragmentCallback, IMap {
     
     private fun addClickListenerToMark(mark: PlacemarkMapObject, type: TechnicTypes) {
         mark.addTapListener { mapObject, point ->
-            Toast.makeText(requireContext(), "${point.latitude} ${point.longitude}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireContext(),
+                "${point.latitude} ${point.longitude}",
+                Toast.LENGTH_SHORT
+            ).show()
             val targFragment = TargFragment(
-                Technic(coords = Coordinates(x= point.latitude, y = point.longitude), type = type),
-            this)
+                Technic(coords = Coordinates(x = point.latitude, y = point.longitude), type = type),
+                this
+            )
             targFragment.show(parentFragmentManager, "targFragment")
             true
         }
     }
-
-   override fun onBroadcastButtonClick(technic: Technic){
-       val sb = StringBuilder()
-       sb.append(technic.type.name)
-       sb.append(" ")
-       sb.append(technic.coords.x)
-       sb.append(" ")
-       sb.append(technic.coords.y)
+    
+    override fun onBroadcastButtonClick(technic: Technic) {
+        val sb = StringBuilder()
+        sb.append(technic.type.name)
+        sb.append(" ")
+        sb.append(technic.coords.x)
+        sb.append(" ")
+        sb.append(technic.coords.y)
         databaseRef.setValue(sb.toString())
     }
     
-    private fun addMarker(latitude: Double, longitude: Double, asim: Float): PlacemarkMapObject {
-        marker.direction = asim
-        marker.geometry = Point(latitude, longitude)
-        marker.isVisible = true
-        marker.addTapListener { mapObject, point ->
+    private fun editDroneMarker(
+        latitude: Double,
+        longitude: Double,
+        asim: Float,
+    ): PlacemarkMapObject {
+        droneMarker.direction = asim
+        droneMarker.geometry = Point(latitude, longitude)
+        droneMarker.isVisible = true
+        droneMarker.addTapListener { mapObject, point ->
             return@addTapListener true
         }
-        // markerTapListener?.let { marker.addTapListener(it) }
-        return marker
+        editPolylineOnMapGeometry()
+        return droneMarker
+    }
+    
+    private fun editPolylineOnMapGeometry() {
+        val cameraPositionTarget = binding.mapView.map.cameraPosition.target
+        polylineONMap.geometry = Polyline(listOf(droneMarker.geometry, cameraPositionTarget))
     }
     
     override fun showLocationFromDrone(entities: List<Entity>) {
         val drone = entities[0]
-        addMarker(drone.lat, drone.lon, drone.asim.toFloat())
+        editDroneMarker(drone.lat, drone.lon, drone.asim.toFloat())
     }
-
+    
     override fun deleteAll() {
         binding.mapView.map.mapObjects.clear()
         viewModel.deleteAll()
         listOfObjects.clear()
-        initMarker()
+        initDroneMarker()
     }
     
-    private fun initMarker() {
-        marker = binding.mapView.map.mapObjects.addPlacemark(
+    private fun initDroneMarker() {
+        droneMarker = binding.mapView.map.mapObjects.addPlacemark(
             Point(0.0, 0.0),
             ImageProvider.fromResource(requireContext(), R.drawable.gps_tacker2)
         )
-        marker.setIconStyle(IconStyle().setRotationType(RotationType.ROTATE))
-        marker.isVisible = false
+        droneMarker.setIconStyle(IconStyle().setRotationType(RotationType.ROTATE))
+        droneMarker.isVisible = false
+        
+        val cameraPositionTarget = binding.mapView.map.cameraPosition.target
+        val latitude = cameraPositionTarget.latitude
+        val longitude = cameraPositionTarget.longitude
+        
+        val polyline = Polyline(listOf(Point(latitude, longitude), Point(0.0, 0.0)))
+        polylineONMap = binding.mapView.map.mapObjects.addPolyline(polyline)
+        polylineONMap.strokeWidth = 0.2f
     }
     
     override fun showLocationDialog() {
@@ -247,7 +273,7 @@ TargFragment.TargetFragmentCallback, IMap {
     private fun getMarkerLocation() {
         binding.mapView.map.move(
             CameraPosition(
-                Point(marker.geometry.latitude, marker.geometry.longitude),
+                Point(droneMarker.geometry.latitude, droneMarker.geometry.longitude),
                 12.0f,
                 0.0f,
                 0.0f
@@ -262,12 +288,22 @@ TargFragment.TargetFragmentCallback, IMap {
         cameraUpdateReason: CameraUpdateReason,
         finished: Boolean
     ) {
-        val latitude = String.format("%.6f", cameraPosition.target.latitude)
-        val longitude = String.format("%.6f", cameraPosition.target.longitude)
-        binding.latitude.text = "Широта = $latitude"
-        binding.longitude.text = "Долгота = $longitude"
+        val latitude = cameraPosition.target.latitude
+        val longitude = cameraPosition.target.longitude
+        val latitudeText = String.format("%.6f", latitude)
+        val longitudeText = String.format("%.6f", longitude)
+        binding.latitude.text = "Широта = $latitudeText"
+        binding.longitude.text = "Долгота = $longitudeText"
+    
+    
+        polylineONMap.geometry = Polyline(listOf(droneMarker.geometry, cameraPosition.target))
+    
+        val azimuth = MapTools.angleBetween(droneMarker.geometry, cameraPosition.target)
+        val azimuthText = String.format("%.6f", azimuth)
+        binding.azimuth.text = "Азимут = $azimuthText"
+    
     }
-
+    
     override fun onStart() {
         super.onStart()
         MapKitFactory.getInstance().onStart()

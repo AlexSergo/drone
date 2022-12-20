@@ -19,11 +19,20 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/azimuth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Азимут"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
                 android:id="@+id/latitude"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Широта"
-                android:textSize="14dp"
+                android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
@@ -32,7 +41,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Долгота"
-                android:textSize="14dp"
+                android:textSize="14sp"
                 android:background="@color/white"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="@id/latitude" />
