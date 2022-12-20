@@ -63,6 +63,16 @@
         android:layout_height="48dp"
         android:src="@drawable/zoom_out"
         android:translationZ="2dp"
+        app:layout_constraintBottom_toTopOf="@id/compassButton"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageView
+        android:id="@+id/compassButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:src="@drawable/compass"
+        android:translationZ="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

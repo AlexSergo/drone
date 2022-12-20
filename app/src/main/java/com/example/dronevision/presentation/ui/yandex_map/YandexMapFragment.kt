@@ -80,10 +80,11 @@ TargFragment.TargetFragmentCallback, IMap {
         SpawnTechnic.spawnTechnicLiveData.observe(viewLifecycleOwner) {
             spawnTechnic(it.imageRes, it.type)
         }
-        
+    
+        setupCompassButton()
         setupZoomButtons()
-    
-    
+        
+        
         val database =
             Firebase.database("https://drone-6c66c-default-rtdb.asia-southeast1.firebasedatabase.app")
         databaseRef = database.getReference("message")
@@ -92,23 +93,35 @@ TargFragment.TargetFragmentCallback, IMap {
         return binding.root
     }
     
+    private fun setupCompassButton() {
+        binding.compassButton.setOnClickListener {
+            val cameraPosition = binding.mapView.map.cameraPosition
+            binding.mapView.map.move(
+                CameraPosition(
+                    cameraPosition.target,
+                    cameraPosition.zoom, 0.0f, cameraPosition.tilt
+                ), Animation(Animation.Type.SMOOTH, 1.0f), null
+            )
+        }
+    }
+    
     private fun setupZoomButtons() {
         binding.zoomInButton.setOnClickListener {
             val cameraPosition = binding.mapView.map.cameraPosition
             binding.mapView.map.move(
                 CameraPosition(
                     cameraPosition.target,
-                    cameraPosition.zoom + 1, 0.0f, 0.0f
+                    cameraPosition.zoom + 1, cameraPosition.azimuth, cameraPosition.tilt
                 ), Animation(Animation.Type.SMOOTH, 1.0f), null
             )
         }
-        
+    
         binding.zoomOutButton.setOnClickListener {
             val cameraPosition = binding.mapView.map.cameraPosition
             binding.mapView.map.move(
                 CameraPosition(
                     cameraPosition.target,
-                    cameraPosition.zoom - 1, 0.0f, 0.0f
+                    cameraPosition.zoom - 1, cameraPosition.azimuth, cameraPosition.tilt
                 ), Animation(Animation.Type.SMOOTH, 1.0f), null
             )
         }
@@ -326,6 +339,7 @@ TargFragment.TargetFragmentCallback, IMap {
         val azimuthText = String.format("%.6f", azimuth)
         binding.azimuth.text = "Азимут = $azimuthText"
     
+        binding.compassButton.rotation = cameraPosition.azimuth
     }
     
     override fun onStart() {
