@@ -21,10 +21,7 @@ import com.example.dronevision.presentation.model.BluetoothListItem
 import com.example.dronevision.presentation.model.Message
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.ImageTypes
-import com.example.dronevision.presentation.ui.bluetooth.BluetoothCallback
-import com.example.dronevision.presentation.ui.bluetooth.BluetoothConnection
-import com.example.dronevision.presentation.ui.bluetooth.BluetoothReceiver
-import com.example.dronevision.presentation.ui.bluetooth.SelectBluetoothFragment
+import com.example.dronevision.presentation.ui.bluetooth.*
 import com.example.dronevision.presentation.ui.targ.TargFragment
 import com.example.dronevision.utils.SpawnTechnic
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -196,14 +193,16 @@ TargFragment.TargetFragmentCallback{
         return marker
     }
     
-    private fun showLocationFromDrone(message: String) {
-        val array = message.split(",")
+    private fun showLocationFromDrone(entities: List<Entity>) {
+     /*   val array = message.split(",")
         val lat = array[0].toDouble()
         val lon = array[1].toDouble()
         val alt = array[2].toDouble()
-        val asim = array[3].toFloat()
+        val asim = array[3].toFloat()*/
+
+        val drone = entities[0]
         
-        addMarker(lat, lon, asim)
+        addMarker(drone.lat, drone.lon, drone.asim.toFloat())
     }
     
     private fun setupBluetooth() {
@@ -225,11 +224,11 @@ TargFragment.TargetFragmentCallback{
         })
     }
     
-    override fun onReceive(message: Message) {
+    override fun onReceive(message: Message, entities: List<Entity>?) {
         activity?.runOnUiThread {
             Toast.makeText(requireContext(), message.message, Toast.LENGTH_LONG).show()
-            if (!message.isSystem)
-                showLocationFromDrone(message.message)
+            if (entities != null)
+                showLocationFromDrone(entities)
         }
     }
     

@@ -3,6 +3,7 @@ package com.example.dronevision.presentation.ui.bluetooth
 import android.bluetooth.BluetoothSocket
 import android.util.Log
 import com.example.dronevision.presentation.model.Message
+import com.google.gson.Gson
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -28,9 +29,10 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
         while (true){
             try {
                 val size = inputStream?.read(buffer)
+              //  Deserializer.deserialize(buffer)
                 val message = String(buffer, 0, size!!)
-                Log.d("MyLog", "Message $message")
-                listener.onReceive(Message(message, false))
+                val entities = Gson().fromJson(message, Entities::class.java)
+                listener.onReceive(Message("Данные получены!", false), entities.entities)
             }catch (e: IOException){
                 listener.onReceive(Message("Ошибка, сбой соединения!", true))
                 return
@@ -47,6 +49,6 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
     }
 
     interface MessageListener{
-        fun onReceive(message: Message)
+        fun onReceive(message: Message, entities: List<Entity>? = null)
     }
 }
