@@ -19,15 +19,11 @@ class YandexMapViewModel(
     private val deleteTechnicUseCase: DeleteTechnicUseCase
 ) : androidx.lifecycle.ViewModel() {
     
-    private val _tehnicListLiveData = MutableLiveData<List<Technic>>()
-    val technicListLiveData: LiveData<List<Technic>> get() = _tehnicListLiveData
-    
-    fun getLiveData(): LiveData<List<Technic>> {
-        return _tehnicListLiveData
-    }
+    private val _technicListLiveData = MutableLiveData<List<Technic>>()
+    val technicListLiveData: LiveData<List<Technic>> get() = _technicListLiveData
     
     fun getTechnics() = viewModelScope.launch(Dispatchers.IO) {
-        _tehnicListLiveData.postValue(TechnicMapperUI.mapTechnicsDTOToTechnicUI(getTechnicsUseCase.execute()))
+        _technicListLiveData.postValue(TechnicMapperUI.mapTechnicsDTOToTechnicUI(getTechnicsUseCase.execute()))
     }
     
     fun saveTechnic(technic: Technic) = viewModelScope.launch(Dispatchers.IO){

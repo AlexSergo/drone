@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.DrawableRes
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.dronevision.App
@@ -83,7 +84,7 @@ TargFragment.TargetFragmentCallback, IMap {
     
         setupCompassButton()
         setupZoomButtons()
-        
+        setCardViewExpand()
         
         val database =
             Firebase.database("https://drone-6c66c-default-rtdb.asia-southeast1.firebasedatabase.app")
@@ -91,6 +92,16 @@ TargFragment.TargetFragmentCallback, IMap {
         onChangeListener(databaseRef)
         
         return binding.root
+    }
+    
+    private fun setCardViewExpand() {
+        var isCardViewExpanded = true
+        binding.infoCard.setOnClickListener {
+            isCardViewExpanded = !isCardViewExpanded
+            binding.longitude.isVisible = isCardViewExpanded
+            binding.latitude.isVisible = isCardViewExpanded
+            binding.azimuth.isVisible = isCardViewExpanded
+        }
     }
     
     private fun setupCompassButton() {
@@ -339,7 +350,7 @@ TargFragment.TargetFragmentCallback, IMap {
         val azimuthText = String.format("%.6f", azimuth)
         binding.azimuth.text = "Азимут = $azimuthText"
     
-        binding.compassButton.rotation = cameraPosition.azimuth
+        binding.compassButton.rotation = cameraPosition.azimuth * -1
     }
     
     override fun onStart() {
