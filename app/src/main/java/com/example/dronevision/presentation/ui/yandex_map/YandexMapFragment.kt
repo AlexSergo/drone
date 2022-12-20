@@ -16,6 +16,7 @@ import com.example.dronevision.databinding.FragmentYandexMapBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.model.Technic
+import com.example.dronevision.presentation.ui.IMap
 import com.example.dronevision.presentation.ui.ImageTypes
 import com.example.dronevision.presentation.ui.bluetooth.*
 import com.example.dronevision.presentation.ui.targ.TargFragment
@@ -36,8 +37,7 @@ import com.yandex.runtime.image.ImageProvider
 import javax.inject.Inject
 
 class YandexMapFragment : Fragment(), CameraListener,
-TargFragment.TargetFragmentCallback,
-    com.example.dronevision.presentation.ui.yandex_map.Map {
+TargFragment.TargetFragmentCallback, IMap {
     
     private lateinit var binding: FragmentYandexMapBinding
     private lateinit var marker: PlacemarkMapObject
@@ -283,10 +283,4 @@ TargFragment.TargetFragmentCallback,
         MapKitFactory.getInstance().onStop()
         super.onStop()
     }
-}
-
-interface Map{
-    fun showLocationFromDrone(entities: List<Entity>)
-    fun showLocationDialog()
-    fun deleteAll()
 }

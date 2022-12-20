@@ -25,7 +25,6 @@ import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.model.BluetoothListItem
 import com.example.dronevision.presentation.model.Message
 import com.example.dronevision.presentation.ui.bluetooth.*
-import com.example.dronevision.presentation.ui.yandex_map.Map
 import com.example.dronevision.presentation.ui.yandex_map.YandexMapFragment
 import com.example.dronevision.presentation.view_model.TechnicViewModel
 import com.example.dronevision.presentation.view_model.ViewModelFactory
@@ -39,7 +38,7 @@ class MainActivity : AppCompatActivity(),
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: TechnicViewModel
-    private lateinit var map: Map
+    private lateinit var map: IMap
     private var dialog: SelectBluetoothFragment? = null
     
     @Inject
