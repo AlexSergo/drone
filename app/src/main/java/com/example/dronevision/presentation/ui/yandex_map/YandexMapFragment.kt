@@ -1,7 +1,6 @@
 package com.example.dronevision.presentation.ui.yandex_map
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -253,11 +252,19 @@ TargFragment.TargetFragmentCallback, IMap {
         asim: Float,
     ): PlacemarkMapObject {
         droneMarker.direction = asim
-        droneMarker.geometry = Point(latitude, longitude)
+        if (latitude.isNaN() && longitude.isNaN()) {
+            droneMarker.geometry = Point(0.0, 0.0)
+        } else {
+            droneMarker.geometry = Point(latitude, longitude)
+        }
         droneMarker.isVisible = true
         droneMarker.addTapListener { mapObject, point ->
             return@addTapListener true
         }
+    
+        showWgs82OnCard()
+        calculateAzimuth()
+        showSk42OnCard()
         editPolylineOnMapGeometry()
         return droneMarker
     }
@@ -339,30 +346,35 @@ TargFragment.TargetFragmentCallback, IMap {
         cameraUpdateReason: CameraUpdateReason,
         finished: Boolean
     ) {
-        val latitude = cameraPosition.target.latitude
-        val longitude = cameraPosition.target.longitude
-        val latitudeText = String.format("%.6f", latitude)
-        val longitudeText = String.format("%.6f", longitude)
+        showWgs82OnCard()
+        calculateAzimuth()
+        showSk42OnCard()
+        binding.compassButton.rotation = cameraPosition.azimuth * -1
+        polylineONMap.geometry = Polyline(listOf(droneMarker.geometry, cameraPosition.target))
+    }
+    
+    private fun getCameraPositionLatitude(): Double =
+        binding.mapView.map.cameraPosition.target.latitude
+    
+    private fun getCameraPositionLongitude(): Double =
+        binding.mapView.map.cameraPosition.target.longitude
+    
+    private fun showWgs82OnCard() {
+        val latitudeText = String.format("%.6f", getCameraPositionLatitude())
+        val longitudeText = String.format("%.6f", getCameraPositionLongitude())
         binding.latitude.text = "Широта = $latitudeText"
         binding.longitude.text = "Долгота = $longitudeText"
+    }
     
-        polylineONMap.geometry = Polyline(listOf(droneMarker.geometry, cameraPosition.target))
-    
-        val azimuth = MapTools.angleBetween(droneMarker.geometry, cameraPosition.target)
-        val azimuthText = String.format("%.6f", azimuth)
-        binding.azimuth.text = "Азимут = $azimuthText"
-    
-        binding.compassButton.rotation = cameraPosition.azimuth * -1
-    
+    private fun showSk42OnCard() {
         val x = doubleArrayOf(0.0)
         val y = doubleArrayOf(0.0)
         
         NGeoCalc().wgs84ToPlane(
-            x,
-            y,
+            x, y,
             doubleArrayOf(0.0),
-            NGeoCalc.degreesToRadians(latitude),
-            NGeoCalc.degreesToRadians(longitude),
+            NGeoCalc.degreesToRadians(getCameraPositionLatitude()),
+            NGeoCalc.degreesToRadians(getCameraPositionLongitude()),
             0.0
         )
         binding.plane.text = String.format(
@@ -372,12 +384,19 @@ TargFragment.TargetFragmentCallback, IMap {
         )
     }
     
+    private fun calculateAzimuth() {
+        val cameraPositionTarget = binding.mapView.map.cameraPosition.target
+        val azimuth = MapTools.angleBetween(droneMarker.geometry, cameraPositionTarget)
+        val azimuthText = String.format("%.6f", azimuth)
+        binding.azimuth.text = "Азимут = $azimuthText"
+    }
+    
     override fun onStart() {
         super.onStart()
         MapKitFactory.getInstance().onStart()
         binding.mapView.onStart()
     }
-
+    
     override fun onStop() {
         binding.mapView.onStop()
         MapKitFactory.getInstance().onStop()
