@@ -224,11 +224,11 @@ TargFragment.TargetFragmentCallback, IMap {
         mark.addTapListener { mapObject, point ->
             Toast.makeText(
                 requireContext(),
-                "${point.latitude} ${point.longitude}",
+                "${mark.geometry.latitude} ${mark.geometry.longitude}",
                 Toast.LENGTH_SHORT
             ).show()
             val targFragment = TargFragment(
-                Technic(coords = Coordinates(x = point.latitude, y = point.longitude), type = type),
+                Technic(coords = Coordinates(x = mark.geometry.latitude, y = mark.geometry.longitude), type = type),
                 this
             )
             targFragment.show(parentFragmentManager, "targFragment")

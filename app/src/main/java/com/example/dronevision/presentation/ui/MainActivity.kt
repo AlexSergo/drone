@@ -2,11 +2,13 @@ package com.example.dronevision.presentation.ui
 
 import android.bluetooth.BluetoothManager
 import android.os.Bundle
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.drawerlayout.widget.DrawerLayout
@@ -55,6 +57,10 @@ class MainActivity : AppCompatActivity(),
         setupOptionsMenu()
         setupBluetooth()
         setupNavController()
+
+
+        val navFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
+        map = navFragment?.childFragmentManager?.fragments?.get(0) as YandexMapFragment
     }
 
     private fun setupNavController() {
@@ -170,6 +176,8 @@ class MainActivity : AppCompatActivity(),
                 viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_breach, TechnicTypes.GAP))
             }
         }
+
+        binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
 
