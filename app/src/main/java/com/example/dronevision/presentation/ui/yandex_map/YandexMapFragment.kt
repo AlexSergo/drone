@@ -20,6 +20,8 @@ import com.example.dronevision.presentation.ui.IMap
 import com.example.dronevision.presentation.ui.ImageTypes
 import com.example.dronevision.presentation.ui.bluetooth.*
 import com.example.dronevision.presentation.ui.targ.TargFragment
+import com.example.dronevision.utils.FindTarget
+import com.example.dronevision.utils.HeightFinder
 import com.example.dronevision.utils.SpawnTechnic
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.database.DataSnapshot
@@ -201,6 +203,7 @@ TargFragment.TargetFragmentCallback, IMap {
     override fun showLocationFromDrone(entities: List<Entity>) {
         val drone = entities[0]
         addMarker(drone.lat, drone.lon, drone.asim.toFloat())
+        getTargetCoordinates(entities)
     }
 
     override fun deleteAll() {
@@ -254,6 +257,17 @@ TargFragment.TargetFragmentCallback, IMap {
             ),
             Animation(Animation.Type.SMOOTH, 1.0f), null
         )
+    }
+
+    private fun getTargetCoordinates(entities: List<Entity>) {
+        val drone = entities[0]
+        val lat = 55.666564//drone.lat
+        val lon = 37.613428//drone.lon
+        val alt = drone.alt
+        val ywr = drone.cam_deflect
+        val pt = drone.cam_angle
+        val heightFinder = HeightFinder()
+        val geoHeight = heightFinder.FindH(lat, lon)
     }
     
     override fun onCameraPositionChanged(
