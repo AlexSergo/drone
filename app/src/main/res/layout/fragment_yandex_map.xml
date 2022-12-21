@@ -26,18 +26,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Азимут"
-                android:textSize="14sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/latitude"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Широта"
-                android:textSize="14sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/longitude"
@@ -45,9 +41,15 @@
                 android:layout_height="wrap_content"
                 android:text="Долгота"
                 android:textSize="14sp"
-                android:background="@color/white"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="@id/latitude" />
+                android:background="@color/white" />
+
+            <TextView
+                android:id="@+id/plane"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="X= , Y="
+                android:textSize="14sp"
+                android:background="@color/white" />
         </androidx.appcompat.widget.LinearLayoutCompat>
     </androidx.cardview.widget.CardView>
 

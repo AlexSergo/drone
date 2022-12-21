@@ -1,6 +1,7 @@
 package com.example.dronevision.presentation.ui.yandex_map
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +21,7 @@ import com.example.dronevision.presentation.ui.ImageTypes
 import com.example.dronevision.presentation.ui.bluetooth.Entity
 import com.example.dronevision.presentation.ui.targ.TargFragment
 import com.example.dronevision.utils.MapTools
+import com.example.dronevision.utils.NGeoCalc
 import com.example.dronevision.utils.SpawnTechnic
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.database.DataSnapshot
@@ -36,6 +38,7 @@ import com.yandex.mapkit.map.*
 import com.yandex.mapkit.map.Map
 import com.yandex.runtime.image.ImageProvider
 import javax.inject.Inject
+
 
 class YandexMapFragment : Fragment(), CameraListener,
 TargFragment.TargetFragmentCallback, IMap {
@@ -343,7 +346,6 @@ TargFragment.TargetFragmentCallback, IMap {
         binding.latitude.text = "Широта = $latitudeText"
         binding.longitude.text = "Долгота = $longitudeText"
     
-    
         polylineONMap.geometry = Polyline(listOf(droneMarker.geometry, cameraPosition.target))
     
         val azimuth = MapTools.angleBetween(droneMarker.geometry, cameraPosition.target)
@@ -351,6 +353,23 @@ TargFragment.TargetFragmentCallback, IMap {
         binding.azimuth.text = "Азимут = $azimuthText"
     
         binding.compassButton.rotation = cameraPosition.azimuth * -1
+    
+        val x = doubleArrayOf(0.0)
+        val y = doubleArrayOf(0.0)
+        
+        NGeoCalc().wgs84ToPlane(
+            x,
+            y,
+            doubleArrayOf(0.0),
+            NGeoCalc.degreesToRadians(latitude),
+            NGeoCalc.degreesToRadians(longitude),
+            0.0
+        )
+        binding.plane.text = String.format(
+            "X= %d  Y= %08d", *arrayOf<Any>(
+                Integer.valueOf(x[0].toInt()), Integer.valueOf(y[0].toInt())
+            )
+        )
     }
     
     override fun onStart() {
