@@ -325,13 +325,15 @@ TargFragment.TargetFragmentCallback, IMap {
     }
 
     private fun showAim(latitude: Double, longitude: Double) {
+        removeAim()
         aimMarker = binding.mapView.map.mapObjects.addPlacemark(
             Point(latitude, longitude),
             ImageProvider.fromResource(requireContext(), R.drawable.ic_cross_center)
         )
 
-        focusCamera(latitude, longitude)
+            //focusCamera(latitude, longitude)
 
+        polylineONMap.parent.remove(polylineONMap)
         val polyline = Polyline(listOf(droneMarker.geometry, Point(latitude, longitude)))
         polylineONMap = binding.mapView.map.mapObjects.addPolyline(polyline)
         polylineONMap.strokeWidth = 0.2f
