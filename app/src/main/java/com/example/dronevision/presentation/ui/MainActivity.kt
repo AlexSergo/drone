@@ -105,8 +105,6 @@ class MainActivity : AppCompatActivity(),
 
     override fun onReceive(message: Message, entities: List<Entity>?) {
         runOnUiThread {
-            val navFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
-            map = navFragment?.getChildFragmentManager()?.getFragments()?.get(0) as YandexMapFragment
             Toast.makeText(this, message.message, Toast.LENGTH_LONG).show()
             if (entities != null)
                 map.showLocationFromDrone(entities)
