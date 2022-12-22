@@ -19,6 +19,8 @@ import com.example.dronevision.presentation.ui.IMap
 import com.example.dronevision.presentation.ui.ImageTypes
 import com.example.dronevision.presentation.ui.bluetooth.Entity
 import com.example.dronevision.presentation.ui.targ.TargFragment
+import com.example.dronevision.utils.FindTarget
+import com.example.dronevision.utils.HeightFinder
 import com.example.dronevision.utils.MapTools
 import com.example.dronevision.utils.NGeoCalc
 import com.example.dronevision.utils.SpawnTechnic
@@ -46,7 +48,7 @@ TargFragment.TargetFragmentCallback, IMap {
     private lateinit var binding: FragmentYandexMapBinding
     private lateinit var droneMarker: PlacemarkMapObject
     private var aimMarker: PlacemarkMapObject? = null
-    
+
     private lateinit var polylineONMap: PolylineMapObject
     
     private lateinit var viewModel: YandexMapViewModel
@@ -171,6 +173,7 @@ TargFragment.TargetFragmentCallback, IMap {
                 val str = snapshot.value.toString().split(" ")
                 val lat = str[1].toDouble()
                 val lon = str[2].toDouble()
+                val objects = binding.mapView.map.mapObjects
                 for (mark in listOfObjects)
                     if (mark.geometry.longitude == lon && mark.geometry.latitude == lat)
                         return
@@ -234,7 +237,7 @@ TargFragment.TargetFragmentCallback, IMap {
     private fun removeAim(){
         aimMarker?.parent?.remove(aimMarker!!)
     }
-    
+
     private fun addClickListenerToMark(mark: PlacemarkMapObject, type: TechnicTypes) {
         mark.addTapListener { mapObject, point ->
             Toast.makeText(
@@ -382,7 +385,26 @@ TargFragment.TargetFragmentCallback, IMap {
             Animation(Animation.Type.SMOOTH, 1.0f), null
         )
     }
-    
+
+    private fun getTargetCoordinates(entities: List<Entity>): FindTarget {
+        val drone = entities[0]
+        var lat = drone.lat
+        var lon = drone.lon
+        if (lat.isNaN() && lon.isNaN()) {
+            lat = 0.0
+            lon = 0.0
+        }
+        val alt = drone.alt
+        val ywr = drone.cam_deflect
+        val pt = drone.cam_angle
+        val asim = drone.asim
+        val heightFinder = HeightFinder()
+        val geoHeight = heightFinder.FindH(lat, lon)
+        val h = geoHeight + alt
+        var findTarget = FindTarget(h, lat, lon, asim + ywr, pt)
+        return findTarget
+    }
+
     override fun onCameraPositionChanged(
         map: Map,
         cameraPosition: CameraPosition,
@@ -435,13 +457,13 @@ TargFragment.TargetFragmentCallback, IMap {
         val azimuthText = String.format("%.6f", azimuth)
         binding.azimuth.text = "Азимут = $azimuthText"
     }
-    
+
     override fun onStart() {
         super.onStart()
         MapKitFactory.getInstance().onStart()
         binding.mapView.onStart()
     }
-    
+
     override fun onStop() {
         binding.mapView.onStop()
         MapKitFactory.getInstance().onStop()
