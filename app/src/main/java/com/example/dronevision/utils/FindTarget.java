@@ -20,9 +20,10 @@ public class FindTarget {
         this.Drone_lon = drone_lon;
         this.Drone_course = drone_course;
         this.Gimbal_pitch = gimbal_pitch;
+        find_target_coordinates();
     }
 
-    public void find_target_coordinates() {
+    private void find_target_coordinates() {
         double geo_alt = heightFinder.FindH(Drone_lat, Drone_lon);
         Drone_alt += geo_alt;
         int nz = (int) (Drone_lon / 6 + 1);

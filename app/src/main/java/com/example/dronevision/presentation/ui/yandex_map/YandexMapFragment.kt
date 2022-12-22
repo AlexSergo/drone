@@ -203,7 +203,7 @@ TargFragment.TargetFragmentCallback, IMap {
     override fun showLocationFromDrone(entities: List<Entity>) {
         val drone = entities[0]
         addMarker(drone.lat, drone.lon, drone.asim.toFloat())
-        getTargetCoordinates(entities)
+//        val target = getTargetCoordinates(entities)
     }
 
     override fun deleteAll() {
@@ -259,7 +259,7 @@ TargFragment.TargetFragmentCallback, IMap {
         )
     }
 
-    private fun getTargetCoordinates(entities: List<Entity>) {
+    private fun getTargetCoordinates(entities: List<Entity>): FindTarget {
         val drone = entities[0]
         var lat = drone.lat
         var lon = drone.lon
@@ -270,9 +270,12 @@ TargFragment.TargetFragmentCallback, IMap {
         val alt = drone.alt
         val ywr = drone.cam_deflect
         val pt = drone.cam_angle
+        val asim = drone.asim
         val heightFinder = HeightFinder()
         val geoHeight = heightFinder.FindH(lat, lon)
-        var h = geoHeight + alt
+        val h = geoHeight + alt
+        var findTarget = FindTarget(h, lat, lon, asim + ywr, pt)
+        return findTarget
     }
     
     override fun onCameraPositionChanged(
