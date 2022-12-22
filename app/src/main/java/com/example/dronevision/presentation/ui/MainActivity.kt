@@ -107,7 +107,8 @@ class MainActivity : AppCompatActivity(),
 
     override fun onReceive(message: Message, entities: List<Entity>?) {
         runOnUiThread {
-            Toast.makeText(this, message.message, Toast.LENGTH_LONG).show()
+            if (message.isSystem)
+                Toast.makeText(this, message.message, Toast.LENGTH_LONG).show()
             if (entities != null)
                 map.showLocationFromDrone(entities)
         }

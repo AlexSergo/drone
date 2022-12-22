@@ -39,6 +39,7 @@ import com.yandex.mapkit.map.*
 import com.yandex.mapkit.map.Map
 import com.yandex.runtime.image.ImageProvider
 import javax.inject.Inject
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 
@@ -191,17 +192,17 @@ TargFragment.TargetFragmentCallback, IMap {
 
     private fun spawnTechnic(@DrawableRes imageRes: Int, type: TechnicTypes, coords: Coordinates? = null) {
         val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-        val mark: PlacemarkMapObject = if (coords != null)
-            setMark(coords.x, coords.y, imageRes)
-        else
-            setMark(cameraPositionTarget.latitude, cameraPositionTarget.longitude, imageRes)
-
-        addClickListenerToMark(mark, type)
         viewModel.getTechnics()
         var count = 0
         viewModel.technicListLiveData.observe(viewLifecycleOwner) {
             it?.let {
                 count = it.size + 1
+                val mark: PlacemarkMapObject = if (coords != null)
+                    setMark(coords.x, coords.y, imageRes)
+                else
+                    setMark(cameraPositionTarget.latitude, cameraPositionTarget.longitude, imageRes)
+
+                addClickListenerToMark(mark, type)
                 viewModel.saveTechnic(
                     Technic(
                         id = count,
@@ -216,7 +217,8 @@ TargFragment.TargetFragmentCallback, IMap {
     private fun setMark(latitude: Double, longitude: Double, @DrawableRes imageRes: Int): PlacemarkMapObject{
         val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
         aimMarker?.let {
-            if (round(latitude) == it.geometry.latitude && round(longitude) == it.geometry.longitude)
+            if ( abs(latitude - it.geometry.latitude) < 0.0001
+                && abs(longitude - it.geometry.longitude) < 0.0001)
                 removeAim()
         }
         val mark: PlacemarkMapObject = mapObjCollection.addPlacemark(
@@ -229,13 +231,10 @@ TargFragment.TargetFragmentCallback, IMap {
         return mark
     }
 
-    private fun round(i: Double): Double{
-        val res = (i * 100000).roundToInt() / 100000.0
-        return res
-    }
-
     private fun removeAim(){
         aimMarker?.parent?.remove(aimMarker!!)
+        aimMarker = null
+        editPolylineOnMapGeometry()
     }
 
     private fun addClickListenerToMark(mark: PlacemarkMapObject, type: TechnicTypes) {
@@ -317,6 +316,7 @@ TargFragment.TargetFragmentCallback, IMap {
 
         focusCamera(latitude, longitude)
 
+        polylineONMap.parent.remove(polylineONMap)
         val polyline = Polyline(listOf(droneMarker.geometry, Point(latitude, longitude)))
         polylineONMap = binding.mapView.map.mapObjects.addPolyline(polyline)
         polylineONMap.strokeWidth = 0.2f
@@ -366,13 +366,17 @@ TargFragment.TargetFragmentCallback, IMap {
                     1 -> {}
                     2 -> {}
                     3 -> {
-                        getMarkerLocation()
+                        if (aimMarker != null)
+                            focusCamera(aimMarker!!.geometry.latitude, aimMarker!!.geometry.longitude)
+                        else
+                            getMarkerLocation()
                     }
                     4 -> {}
                 }
             }
             .show()
     }
+
     
     private fun getMarkerLocation() {
         binding.mapView.map.move(
