@@ -37,22 +37,22 @@ import com.google.android.material.navigation.NavigationView
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(),
-    NavigationView.OnNavigationItemSelectedListener,  BluetoothReceiver.MessageListener {
-    
+    NavigationView.OnNavigationItemSelectedListener, BluetoothReceiver.MessageListener {
+
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var viewModel: TechnicViewModel
     private lateinit var map: IMap
     private var dialog: SelectBluetoothFragment? = null
-    
+
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (applicationContext as App).appComponent.inject(this)
         viewModel = ViewModelProvider(this, viewModelFactory)[TechnicViewModel::class.java]
-        
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -61,17 +61,18 @@ class MainActivity : AppCompatActivity(),
         setupNavController()
 
 
-        val navFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
+        val navFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
         map = navFragment?.childFragmentManager?.fragments?.get(0) as YandexMapFragment
     }
 
     private fun setupNavController() {
         setSupportActionBar(binding.appBarMain.toolbar)
-        
+
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_main)
-    
+
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.targ01, R.id.targ04, R.id.targ08, R.id.targ10, R.id.targ12, R.id.targ14,
@@ -82,7 +83,7 @@ class MainActivity : AppCompatActivity(),
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-    
+
         navView.setNavigationItemSelectedListener(this)
     }
 
@@ -112,7 +113,7 @@ class MainActivity : AppCompatActivity(),
                 map.showLocationFromDrone(entities)
         }
     }
-    
+
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.targ01 -> {
@@ -208,7 +209,7 @@ class MainActivity : AppCompatActivity(),
                         true
                     }
                     R.id.addHeightMaps -> {
-                        //  Вставить код для загрузка высотных карт
+                        //  Загрузка высотной карты (Москвы) надо будет добавить возможность выбирать регионы
                         val hgtLoader = HgtLoader(resources)
                         true
                     }
@@ -217,7 +218,7 @@ class MainActivity : AppCompatActivity(),
             }
         }, this, Lifecycle.State.RESUMED)
     }
-    
+
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()

@@ -38,11 +38,10 @@ public class HgtLoader {
         return myText;
     }
 
-    private byte[]  convertStreamToString(InputStream is) throws IOException {
+    private byte[] convertStreamToString(InputStream is) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int i = is.read();
-        while( i != -1)
-        {
+        while (i != -1) {
             baos.write(i);
             i = is.read();
         }
