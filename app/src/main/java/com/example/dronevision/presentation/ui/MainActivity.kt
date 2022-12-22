@@ -1,5 +1,6 @@
 package com.example.dronevision.presentation.ui
 
+import android.app.Activity
 import android.bluetooth.BluetoothManager
 import android.os.Bundle
 import android.view.Gravity
@@ -30,6 +31,7 @@ import com.example.dronevision.presentation.ui.bluetooth.*
 import com.example.dronevision.presentation.ui.yandex_map.YandexMapFragment
 import com.example.dronevision.presentation.view_model.TechnicViewModel
 import com.example.dronevision.presentation.view_model.ViewModelFactory
+import com.example.dronevision.utils.HgtLoader
 import com.example.dronevision.utils.SpawnTechnicModel
 import com.google.android.material.navigation.NavigationView
 import javax.inject.Inject
@@ -205,6 +207,11 @@ class MainActivity : AppCompatActivity(),
                     }
                     R.id.removeAll -> {
                         map.deleteAll()
+                        true
+                    }
+                    R.id.addHeightMaps -> {
+                        //  Вставить код для загрузка высотных карт
+                        val hgtLoader = HgtLoader(resources)
                         true
                     }
                     else -> false

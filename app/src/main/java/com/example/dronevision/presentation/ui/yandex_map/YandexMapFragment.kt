@@ -19,6 +19,8 @@ import com.example.dronevision.presentation.ui.IMap
 import com.example.dronevision.presentation.ui.ImageTypes
 import com.example.dronevision.presentation.ui.bluetooth.Entity
 import com.example.dronevision.presentation.ui.targ.TargFragment
+import com.example.dronevision.utils.FindTarget
+import com.example.dronevision.utils.HeightFinder
 import com.example.dronevision.utils.MapTools
 import com.example.dronevision.utils.NGeoCalc
 import com.example.dronevision.utils.SpawnTechnic
@@ -38,18 +40,17 @@ import com.yandex.mapkit.map.Map
 import com.yandex.runtime.image.ImageProvider
 import javax.inject.Inject
 
-
 class YandexMapFragment : Fragment(), CameraListener,
 TargFragment.TargetFragmentCallback, IMap {
     
     private lateinit var binding: FragmentYandexMapBinding
     private lateinit var droneMarker: PlacemarkMapObject
-    
+
     private lateinit var polylineONMap: PolylineMapObject
     
     private lateinit var viewModel: YandexMapViewModel
     private lateinit var databaseRef: DatabaseReference
-    
+
     private val listOfObjects = mutableListOf<PlacemarkMapObject>()
     
     @Inject
@@ -74,20 +75,20 @@ TargFragment.TargetFragmentCallback, IMap {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentYandexMapBinding.inflate(inflater, container, false)
-    
+        
         binding.mapView.map.addCameraListener(this)
-    
+
         initDroneMarker()
         initTechnic()
-    
+        
         SpawnTechnic.spawnTechnicLiveData.observe(viewLifecycleOwner) {
             spawnTechnic(it.imageRes, it.type)
         }
-    
+
         setupCompassButton()
         setupZoomButtons()
         setCardViewExpand()
-        
+
         val database =
             Firebase.database("https://drone-6c66c-default-rtdb.asia-southeast1.firebasedatabase.app")
         databaseRef = database.getReference("message")
@@ -105,7 +106,7 @@ TargFragment.TargetFragmentCallback, IMap {
             binding.azimuth.isVisible = isCardViewExpanded
         }
     }
-    
+
     private fun setupCompassButton() {
         binding.compassButton.setOnClickListener {
             val cameraPosition = binding.mapView.map.cameraPosition
@@ -117,7 +118,7 @@ TargFragment.TargetFragmentCallback, IMap {
             )
         }
     }
-    
+
     private fun setupZoomButtons() {
         binding.zoomInButton.setOnClickListener {
             val cameraPosition = binding.mapView.map.cameraPosition
@@ -128,7 +129,7 @@ TargFragment.TargetFragmentCallback, IMap {
                 ), Animation(Animation.Type.SMOOTH, 1.0f), null
             )
         }
-    
+
         binding.zoomOutButton.setOnClickListener {
             val cameraPosition = binding.mapView.map.cameraPosition
             binding.mapView.map.move(
@@ -139,7 +140,7 @@ TargFragment.TargetFragmentCallback, IMap {
             )
         }
     }
-    
+
     private fun initTechnic() {
         viewModel.getTechnics()
         viewModel.technicListLiveData.observe(viewLifecycleOwner) {
@@ -180,7 +181,6 @@ TargFragment.TargetFragmentCallback, IMap {
             }
 
             override fun onCancelled(error: DatabaseError) {
-
             }
         })
     }
@@ -235,7 +235,7 @@ TargFragment.TargetFragmentCallback, IMap {
             true
         }
     }
-    
+
     override fun onBroadcastButtonClick(technic: Technic) {
         val sb = StringBuilder()
         sb.append(technic.type.name)
@@ -261,14 +261,14 @@ TargFragment.TargetFragmentCallback, IMap {
         droneMarker.addTapListener { mapObject, point ->
             return@addTapListener true
         }
-    
+
         showWgs82OnCard()
         calculateAzimuth()
         showSk42OnCard()
         editPolylineOnMapGeometry()
         return droneMarker
     }
-    
+
     private fun editPolylineOnMapGeometry() {
         val cameraPositionTarget = binding.mapView.map.cameraPosition.target
         polylineONMap.geometry = Polyline(listOf(droneMarker.geometry, cameraPositionTarget))
@@ -278,7 +278,7 @@ TargFragment.TargetFragmentCallback, IMap {
         val drone = entities[0]
         editDroneMarker(drone.lat, drone.lon, drone.asim.toFloat())
     }
-    
+
     override fun deleteAll() {
         binding.mapView.map.mapObjects.clear()
         viewModel.deleteAll()
@@ -293,11 +293,11 @@ TargFragment.TargetFragmentCallback, IMap {
         )
         droneMarker.setIconStyle(IconStyle().setRotationType(RotationType.ROTATE))
         droneMarker.isVisible = false
-        
+
         val cameraPositionTarget = binding.mapView.map.cameraPosition.target
         val latitude = cameraPositionTarget.latitude
         val longitude = cameraPositionTarget.longitude
-        
+
         val polyline = Polyline(listOf(Point(latitude, longitude), Point(0.0, 0.0)))
         polylineONMap = binding.mapView.map.mapObjects.addPolyline(polyline)
         polylineONMap.strokeWidth = 0.2f
@@ -339,7 +339,26 @@ TargFragment.TargetFragmentCallback, IMap {
             Animation(Animation.Type.SMOOTH, 1.0f), null
         )
     }
-    
+
+    private fun getTargetCoordinates(entities: List<Entity>): FindTarget {
+        val drone = entities[0]
+        var lat = drone.lat
+        var lon = drone.lon
+        if (lat.isNaN() && lon.isNaN()) {
+            lat = 0.0
+            lon = 0.0
+        }
+        val alt = drone.alt
+        val ywr = drone.cam_deflect
+        val pt = drone.cam_angle
+        val asim = drone.asim
+        val heightFinder = HeightFinder()
+        val geoHeight = heightFinder.FindH(lat, lon)
+        val h = geoHeight + alt
+        var findTarget = FindTarget(h, lat, lon, asim + ywr, pt)
+        return findTarget
+    }
+
     override fun onCameraPositionChanged(
         map: Map,
         cameraPosition: CameraPosition,
@@ -352,24 +371,24 @@ TargFragment.TargetFragmentCallback, IMap {
         binding.compassButton.rotation = cameraPosition.azimuth * -1
         polylineONMap.geometry = Polyline(listOf(droneMarker.geometry, cameraPosition.target))
     }
-    
+
     private fun getCameraPositionLatitude(): Double =
         binding.mapView.map.cameraPosition.target.latitude
-    
+
     private fun getCameraPositionLongitude(): Double =
         binding.mapView.map.cameraPosition.target.longitude
-    
+
     private fun showWgs82OnCard() {
         val latitudeText = String.format("%.6f", getCameraPositionLatitude())
         val longitudeText = String.format("%.6f", getCameraPositionLongitude())
         binding.latitude.text = "Широта = $latitudeText"
         binding.longitude.text = "Долгота = $longitudeText"
     }
-    
+
     private fun showSk42OnCard() {
         val x = doubleArrayOf(0.0)
         val y = doubleArrayOf(0.0)
-        
+
         NGeoCalc().wgs84ToPlane(
             x, y,
             doubleArrayOf(0.0),
@@ -383,20 +402,20 @@ TargFragment.TargetFragmentCallback, IMap {
             )
         )
     }
-    
+
     private fun calculateAzimuth() {
         val cameraPositionTarget = binding.mapView.map.cameraPosition.target
         val azimuth = MapTools.angleBetween(droneMarker.geometry, cameraPositionTarget)
         val azimuthText = String.format("%.6f", azimuth)
         binding.azimuth.text = "Азимут = $azimuthText"
     }
-    
+
     override fun onStart() {
         super.onStart()
         MapKitFactory.getInstance().onStart()
         binding.mapView.onStart()
     }
-    
+
     override fun onStop() {
         binding.mapView.onStop()
         MapKitFactory.getInstance().onStop()
