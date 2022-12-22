@@ -31,7 +31,8 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
                 val size = inputStream?.read(buffer)
                 val message = String(buffer, 0, size!!)
                 val entities = Gson().fromJson(message, Entities::class.java)
-                listener.onReceive(Message("Данные получены!", false), entities.entities)
+                listener.onReceive(Message("Данные получены!", false), entities.entities.toMutableList())
+
             }catch (e: IOException){
                 listener.onReceive(Message("Ошибка, сбой соединения!", true))
                 return
@@ -47,6 +48,6 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
     }
 
     interface MessageListener{
-        fun onReceive(message: Message, entities: List<Entity>? = null)
+        fun onReceive(message: Message, entities: MutableList<Entity>? = null)
     }
 }

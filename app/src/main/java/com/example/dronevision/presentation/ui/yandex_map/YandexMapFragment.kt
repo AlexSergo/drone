@@ -312,10 +312,8 @@ TargFragment.TargetFragmentCallback, IMap {
     override fun showLocationFromDrone(entities: List<Entity>) {
         val drone = entities[0]
         editDroneMarker(drone.lat, drone.lon, drone.asim.toFloat())
-        if (entities.size > 1) {
-            val aim = entities[1]
-            showAim(aim.lat, aim.lon)
-        }
+        val aim = entities[1]
+        showAim(aim.lat, aim.lon)
         if (entities[0].calc_target) {
             getTargetCoordinates(entities)
             CalculateTargetCoordinates.targetLiveData.observe(viewLifecycleOwner) {
@@ -337,7 +335,9 @@ TargFragment.TargetFragmentCallback, IMap {
     }
 
     private fun showAim(latitude: Double, longitude: Double) {
-        removeAim()
+        if (aimMarker != null || polylineToAim != null)
+            removeAim()
+
         aimMarker = binding.mapView.map.mapObjects.addPlacemark(
             Point(latitude, longitude),
             ImageProvider.fromResource(requireContext(), R.drawable.ic_cross_center)
@@ -434,10 +434,7 @@ TargFragment.TargetFragmentCallback, IMap {
         val ywr = drone.cam_deflect
         val pt = drone.cam_angle
         val asim = drone.asim
-        val heightFinder = HeightFinder()
-        val geoHeight = heightFinder.FindH(lat, lon)
-        val h = geoHeight + alt
-        var findTarget = FindTarget(h, lat, lon, asim + ywr, pt)
+        var findTarget = FindTarget(alt, lat, lon, asim + ywr, pt)
         CalculateTargetCoordinates.targetLiveData.postValue(findTarget)
     }
 

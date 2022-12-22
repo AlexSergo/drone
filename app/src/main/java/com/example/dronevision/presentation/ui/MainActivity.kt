@@ -106,7 +106,14 @@ class MainActivity : AppCompatActivity(),
         })
     }
 
-    override fun onReceive(message: Message, entities: List<Entity>?) {
+    override fun onReceive(message: Message, entities: MutableList<Entity>?) {
+        entities?.let {
+            if (it[0].lat.isNaN() || it[0].lon.isNaN()) {
+                it[0] = Entity(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false)
+                it[1] = Entity(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false)
+            }
+        }
+
         runOnUiThread {
             if (message.isSystem)
                 Toast.makeText(this, message.message, Toast.LENGTH_LONG).show()
