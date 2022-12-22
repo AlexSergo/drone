@@ -9,6 +9,7 @@ import androidx.annotation.DrawableRes
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.dronevision.App
 import com.example.dronevision.R
 import com.example.dronevision.databinding.FragmentYandexMapBinding
@@ -19,11 +20,7 @@ import com.example.dronevision.presentation.ui.IMap
 import com.example.dronevision.presentation.ui.ImageTypes
 import com.example.dronevision.presentation.ui.bluetooth.Entity
 import com.example.dronevision.presentation.ui.targ.TargFragment
-import com.example.dronevision.utils.FindTarget
-import com.example.dronevision.utils.HeightFinder
-import com.example.dronevision.utils.MapTools
-import com.example.dronevision.utils.NGeoCalc
-import com.example.dronevision.utils.SpawnTechnic
+import com.example.dronevision.utils.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -38,6 +35,7 @@ import com.yandex.mapkit.geometry.Polyline
 import com.yandex.mapkit.map.*
 import com.yandex.mapkit.map.Map
 import com.yandex.runtime.image.ImageProvider
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -314,8 +312,18 @@ TargFragment.TargetFragmentCallback, IMap {
             val aim = entities[1]
             showAim(aim.lat, aim.lon)
         }
-
+        if (entities[0].calc_target) {
+            getTargetCoordinates(entities)
+            CalculateTargetCoordinates.targetLiveData.observe(viewLifecycleOwner) {
+                spawnTechnic(
+                    R.drawable.ic_99,
+                    TechnicTypes.ANOTHER,
+                    Coordinates(x = it.lat, y = it.lon)
+                )
+            }
+        }
     }
+
 
     override fun deleteAll() {
         binding.mapView.map.mapObjects.clear()
@@ -408,7 +416,7 @@ TargFragment.TargetFragmentCallback, IMap {
         )
     }
 
-    private fun getTargetCoordinates(entities: List<Entity>): FindTarget {
+    private fun getTargetCoordinates(entities: List<Entity>) = lifecycleScope.launch {
         val drone = entities[0]
         var lat = drone.lat
         var lon = drone.lon
@@ -424,7 +432,7 @@ TargFragment.TargetFragmentCallback, IMap {
         val geoHeight = heightFinder.FindH(lat, lon)
         val h = geoHeight + alt
         var findTarget = FindTarget(h, lat, lon, asim + ywr, pt)
-        return findTarget
+        CalculateTargetCoordinates.targetLiveData.postValue(findTarget)
     }
 
     override fun onCameraPositionChanged(

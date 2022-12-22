@@ -8,6 +8,10 @@ object SpawnTechnic {
     val spawnTechnicLiveData: MutableLiveData<SpawnTechnicModel> = MutableLiveData()
 }
 
+object CalculateTargetCoordinates{
+    val targetLiveData: MutableLiveData<FindTarget> = MutableLiveData()
+}
+
 data class SpawnTechnicModel(
     @DrawableRes val imageRes: Int,
     val type: TechnicTypes
