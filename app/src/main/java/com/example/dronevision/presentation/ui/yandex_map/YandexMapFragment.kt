@@ -1,13 +1,16 @@
 package com.example.dronevision.presentation.ui.yandex_map
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentOnAttachListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.dronevision.App
@@ -49,6 +52,7 @@ TargFragment.TargetFragmentCallback, IMap {
     private var aimMarker: PlacemarkMapObject? = null
 
     private lateinit var polylineONMap: PolylineMapObject
+    private var polylineToAim: PolylineMapObject? = null
     
     private lateinit var viewModel: YandexMapViewModel
     private lateinit var databaseRef: DatabaseReference
@@ -243,7 +247,7 @@ TargFragment.TargetFragmentCallback, IMap {
     private fun removeAim(){
         aimMarker?.parent?.remove(aimMarker!!)
         aimMarker = null
-        editPolylineOnMapGeometry()
+        polylineToAim?.parent?.remove(polylineToAim!!)
     }
 
     private fun addClickListenerToMark(mark: PlacemarkMapObject, type: TechnicTypes) {
@@ -338,13 +342,15 @@ TargFragment.TargetFragmentCallback, IMap {
             Point(latitude, longitude),
             ImageProvider.fromResource(requireContext(), R.drawable.ic_cross_center)
         )
-
             //focusCamera(latitude, longitude)
+        drawPolylineToAim(from = droneMarker.geometry, to = Point(latitude, longitude))
+    }
 
-        polylineONMap.parent.remove(polylineONMap)
-        val polyline = Polyline(listOf(droneMarker.geometry, Point(latitude, longitude)))
-        polylineONMap = binding.mapView.map.mapObjects.addPolyline(polyline)
+    private fun drawPolylineToAim(from: Point, to: Point) {
+        val polyline = Polyline(listOf(from, to))
+        polylineToAim = binding.mapView.map.mapObjects.addPolyline(polyline)
         polylineONMap.strokeWidth = 0.2f
+        polylineToAim?.outlineColor = Color.GREEN
     }
 
     private fun focusCamera(latitude: Double, longitude: Double) {
@@ -446,8 +452,7 @@ TargFragment.TargetFragmentCallback, IMap {
         showSk42OnCard()
         binding.compassButton.rotation = cameraPosition.azimuth * -1
 
-        if (aimMarker == null)
-            polylineONMap.geometry = Polyline(listOf(droneMarker.geometry, cameraPosition.target))
+        polylineONMap.geometry = Polyline(listOf(droneMarker.geometry, cameraPosition.target))
     }
     
     private fun getCameraPositionLatitude(): Double =
