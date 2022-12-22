@@ -261,13 +261,18 @@ TargFragment.TargetFragmentCallback, IMap {
 
     private fun getTargetCoordinates(entities: List<Entity>) {
         val drone = entities[0]
-        val lat = 55.666564//drone.lat
-        val lon = 37.613428//drone.lon
+        var lat = drone.lat
+        var lon = drone.lon
+        if (lat.isNaN() && lon.isNaN()) {
+            lat = 0.0
+            lon = 0.0
+        }
         val alt = drone.alt
         val ywr = drone.cam_deflect
         val pt = drone.cam_angle
         val heightFinder = HeightFinder()
         val geoHeight = heightFinder.FindH(lat, lon)
+        var h = geoHeight + alt
     }
     
     override fun onCameraPositionChanged(
