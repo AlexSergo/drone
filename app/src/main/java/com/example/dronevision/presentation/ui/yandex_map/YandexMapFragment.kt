@@ -110,7 +110,7 @@ TargFragment.TargetFragmentCallback, IMap {
             binding.azimuth.isVisible = isCardViewExpanded
         }
     }
-    
+
     private fun setupCompassButton() {
         binding.compassButton.setOnClickListener {
             val cameraPosition = binding.mapView.map.cameraPosition
@@ -122,7 +122,7 @@ TargFragment.TargetFragmentCallback, IMap {
             )
         }
     }
-    
+
     private fun setupZoomButtons() {
         binding.zoomInButton.setOnClickListener {
             val cameraPosition = binding.mapView.map.cameraPosition
@@ -133,7 +133,7 @@ TargFragment.TargetFragmentCallback, IMap {
                 ), Animation(Animation.Type.SMOOTH, 1.0f), null
             )
         }
-    
+
         binding.zoomOutButton.setOnClickListener {
             val cameraPosition = binding.mapView.map.cameraPosition
             binding.mapView.map.move(
@@ -144,7 +144,7 @@ TargFragment.TargetFragmentCallback, IMap {
             )
         }
     }
-    
+
     private fun initTechnic() {
         viewModel.getTechnics()
         viewModel.technicListLiveData.observe(viewLifecycleOwner) {
@@ -167,7 +167,7 @@ TargFragment.TargetFragmentCallback, IMap {
         }
     }
 
-    private fun onChangeListener(dRef: DatabaseReference){
+    private fun onChangeListener(dRef: DatabaseReference) {
         dRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (null == snapshot.value) return
@@ -179,8 +179,10 @@ TargFragment.TargetFragmentCallback, IMap {
                     if (mark.geometry.longitude == lon && mark.geometry.latitude == lat)
                         return
 
-                spawnTechnic(ImageTypes.imageMap[TechnicTypes.valueOf(str[0])]!!,
-                    TechnicTypes.valueOf(str[0]), Coordinates(x = str[1].toDouble(), y = str[2].toDouble())
+                spawnTechnic(
+                    ImageTypes.imageMap[TechnicTypes.valueOf(str[0])]!!,
+                    TechnicTypes.valueOf(str[0]),
+                    Coordinates(x = str[1].toDouble(), y = str[2].toDouble())
                 )
             }
 
@@ -190,7 +192,11 @@ TargFragment.TargetFragmentCallback, IMap {
         })
     }
 
-    private fun spawnTechnic(@DrawableRes imageRes: Int, type: TechnicTypes, coords: Coordinates? = null) {
+    private fun spawnTechnic(
+        @DrawableRes imageRes: Int,
+        type: TechnicTypes,
+        coords: Coordinates? = null
+    ) {
         val cameraPositionTarget = binding.mapView.map.cameraPosition.target
         viewModel.getTechnics()
         var count = 0
@@ -214,7 +220,11 @@ TargFragment.TargetFragmentCallback, IMap {
         }
     }
 
-    private fun setMark(latitude: Double, longitude: Double, @DrawableRes imageRes: Int): PlacemarkMapObject{
+    private fun setMark(
+        latitude: Double,
+        longitude: Double,
+        @DrawableRes imageRes: Int
+    ): PlacemarkMapObject {
         val mapObjCollection = binding.mapView.map.mapObjects.addCollection()
         aimMarker?.let {
             if ( abs(latitude - it.geometry.latitude) < 0.0001
@@ -231,6 +241,7 @@ TargFragment.TargetFragmentCallback, IMap {
         return mark
     }
 
+
     private fun removeAim(){
         aimMarker?.parent?.remove(aimMarker!!)
         aimMarker = null
@@ -245,7 +256,12 @@ TargFragment.TargetFragmentCallback, IMap {
                 Toast.LENGTH_SHORT
             ).show()
             val targFragment = TargFragment(
-                Technic(coords = Coordinates(x = mark.geometry.latitude, y = mark.geometry.longitude), type = type),
+                Technic(
+                    coords = Coordinates(
+                        x = mark.geometry.latitude,
+                        y = mark.geometry.longitude
+                    ), type = type
+                ),
                 this
             )
             targFragment.show(parentFragmentManager, "targFragment")
@@ -262,7 +278,7 @@ TargFragment.TargetFragmentCallback, IMap {
         sb.append(technic.coords.y)
         databaseRef.setValue(sb.toString())
     }
-    
+
     private fun editDroneMarker(
         latitude: Double,
         longitude: Double,
@@ -278,19 +294,19 @@ TargFragment.TargetFragmentCallback, IMap {
         droneMarker.addTapListener { mapObject, point ->
             return@addTapListener true
         }
-    
+
         showWgs82OnCard()
         calculateAzimuth()
         showSk42OnCard()
         editPolylineOnMapGeometry()
         return droneMarker
     }
-    
+
     private fun editPolylineOnMapGeometry() {
         val cameraPositionTarget = binding.mapView.map.cameraPosition.target
         polylineONMap.geometry = Polyline(listOf(droneMarker.geometry, cameraPositionTarget))
     }
-    
+
     override fun showLocationFromDrone(entities: List<Entity>) {
         val drone = entities[0]
         editDroneMarker(drone.lat, drone.lon, drone.asim.toFloat())
@@ -300,7 +316,7 @@ TargFragment.TargetFragmentCallback, IMap {
         }
 
     }
-    
+
     override fun deleteAll() {
         binding.mapView.map.mapObjects.clear()
         viewModel.deleteAll()
@@ -308,7 +324,7 @@ TargFragment.TargetFragmentCallback, IMap {
         initDroneMarker()
     }
 
-    private fun showAim(latitude: Double, longitude: Double){
+    private fun showAim(latitude: Double, longitude: Double) {
         aimMarker = binding.mapView.map.mapObjects.addPlacemark(
             Point(latitude, longitude),
             ImageProvider.fromResource(requireContext(), R.drawable.ic_cross_center)
@@ -316,7 +332,6 @@ TargFragment.TargetFragmentCallback, IMap {
 
         focusCamera(latitude, longitude)
 
-        polylineONMap.parent.remove(polylineONMap)
         val polyline = Polyline(listOf(droneMarker.geometry, Point(latitude, longitude)))
         polylineONMap = binding.mapView.map.mapObjects.addPolyline(polyline)
         polylineONMap.strokeWidth = 0.2f
@@ -325,8 +340,10 @@ TargFragment.TargetFragmentCallback, IMap {
     private fun focusCamera(latitude: Double, longitude: Double) {
         val cameraPosition = binding.mapView.map.cameraPosition
         binding.mapView.map.move(
-            CameraPosition(Point(latitude, longitude),
-                cameraPosition.zoom+1, 0f,0f),
+            CameraPosition(
+                Point(latitude, longitude),
+                cameraPosition.zoom + 1, 0f, 0f
+            ),
             Animation(Animation.Type.SMOOTH, 1f),
             null
         )
@@ -339,16 +356,16 @@ TargFragment.TargetFragmentCallback, IMap {
         )
         droneMarker.setIconStyle(IconStyle().setRotationType(RotationType.ROTATE))
         droneMarker.isVisible = false
-        
+
         val cameraPositionTarget = binding.mapView.map.cameraPosition.target
         val latitude = cameraPositionTarget.latitude
         val longitude = cameraPositionTarget.longitude
-        
+
         val polyline = Polyline(listOf(Point(latitude, longitude), Point(0.0, 0.0)))
         polylineONMap = binding.mapView.map.mapObjects.addPolyline(polyline)
         polylineONMap.strokeWidth = 0.2f
     }
-    
+
     override fun showLocationDialog() {
         val locationDialogArray = arrayOf(
             "Запросить у Р-187-П1",
@@ -357,7 +374,7 @@ TargFragment.TargetFragmentCallback, IMap {
             "Найти на карте",
             "Передать Р-187-П1"
         )
-        
+
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Координаты")
             .setItems(locationDialogArray) { dialog, which ->
@@ -377,7 +394,6 @@ TargFragment.TargetFragmentCallback, IMap {
             .show()
     }
 
-    
     private fun getMarkerLocation() {
         binding.mapView.map.move(
             CameraPosition(
