@@ -6,11 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentOnAttachListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.dronevision.App
@@ -39,9 +37,9 @@ import com.yandex.mapkit.map.*
 import com.yandex.mapkit.map.Map
 import com.yandex.runtime.image.ImageProvider
 import kotlinx.coroutines.launch
+import java.io.IOException
 import javax.inject.Inject
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 
 class YandexMapFragment : Fragment(), CameraListener,
@@ -98,7 +96,7 @@ TargFragment.TargetFragmentCallback, IMap {
         val database =
             Firebase.database("https://drone-6c66c-default-rtdb.asia-southeast1.firebasedatabase.app")
         databaseRef = database.getReference("message")
-        onChangeListener(databaseRef)
+        onDatabaseChangeListener(databaseRef)
         
         return binding.root
     }
@@ -169,14 +167,13 @@ TargFragment.TargetFragmentCallback, IMap {
         }
     }
 
-    private fun onChangeListener(dRef: DatabaseReference) {
+    private fun onDatabaseChangeListener(dRef: DatabaseReference) {
         dRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (null == snapshot.value) return
                 val str = snapshot.value.toString().split(" ")
                 val lat = str[1].toDouble()
                 val lon = str[2].toDouble()
-                val objects = binding.mapView.map.mapObjects
                 for (mark in listOfObjects)
                     if (mark.geometry.longitude == lon && mark.geometry.latitude == lat)
                         return
@@ -325,7 +322,6 @@ TargFragment.TargetFragmentCallback, IMap {
             }
         }
     }
-
 
     override fun deleteAll() {
         binding.mapView.map.mapObjects.clear()
