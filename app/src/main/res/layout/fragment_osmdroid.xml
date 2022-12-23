@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <org.osmdroid.views.MapView
+            android:id="@+id/mapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:enabled="true"
+            android:paddingBottom="10dp" />
+
+        <View
+            android:id="@+id/form_View"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:background="@drawable/ic_cross_center" />
+
+        <TextView
+            android:id="@+id/coordView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_gravity="bottom|center_vertical|center_horizontal|center"
+            android:textSize="18dp" />
+
+        <TableLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right|center_vertical|center_horizontal|center"
+            android:layout_marginBottom="20dp"
+            android:orientation="vertical">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:baselineAligned="true"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/rulerButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ruler_black" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:baselineAligned="true"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/zoomInButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/zoom_in" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:baselineAligned="true"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/zoomOutButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:src="@drawable/zoom_out" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:baselineAligned="true"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
+
+                <RelativeLayout>
+
+                    <ImageView
+                        android:id="@+id/compassButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:src="@drawable/compass" />
+
+                    <ImageView
+                        android:id="@+id/lockerView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:src="@drawable/locker" />
+                </RelativeLayout>
+            </TableRow>
+        </TableLayout>
+    </FrameLayout>
+
+
+</FrameLayout>

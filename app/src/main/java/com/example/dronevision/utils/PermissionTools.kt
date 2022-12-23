@@ -20,7 +20,6 @@ object PermissionTools {
         Manifest.permission.BLUETOOTH,  // Bluetooth connected products
         Manifest.permission.BLUETOOTH_ADMIN,  // Bluetooth connected products
         Manifest.permission.READ_EXTERNAL_STORAGE,  // Log files
-        Manifest.permission.RECORD_AUDIO // Speaker accessory
     )
     
     private const val REQUEST_PERMISSION_CODE = 12345
@@ -31,7 +30,7 @@ object PermissionTools {
      * Checks if there is any missing permissions, and
      * requests runtime permission if needed.
      */
-    private fun checkAndRequestPermissions(appCompatActivity: AppCompatActivity) {
+    fun checkAndRequestPermissions(appCompatActivity: AppCompatActivity) {
         // Check for permissions
         for (permission in REQUIRED_PERMISSION_LIST) {
             if (ContextCompat.checkSelfPermission(

@@ -18,6 +18,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import androidx.preference.PreferenceManager
 import com.example.dronevision.AbonentDialogFragment
 import com.example.dronevision.App
 import com.example.dronevision.R
@@ -26,12 +27,13 @@ import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.model.BluetoothListItem
 import com.example.dronevision.presentation.model.Message
 import com.example.dronevision.presentation.ui.bluetooth.*
-import com.example.dronevision.presentation.ui.yandex_map.YandexMapFragment
 import com.example.dronevision.presentation.view_model.TechnicViewModel
 import com.example.dronevision.presentation.view_model.ViewModelFactory
 import com.example.dronevision.utils.HgtLoader
 import com.example.dronevision.utils.SpawnTechnicModel
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.components.BuildConfig
+import org.osmdroid.config.Configuration
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(),
@@ -57,13 +59,21 @@ class MainActivity : AppCompatActivity(),
         setupOptionsMenu()
         setupBluetooth()
         setupNavController()
-
+        
+        setupOsmdroidConfiguration()
 
         val navFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
-        map = navFragment?.childFragmentManager?.fragments?.get(0) as YandexMapFragment
+        map = navFragment?.childFragmentManager?.fragments?.get(0) as IMap
     }
-
+    
+    private fun setupOsmdroidConfiguration() {
+        val provider = Configuration.getInstance()
+        provider.userAgentValue = BuildConfig.APPLICATION_ID
+        provider.osmdroidTileCache = externalCacheDir
+        provider.load(this, PreferenceManager.getDefaultSharedPreferences(this))
+    }
+    
     private fun setupNavController() {
         setSupportActionBar(binding.appBarMain.toolbar)
 
@@ -217,6 +227,10 @@ class MainActivity : AppCompatActivity(),
                     R.id.addHeightMaps -> {
                         //  Загрузка высотной карты (Москвы) надо будет добавить возможность выбирать регионы
                         val hgtLoader = HgtLoader(resources)
+                        true
+                    }
+                    R.id.mapOfflineItem -> {
+                        map.offlineMode()
                         true
                     }
                     else -> false

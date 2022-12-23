@@ -331,6 +331,10 @@ TargFragment.TargetFragmentCallback, IMap {
         initDroneMarker()
     }
     
+    override fun offlineMode() {
+        Toast.makeText(requireContext(), "Яндекс карты не позволяют зайти в оффлайн мод", Toast.LENGTH_SHORT).show()
+    }
+    
     private fun showAim(latitude: Double, longitude: Double) {
         if (aimMarker != null || polylineToAim != null)
             removeAim()

@@ -7,4 +7,5 @@ interface IMap{
     fun showLocationFromDrone(entities: List<Entity>)
     fun showLocationDialog()
     fun deleteAll()
+    fun offlineMode()
 }

@@ -84,6 +84,8 @@ dependencies {
 
     implementation platform('com.google.firebase:firebase-bom:31.1.1')
 
+    implementation 'androidx.preference:preference-ktx:1.2.0'
+
     implementation project(path:':data')
     implementation project(path:':domain')
 

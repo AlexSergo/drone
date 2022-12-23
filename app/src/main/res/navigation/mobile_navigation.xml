@@ -7,4 +7,8 @@
         android:id="@+id/yandexMapFragment"
         android:name="com.example.dronevision.presentation.ui.yandex_map.YandexMapFragment"
         android:label="Яндекс карта" />
+    <fragment
+        android:id="@+id/osmdroidFragment"
+        android:name="com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment"
+        android:label="OsmdroidFragment" />
 </navigation>
