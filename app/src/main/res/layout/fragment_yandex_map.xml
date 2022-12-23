@@ -4,6 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <TextView
+        android:id="@+id/distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="200 km"
+        android:textSize="10sp"
+        android:textColor="@color/black"
+        android:translationZ="2dp"
+        app:layout_constraintStart_toEndOf="@id/form_View"
+        app:layout_constraintBottom_toBottomOf="@id/form_View"/>
+
     <androidx.cardview.widget.CardView
         android:id="@+id/infoCard"
         android:layout_width="wrap_content"

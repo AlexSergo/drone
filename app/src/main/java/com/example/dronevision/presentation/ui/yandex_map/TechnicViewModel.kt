@@ -12,7 +12,7 @@ import com.example.dronevision.presentation.model.Technic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class YandexMapViewModel(
+class TechnicViewModel(
     private val getTechnicsUseCase: GetTechnicsUseCase,
     private val saveTechnicUseCase: SaveTechnicUseCase,
     private val deleteAllUseCase: DeleteAllUseCase,

@@ -19,6 +19,7 @@ import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.IMap
 import com.example.dronevision.presentation.ui.ImageTypes
+import com.example.dronevision.presentation.ui.MyMapFragment
 import com.example.dronevision.presentation.ui.bluetooth.Entity
 import com.example.dronevision.presentation.ui.targ.TargFragment
 import com.example.dronevision.utils.*
@@ -31,18 +32,21 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
+import com.yandex.mapkit.geometry.Geo
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.geometry.Polyline
 import com.yandex.mapkit.map.*
 import com.yandex.mapkit.map.Map
 import com.yandex.runtime.image.ImageProvider
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.IOException
 import javax.inject.Inject
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 
-class YandexMapFragment : Fragment(), CameraListener,
+class YandexMapFragment :  MyMapFragment(), CameraListener,
 TargFragment.TargetFragmentCallback, IMap {
     
     private lateinit var binding: FragmentYandexMapBinding
@@ -51,27 +55,14 @@ TargFragment.TargetFragmentCallback, IMap {
 
     private lateinit var polylineONMap: PolylineMapObject
     private var polylineToAim: PolylineMapObject? = null
-    
-    private lateinit var viewModel: YandexMapViewModel
+
     private lateinit var databaseRef: DatabaseReference
     
     private val listOfObjects = mutableListOf<PlacemarkMapObject>()
-    
-    @Inject
-    lateinit var viewModelFactory: YandexMapViewModelFactory
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        inject()
-        initViewModel()
-    }
-    
-    private fun inject() {
-        (requireContext().applicationContext as App).appComponent.inject(this)
-    }
-    
-    private fun initViewModel() {
-        viewModel = ViewModelProvider(this, viewModelFactory)[YandexMapViewModel::class.java]
+        inject(YandexMapFragment())
     }
     
     override fun onCreateView(
@@ -84,10 +75,6 @@ TargFragment.TargetFragmentCallback, IMap {
 
         initDroneMarker()
         initTechnic()
-    
-        SpawnTechnic.spawnTechnicLiveData.observe(viewLifecycleOwner) {
-            spawnTechnic(it.imageRes, it.type)
-        }
     
         setupCompassButton()
         setupZoomButtons()
@@ -146,7 +133,7 @@ TargFragment.TargetFragmentCallback, IMap {
         }
     }
 
-    private fun initTechnic() {
+    override fun initTechnic() {
         viewModel.getTechnics()
         viewModel.technicListLiveData.observe(viewLifecycleOwner) {
             it?.let { list ->
@@ -159,8 +146,7 @@ TargFragment.TargetFragmentCallback, IMap {
                             ImageTypes.imageMap[technic.type]!!
                         )
                     )
-                    mark.geometry.latitude
-                    mark.geometry.longitude
+
                     listOfObjects.add(mark)
                     addClickListenerToMark(mark, technic.type)
                 }
@@ -192,10 +178,10 @@ TargFragment.TargetFragmentCallback, IMap {
         })
     }
 
-    private fun spawnTechnic(
+    override fun spawnTechnic(
         @DrawableRes imageRes: Int,
         type: TechnicTypes,
-        coords: Coordinates? = null
+        coords: Coordinates?
     ) {
         val cameraPositionTarget = binding.mapView.map.cameraPosition.target
         viewModel.getTechnics()
@@ -235,14 +221,13 @@ TargFragment.TargetFragmentCallback, IMap {
             Point(latitude, longitude),
             ImageProvider.fromResource(requireContext(), imageRes)
         )
-        mark.geometry.latitude
-        mark.geometry.longitude
+
         listOfObjects.add(mark)
         return mark
     }
 
 
-    private fun removeAim(){
+    override fun removeAim(){
         aimMarker?.parent?.remove(aimMarker!!)
         aimMarker = null
         polylineToAim?.parent?.remove(polylineToAim!!)
@@ -334,7 +319,11 @@ TargFragment.TargetFragmentCallback, IMap {
     override fun offlineMode() {
         Toast.makeText(requireContext(), "Яндекс карты не позволяют зайти в оффлайн мод", Toast.LENGTH_SHORT).show()
     }
-    
+
+    override fun changeGridState(isShow: Boolean) {
+
+    }
+
     private fun showAim(latitude: Double, longitude: Double) {
         if (aimMarker != null || polylineToAim != null)
             removeAim()
@@ -366,7 +355,7 @@ TargFragment.TargetFragmentCallback, IMap {
         )
     }
 
-    private fun initDroneMarker() {
+    override fun initDroneMarker() {
         droneMarker = binding.mapView.map.mapObjects.addPlacemark(
             Point(0.0, 0.0),
             ImageProvider.fromResource(requireContext(), R.drawable.gps_tacker2)
@@ -423,7 +412,7 @@ TargFragment.TargetFragmentCallback, IMap {
         )
     }
 
-    private fun getTargetCoordinates(entities: List<Entity>) = lifecycleScope.launch {
+    private fun getTargetCoordinates(entities: List<Entity>) = lifecycleScope.launch(Dispatchers.IO) {
         val drone = entities[0]
         var lat = drone.lat
         var lon = drone.lon
@@ -451,6 +440,10 @@ TargFragment.TargetFragmentCallback, IMap {
         binding.compassButton.rotation = cameraPosition.azimuth * -1
 
         polylineONMap.geometry = Polyline(listOf(droneMarker.geometry, cameraPosition.target))
+
+        val distance = (Geo.distance(droneMarker.geometry, cameraPosition.target) / 100).roundToInt() / 10.0
+
+        binding.distance.text = "$distance km"
     }
     
     private fun getCameraPositionLatitude(): Double =

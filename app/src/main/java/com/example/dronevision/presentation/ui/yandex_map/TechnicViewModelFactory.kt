@@ -7,7 +7,7 @@ import com.example.dronevision.domain.use_cases.DeleteTechnicUseCase
 import com.example.dronevision.domain.use_cases.GetTechnicsUseCase
 import com.example.dronevision.domain.use_cases.SaveTechnicUseCase
 
-class YandexMapViewModelFactory(
+class TechnicViewModelFactory(
     private val getTechnicsUseCase: GetTechnicsUseCase,
     private val saveTechnicUseCase: SaveTechnicUseCase,
     private val deleteAllUseCase: DeleteAllUseCase,
@@ -16,8 +16,8 @@ class YandexMapViewModelFactory(
     
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(YandexMapViewModel::class.java))
-            return YandexMapViewModel(
+        if (modelClass.isAssignableFrom(TechnicViewModel::class.java))
+            return TechnicViewModel(
                 getTechnicsUseCase = getTechnicsUseCase,
                 saveTechnicUseCase = saveTechnicUseCase,
                 deleteAllUseCase = deleteAllUseCase,

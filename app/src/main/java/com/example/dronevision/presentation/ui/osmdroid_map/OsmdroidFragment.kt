@@ -11,29 +11,55 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.content.PermissionChecker.checkSelfPermission
-import androidx.fragment.app.Fragment
+import com.example.dronevision.R
 import com.example.dronevision.databinding.FragmentOsmdroidBinding
+import com.example.dronevision.domain.model.Coordinates
+import com.example.dronevision.domain.model.TechnicTypes
+import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.IMap
+import com.example.dronevision.presentation.ui.ImageTypes
+import com.example.dronevision.presentation.ui.MyMapFragment
 import com.example.dronevision.presentation.ui.bluetooth.Entity
 import org.osmdroid.tileprovider.modules.OfflineTileProvider
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.tileprovider.util.SimpleRegisterReceiver
+import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
+import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Overlay
 import org.osmdroid.views.overlay.ScaleBarOverlay
 import org.osmdroid.views.overlay.compass.CompassOverlay
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
+import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
+import org.osmdroid.views.overlay.Polyline
 import java.io.File
+import kotlin.math.abs
 
-class OsmdroidFragment : Fragment(), IMap {
+
+class OsmdroidFragment : MyMapFragment(), IMap {
     
     private lateinit var binding: FragmentOsmdroidBinding
     private lateinit var rotationGestureOverlay: RotationGestureOverlay
     private val dirName = Environment.getExternalStorageDirectory().path + "/Drone Vision/"
-    
+
+    private val overlayGrid = LatLonGridlineOverlay2()
+    private val listOfTechnic = mutableListOf<Overlay>()
+    private lateinit var droneMarker: Marker
+    private lateinit var polylineToCenter: Polyline
+    private var aimMarker: Marker? = null
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        inject(this)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -42,6 +68,12 @@ class OsmdroidFragment : Fragment(), IMap {
         
         checkStoragePermissions()
         setupOsmdroidMap()
+        initDroneMarker()
+        initTechnic()
+
+        setPolyline(polylineToCenter,
+            listOf(droneMarker.position,
+                GeoPoint(binding.mapView.mapCenter.latitude, binding.mapView.mapCenter.longitude)))
         
         return binding.root
     }
@@ -80,7 +112,7 @@ class OsmdroidFragment : Fragment(), IMap {
     
     private fun setupOsmdroidMap() = binding.run {
         mapView.setTileSource(TileSourceFactory.MAPNIK)
-        mapView.controller.setZoom(18.0)
+        mapView.controller.setZoom(2.0)
         val compassOverlay = CompassOverlay(requireContext().applicationContext, mapView)
         compassOverlay.enableCompass()
         mapView.overlays.add(compassOverlay)
@@ -131,15 +163,103 @@ class OsmdroidFragment : Fragment(), IMap {
         )
         mapView.overlayManager.add(scaleBarOverlay)
     }
-    
-    
+
+    override fun initDroneMarker() {
+        droneMarker = Marker(binding.mapView)
+        drawMarker(droneMarker, latitude = 10.0, longitude = 0.0, R.drawable.gps_tacker2)
+
+        polylineToCenter = Polyline()
+    }
+
+    private fun setPolyline(polyline: Polyline, points: List<GeoPoint>){
+        polyline.setPoints(points)
+        binding.mapView.overlays.add(polyline)
+    }
+
+    override fun initTechnic() {
+        viewModel.getTechnics()
+        viewModel.technicListLiveData.observe(viewLifecycleOwner) {
+            it?.let { list ->
+                list.forEach { technic ->
+
+                    val mark = Marker(binding.mapView)
+                    drawMarker(mark, technic.coords.x, technic.coords.y,
+                        ImageTypes.imageMap[technic.type]!!)
+
+                    listOfTechnic.add(mark)
+                   // addClickListenerToMark(mark, technic.type)
+                }
+            }
+        }
+    }
+
+    override fun spawnTechnic(@DrawableRes imageRes: Int,
+                             type: TechnicTypes,
+                             coords: Coordinates?
+    ){
+        val cameraPosition = binding.mapView.mapCenter
+        viewModel.getTechnics()
+        var count = 0
+        viewModel.technicListLiveData.observe(viewLifecycleOwner) {
+            it?.let {
+                count = it.size + 1
+                val mark: Marker = if (coords != null)
+                    setMark(coords.x, coords.y, imageRes)
+                else
+                    setMark(cameraPosition.latitude, cameraPosition.longitude, imageRes)
+
+                //addClickListenerToMark(mark, type)
+                viewModel.saveTechnic(
+                    Technic(
+                        id = count,
+                        type = type,
+                        Coordinates(x = mark.position.latitude, y = mark.position.longitude)
+                    )
+                )
+            }
+        }
+    }
+
+    private fun setMark(
+        latitude: Double,
+        longitude: Double,
+        @DrawableRes imageRes: Int
+    ): Marker {
+        aimMarker?.let {
+            if ( abs(latitude - it.position.latitude) < 0.0001
+                && abs(longitude - it.position.longitude) < 0.0001)
+                removeAim()
+        }
+        var mark = Marker(binding.mapView)
+        mark = drawMarker(mark, latitude, longitude, imageRes)
+        listOfTechnic.add(mark)
+        return mark
+    }
+
+    private fun drawMarker(mark: Marker, latitude: Double, longitude: Double, @DrawableRes imageRes: Int): Marker{
+        mark.position = GeoPoint(latitude, longitude)
+        mark.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        binding.mapView.overlays.add(mark)
+        mark.icon = getDrawable(requireContext(), imageRes)
+
+        return mark
+    }
+
+    override fun removeAim(){
+        aimMarker?.remove(binding.mapView)
+        aimMarker = null
+       // polylineToAim?.parent?.remove(polylineToAim!!)
+    }
+
     override fun showLocationFromDrone(entities: List<Entity>) {
     }
     
     override fun showLocationDialog() {
     }
     
-    override fun deleteAll() {
+    override fun deleteAll() = binding.run {
+        mapView.overlays.removeAll(listOfTechnic)
+        return@run
     }
     
     override fun offlineMode() {
@@ -199,7 +319,14 @@ class OsmdroidFragment : Fragment(), IMap {
             Toast.LENGTH_LONG
         ).show()
     }
-    
+
+    override fun changeGridState(isShow: Boolean) {
+        if (isShow)
+            binding.mapView.overlays.add(overlayGrid)
+        else
+            binding.mapView.overlays.remove(overlayGrid)
+    }
+
     override fun onResume() {
         super.onResume()
         binding.mapView.onResume()

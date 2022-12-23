@@ -2,6 +2,7 @@ package com.example.dronevision.presentation.ui
 
 import android.bluetooth.BluetoothManager
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -18,7 +19,6 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import androidx.preference.PreferenceManager
 import com.example.dronevision.AbonentDialogFragment
 import com.example.dronevision.App
 import com.example.dronevision.R
@@ -30,7 +30,6 @@ import com.example.dronevision.presentation.ui.bluetooth.*
 import com.example.dronevision.presentation.view_model.TechnicViewModel
 import com.example.dronevision.presentation.view_model.ViewModelFactory
 import com.example.dronevision.utils.HgtLoader
-import com.example.dronevision.utils.SpawnTechnicModel
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.components.BuildConfig
 import org.osmdroid.config.Configuration
@@ -133,64 +132,64 @@ class MainActivity : AppCompatActivity(),
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.targ01 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_01, TechnicTypes.LAUNCHER))
+                map.spawnTechnic(R.drawable.ic_01, TechnicTypes.LAUNCHER)
             }
             R.id.targ04 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_04, TechnicTypes.OVERLAND))
+                map.spawnTechnic(R.drawable.ic_04, TechnicTypes.OVERLAND)
             }
             R.id.targ08 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_08, TechnicTypes.ARTILLERY))
+                map.spawnTechnic(R.drawable.ic_08, TechnicTypes.ARTILLERY)
             }
             R.id.targ10 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_10, TechnicTypes.REACT))
+                map.spawnTechnic(R.drawable.ic_10, TechnicTypes.REACT)
             }
             R.id.targ12 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_12, TechnicTypes.MINES))
+                map.spawnTechnic(R.drawable.ic_12, TechnicTypes.MINES)
             }
             R.id.targ14 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_14, TechnicTypes.ZUR))
+                map.spawnTechnic(R.drawable.ic_14, TechnicTypes.ZUR)
             }
             R.id.targ17 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_17, TechnicTypes.RLS))
+                map.spawnTechnic(R.drawable.ic_17, TechnicTypes.RLS)
             }
             R.id.targ19 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_19, TechnicTypes.INFANTRY))
+                map.spawnTechnic(R.drawable.ic_19, TechnicTypes.INFANTRY)
             }
             R.id.targ20 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_20, TechnicTypes.O_POINT))
+                map.spawnTechnic(R.drawable.ic_20, TechnicTypes.O_POINT)
             }
             R.id.targ21 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_21, TechnicTypes.KNP))
+                map.spawnTechnic(R.drawable.ic_21, TechnicTypes.KNP)
             }
             R.id.targ22 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_22, TechnicTypes.TANKS))
+                map.spawnTechnic(R.drawable.ic_22, TechnicTypes.TANKS)
             }
             R.id.targ23 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_23, TechnicTypes.BTR))
+                map.spawnTechnic(R.drawable.ic_23, TechnicTypes.BTR)
             }
             R.id.targ24 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_24, TechnicTypes.BMP))
+                map.spawnTechnic(R.drawable.ic_24, TechnicTypes.BMP)
             }
             R.id.targ25 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_25, TechnicTypes.HELICOPTER))
+                map.spawnTechnic(R.drawable.ic_25, TechnicTypes.HELICOPTER)
             }
             R.id.targ27 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_27, TechnicTypes.PTRK))
+                map.spawnTechnic(R.drawable.ic_27, TechnicTypes.PTRK)
             }
             R.id.targ29 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_29, TechnicTypes.KLN_PESH))
+                map.spawnTechnic(R.drawable.ic_29, TechnicTypes.KLN_PESH)
             }
             R.id.targ30 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_30, TechnicTypes.KLN_BR))
+                map.spawnTechnic(R.drawable.ic_30, TechnicTypes.KLN_BR)
             }
             R.id.targ31 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_31, TechnicTypes.TANK))
+                map.spawnTechnic(R.drawable.ic_31, TechnicTypes.TANK)
             }
             R.id.targ99 -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_99, TechnicTypes.ANOTHER))
+                map.spawnTechnic(R.drawable.ic_99, TechnicTypes.ANOTHER)
             }
             R.id.breach -> {
-                viewModel.spawnTechnic(SpawnTechnicModel(R.drawable.ic_breach, TechnicTypes.GAP))
+                map.spawnTechnic(R.drawable.ic_breach, TechnicTypes.GAP)
             }
         }
 
@@ -231,6 +230,11 @@ class MainActivity : AppCompatActivity(),
                     }
                     R.id.mapOfflineItem -> {
                         map.offlineMode()
+                        true
+                    }
+                    R.id.mapGridItem ->{
+                        menuItem.isChecked = !menuItem.isChecked
+                        map.changeGridState(menuItem.isChecked)
                         true
                     }
                     else -> false
