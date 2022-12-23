@@ -81,7 +81,7 @@ TargFragment.TargetFragmentCallback, IMap {
         binding = FragmentYandexMapBinding.inflate(inflater, container, false)
     
         binding.mapView.map.addCameraListener(this)
-    
+
         initDroneMarker()
         initTechnic()
     
@@ -105,6 +105,7 @@ TargFragment.TargetFragmentCallback, IMap {
         var isCardViewExpanded = true
         binding.infoCard.setOnClickListener {
             isCardViewExpanded = !isCardViewExpanded
+            binding.plane.isVisible = isCardViewExpanded
             binding.longitude.isVisible = isCardViewExpanded
             binding.latitude.isVisible = isCardViewExpanded
             binding.azimuth.isVisible = isCardViewExpanded
@@ -329,7 +330,7 @@ TargFragment.TargetFragmentCallback, IMap {
         listOfObjects.clear()
         initDroneMarker()
     }
-
+    
     private fun showAim(latitude: Double, longitude: Double) {
         if (aimMarker != null || polylineToAim != null)
             removeAim()

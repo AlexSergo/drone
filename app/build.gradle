@@ -52,7 +52,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:18.1.0'
 
     // maps
-    implementation 'com.yandex.android:maps.mobile:4.1.0-full' // yandex
+    implementation 'com.yandex.android:maps.mobile:4.2.2-full' // yandex
     implementation 'org.osmdroid:osmdroid-android:6.1.14' // osmdroid
 
     //retrofit

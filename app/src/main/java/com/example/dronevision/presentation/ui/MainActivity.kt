@@ -1,9 +1,7 @@
 package com.example.dronevision.presentation.ui
 
-import android.app.Activity
 import android.bluetooth.BluetoothManager
 import android.os.Bundle
-import android.view.Gravity
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem

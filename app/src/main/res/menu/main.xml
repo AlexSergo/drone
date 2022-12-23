@@ -9,16 +9,16 @@
         <menu>
             <item
                 android:id="@+id/mapOsmItem"
-                android:title="Open Street Map" />
+                android:title="Street Map" />
             <item
-                android:id="@+id/mapGoogleItem"
-                android:title="Google карта" />
+                android:id="@+id/mapRoadmapItem"
+                android:title="Cхема" />
             <item
-                android:id="@+id/mapGoogleSatteliteItem"
-                android:title="Google спутник" />
+                android:id="@+id/mapSatelliteItem"
+                android:title="Спутник" />
             <item
-                android:id="@+id/mapGoogleHybridItem"
-                android:title="Google гибрид" />
+                android:id="@+id/mapHybridItem"
+                android:title="Гибрид" />
             <item
                 android:id="@+id/mapGridItem"
                 android:checkable="true"
