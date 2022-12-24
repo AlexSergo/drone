@@ -2,6 +2,7 @@ package com.example.dronevision.presentation.ui.osmdroid_map
 
 import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -26,6 +27,10 @@ import com.example.dronevision.presentation.ui.IMap
 import com.example.dronevision.presentation.ui.ImageTypes
 import com.example.dronevision.presentation.ui.MyMapFragment
 import com.example.dronevision.presentation.ui.bluetooth.Entity
+import org.osmdroid.events.MapAdapter
+import org.osmdroid.events.MapListener
+import org.osmdroid.events.ScrollEvent
+import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.modules.OfflineTileProvider
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.tileprovider.util.SimpleRegisterReceiver
@@ -122,6 +127,19 @@ class OsmdroidFragment : MyMapFragment(), IMap {
         
         rotationGestureOverlay = RotationGestureOverlay(mapView)
         mapView.overlays.add(rotationGestureOverlay)
+
+        mapView.addMapListener(object : MapListener{
+            override fun onScroll(event: ScrollEvent?): Boolean {
+                setPolyline(polylineToCenter,
+                    listOf(droneMarker.position,
+                        GeoPoint(binding.mapView.mapCenter.latitude, binding.mapView.mapCenter.longitude)))
+                return true
+            }
+
+            override fun onZoom(event: ZoomEvent?): Boolean {
+                return true
+            }
+        })
         
         setupCompass()
         setupZoomButtons()
@@ -173,6 +191,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
 
     private fun setPolyline(polyline: Polyline, points: List<GeoPoint>){
         polyline.setPoints(points)
+        polyline.color = Color.BLUE
         binding.mapView.overlays.add(polyline)
     }
 
@@ -259,6 +278,8 @@ class OsmdroidFragment : MyMapFragment(), IMap {
     
     override fun deleteAll() = binding.run {
         mapView.overlays.removeAll(listOfTechnic)
+        viewModel.deleteAll()
+        listOfTechnic.clear()
         return@run
     }
     

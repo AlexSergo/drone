@@ -11,6 +11,9 @@
                 android:id="@+id/mapOsmItem"
                 android:title="Street Map" />
             <item
+                android:id="@+id/mapYandexItem"
+                android:title="Яндекс Карты" />
+            <item
                 android:id="@+id/mapRoadmapItem"
                 android:title="Cхема" />
             <item

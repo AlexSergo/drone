@@ -237,6 +237,16 @@ class MainActivity : AppCompatActivity(),
                         map.changeGridState(menuItem.isChecked)
                         true
                     }
+                    R.id.mapOsmItem ->{
+                        findNavController(R.id.nav_host_fragment_content_main)
+                            .navigate(R.id.action_yandexMapFragment_to_osmdroidFragment)
+                        true
+                    }
+                    R.id.mapYandexItem ->{
+                        findNavController(R.id.nav_host_fragment_content_main)
+                            .navigate(R.id.action_osmdroidFragment_to_yandexMapFragment)
+                        true
+                    }
                     else -> false
                 }
             }

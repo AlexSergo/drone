@@ -62,7 +62,7 @@ TargFragment.TargetFragmentCallback, IMap {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        inject(YandexMapFragment())
+        inject(this)
     }
     
     override fun onCreateView(
@@ -284,6 +284,8 @@ TargFragment.TargetFragmentCallback, IMap {
         calculateAzimuth()
         showSk42OnCard()
         editPolylineOnMapGeometry()
+
+        binding.mapView.alpha = 0f
         return droneMarker
     }
 

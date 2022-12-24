@@ -6,9 +6,17 @@
     <fragment
         android:id="@+id/yandexMapFragment"
         android:name="com.example.dronevision.presentation.ui.yandex_map.YandexMapFragment"
-        android:label="Яндекс карта" />
+        android:label="Яндекс карта" >
+        <action
+            android:id="@+id/action_yandexMapFragment_to_osmdroidFragment"
+            app:destination="@id/osmdroidFragment" />
+    </fragment>
     <fragment
         android:id="@+id/osmdroidFragment"
         android:name="com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment"
-        android:label="OsmdroidFragment" />
+        android:label="OsmdroidFragment" >
+        <action
+            android:id="@+id/action_osmdroidFragment_to_yandexMapFragment"
+            app:destination="@id/yandexMapFragment" />
+    </fragment>
 </navigation>
