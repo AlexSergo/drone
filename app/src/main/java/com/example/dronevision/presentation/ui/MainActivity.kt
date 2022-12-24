@@ -40,12 +40,13 @@ class MainActivity : AppCompatActivity(),
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-    private lateinit var viewModel: TechnicViewModel
     private lateinit var map: IMap
     private var dialog: SelectBluetoothFragment? = null
 
+    private lateinit var viewModel: TechnicViewModel
     @Inject
     lateinit var viewModelFactory: ViewModelFactory
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,7 +107,6 @@ class MainActivity : AppCompatActivity(),
             override fun onClick(item: BluetoothListItem) {
                 item.let {
                     bluetoothConnection.connect(it.mac)
-                    // bluetoothConnection.sendMessage("Тест")
                 }
                 dialog?.dismiss()
             }
@@ -132,67 +132,66 @@ class MainActivity : AppCompatActivity(),
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.targ01 -> {
-                map.spawnTechnic(R.drawable.ic_01, TechnicTypes.LAUNCHER)
+                map.spawnTechnic(TechnicTypes.LAUNCHER)
             }
             R.id.targ04 -> {
-                map.spawnTechnic(R.drawable.ic_04, TechnicTypes.OVERLAND)
+                map.spawnTechnic(TechnicTypes.OVERLAND)
             }
             R.id.targ08 -> {
-                map.spawnTechnic(R.drawable.ic_08, TechnicTypes.ARTILLERY)
+                map.spawnTechnic(TechnicTypes.ARTILLERY)
             }
             R.id.targ10 -> {
-                map.spawnTechnic(R.drawable.ic_10, TechnicTypes.REACT)
+                map.spawnTechnic(TechnicTypes.REACT)
             }
             R.id.targ12 -> {
-                map.spawnTechnic(R.drawable.ic_12, TechnicTypes.MINES)
+                map.spawnTechnic(TechnicTypes.MINES)
             }
             R.id.targ14 -> {
-                map.spawnTechnic(R.drawable.ic_14, TechnicTypes.ZUR)
+                map.spawnTechnic(TechnicTypes.ZUR)
             }
             R.id.targ17 -> {
-                map.spawnTechnic(R.drawable.ic_17, TechnicTypes.RLS)
+                map.spawnTechnic(TechnicTypes.RLS)
             }
             R.id.targ19 -> {
-                map.spawnTechnic(R.drawable.ic_19, TechnicTypes.INFANTRY)
+                map.spawnTechnic(TechnicTypes.INFANTRY)
             }
             R.id.targ20 -> {
-                map.spawnTechnic(R.drawable.ic_20, TechnicTypes.O_POINT)
+                map.spawnTechnic(TechnicTypes.O_POINT)
             }
             R.id.targ21 -> {
-                map.spawnTechnic(R.drawable.ic_21, TechnicTypes.KNP)
+                map.spawnTechnic(TechnicTypes.KNP)
             }
             R.id.targ22 -> {
-                map.spawnTechnic(R.drawable.ic_22, TechnicTypes.TANKS)
+                map.spawnTechnic(TechnicTypes.TANKS)
             }
             R.id.targ23 -> {
-                map.spawnTechnic(R.drawable.ic_23, TechnicTypes.BTR)
+                map.spawnTechnic(TechnicTypes.BTR)
             }
             R.id.targ24 -> {
-                map.spawnTechnic(R.drawable.ic_24, TechnicTypes.BMP)
+                map.spawnTechnic(TechnicTypes.BMP)
             }
             R.id.targ25 -> {
-                map.spawnTechnic(R.drawable.ic_25, TechnicTypes.HELICOPTER)
+                map.spawnTechnic(TechnicTypes.HELICOPTER)
             }
             R.id.targ27 -> {
-                map.spawnTechnic(R.drawable.ic_27, TechnicTypes.PTRK)
+                map.spawnTechnic(TechnicTypes.PTRK)
             }
             R.id.targ29 -> {
-                map.spawnTechnic(R.drawable.ic_29, TechnicTypes.KLN_PESH)
+                map.spawnTechnic(TechnicTypes.KLN_PESH)
             }
             R.id.targ30 -> {
-                map.spawnTechnic(R.drawable.ic_30, TechnicTypes.KLN_BR)
+                map.spawnTechnic(TechnicTypes.KLN_BR)
             }
             R.id.targ31 -> {
-                map.spawnTechnic(R.drawable.ic_31, TechnicTypes.TANK)
+                map.spawnTechnic(TechnicTypes.TANK)
             }
             R.id.targ99 -> {
-                map.spawnTechnic(R.drawable.ic_99, TechnicTypes.ANOTHER)
+                map.spawnTechnic(TechnicTypes.ANOTHER)
             }
             R.id.breach -> {
-                map.spawnTechnic(R.drawable.ic_breach, TechnicTypes.GAP)
+                map.spawnTechnic(TechnicTypes.GAP)
             }
         }
-
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }

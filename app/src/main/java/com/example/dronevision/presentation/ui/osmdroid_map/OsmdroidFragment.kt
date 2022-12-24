@@ -23,9 +23,7 @@ import com.example.dronevision.databinding.FragmentOsmdroidBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.model.Technic
-import com.example.dronevision.presentation.ui.IMap
-import com.example.dronevision.presentation.ui.ImageTypes
-import com.example.dronevision.presentation.ui.MyMapFragment
+import com.example.dronevision.presentation.ui.*
 import com.example.dronevision.presentation.ui.bluetooth.Entity
 import org.osmdroid.events.MapAdapter
 import org.osmdroid.events.MapListener
@@ -47,14 +45,14 @@ import java.io.File
 import kotlin.math.abs
 
 
-class OsmdroidFragment : MyMapFragment(), IMap {
+class OsmdroidFragment : MyMapFragment<Overlay>(), IMap,
+    RemoteDatabaseHandler by RemoteDatabaseHandlerImpl() {
     
     private lateinit var binding: FragmentOsmdroidBinding
     private lateinit var rotationGestureOverlay: RotationGestureOverlay
     private val dirName = Environment.getExternalStorageDirectory().path + "/Drone Vision/"
 
     private val overlayGrid = LatLonGridlineOverlay2()
-    private val listOfTechnic = mutableListOf<Overlay>()
     private lateinit var droneMarker: Marker
     private lateinit var polylineToCenter: Polyline
     private var aimMarker: Marker? = null
@@ -79,7 +77,9 @@ class OsmdroidFragment : MyMapFragment(), IMap {
         setPolyline(polylineToCenter,
             listOf(droneMarker.position,
                 GeoPoint(binding.mapView.mapCenter.latitude, binding.mapView.mapCenter.longitude)))
-        
+
+
+        onDatabaseChangeListener(databaseRef, this)
         return binding.root
     }
     
@@ -184,7 +184,9 @@ class OsmdroidFragment : MyMapFragment(), IMap {
 
     override fun initDroneMarker() {
         droneMarker = Marker(binding.mapView)
-        drawMarker(droneMarker, latitude = 10.0, longitude = 0.0, R.drawable.gps_tacker2)
+        drawMarker(droneMarker,
+            Technic( coords = Coordinates(x = 10.0, y = 0.0),
+                type = TechnicTypes.DRONE))
 
         polylineToCenter = Polyline()
     }
@@ -202,8 +204,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
                 list.forEach { technic ->
 
                     val mark = Marker(binding.mapView)
-                    drawMarker(mark, technic.coords.x, technic.coords.y,
-                        ImageTypes.imageMap[technic.type]!!)
+                    drawMarker(mark, technic)
 
                     listOfTechnic.add(mark)
                    // addClickListenerToMark(mark, technic.type)
@@ -212,10 +213,15 @@ class OsmdroidFragment : MyMapFragment(), IMap {
         }
     }
 
-    override fun spawnTechnic(@DrawableRes imageRes: Int,
-                             type: TechnicTypes,
-                             coords: Coordinates?
-    ){
+    override fun spawnTechnic(type: TechnicTypes, coords: Coordinates?){
+        if (coords != null)
+            for (technic in listOfTechnic) {
+                technic as Marker
+                if (technic.position.latitude == coords.x &&
+                    technic.position.longitude == coords.y)
+                    return
+            }
+
         val cameraPosition = binding.mapView.mapCenter
         viewModel.getTechnics()
         var count = 0
@@ -223,9 +229,9 @@ class OsmdroidFragment : MyMapFragment(), IMap {
             it?.let {
                 count = it.size + 1
                 val mark: Marker = if (coords != null)
-                    setMark(coords.x, coords.y, imageRes)
+                    setMark(coords.x, coords.y, type)
                 else
-                    setMark(cameraPosition.latitude, cameraPosition.longitude, imageRes)
+                    setMark(cameraPosition.latitude, cameraPosition.longitude, type)
 
                 //addClickListenerToMark(mark, type)
                 viewModel.saveTechnic(
@@ -242,7 +248,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
     private fun setMark(
         latitude: Double,
         longitude: Double,
-        @DrawableRes imageRes: Int
+        type: TechnicTypes
     ): Marker {
         aimMarker?.let {
             if ( abs(latitude - it.position.latitude) < 0.0001
@@ -250,16 +256,19 @@ class OsmdroidFragment : MyMapFragment(), IMap {
                 removeAim()
         }
         var mark = Marker(binding.mapView)
-        mark = drawMarker(mark, latitude, longitude, imageRes)
+        mark = drawMarker(mark, Technic(
+            coords = Coordinates(x= latitude, y = longitude),
+            type = type)
+        )
         listOfTechnic.add(mark)
         return mark
     }
 
-    private fun drawMarker(mark: Marker, latitude: Double, longitude: Double, @DrawableRes imageRes: Int): Marker{
-        mark.position = GeoPoint(latitude, longitude)
+    private fun drawMarker(mark: Marker,technic: Technic): Marker{
+        mark.position = GeoPoint(technic.coords.x, technic.coords.y)
         mark.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
         binding.mapView.overlays.add(mark)
-        mark.icon = getDrawable(requireContext(), imageRes)
+        mark.icon = getDrawable(requireContext(), ImageTypes.imageMap[technic.type]!!)
 
         return mark
     }

@@ -14,8 +14,7 @@ interface IMap{
     fun offlineMode()
     fun changeGridState(isShow: Boolean)
     fun initTechnic()
-    fun spawnTechnic(@DrawableRes imageRes: Int,
-                     type: TechnicTypes,
+    fun spawnTechnic(type: TechnicTypes,
                      coords: Coordinates? = null)
     fun removeAim()
     fun initDroneMarker()

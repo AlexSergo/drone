@@ -20,5 +20,6 @@ enum class TechnicTypes {
     KLN_BR,
     TANK,
     GAP,
-    ANOTHER
+    ANOTHER,
+    DRONE
 }
