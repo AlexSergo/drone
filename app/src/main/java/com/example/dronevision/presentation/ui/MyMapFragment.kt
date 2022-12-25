@@ -4,7 +4,10 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.dronevision.App
+import com.example.dronevision.presentation.delegates.*
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment
+import com.example.dronevision.presentation.ui.view_model.TargetViewModel
+import com.example.dronevision.presentation.ui.view_model.TargetViewModelFactory
 import com.example.dronevision.presentation.ui.yandex_map.YandexMapFragment
 import com.example.dronevision.presentation.ui.yandex_map.TechnicViewModel
 import com.example.dronevision.presentation.ui.yandex_map.TechnicViewModelFactory
@@ -13,14 +16,21 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import javax.inject.Inject
 
-open class MyMapFragment<T>: Fragment() {
+open class MyMapFragment<T>: Fragment(),
+    RemoteDatabaseHandler by RemoteDatabaseHandlerImpl(),
+    OfflineMapHandler by OfflineMapHandlerImpl(),
+    StoragePermissionHandler by StoragePermissionHandlerImpl(),
+    GeoInformation by GeoInformationImpl(){
 
     protected lateinit var viewModel: TechnicViewModel
+    protected lateinit var targetViewModel: TargetViewModel
     protected lateinit var databaseRef: DatabaseReference
     protected val listOfTechnic = mutableListOf<T>()
 
     @Inject
     lateinit var viewModelFactory: TechnicViewModelFactory
+    @Inject
+    lateinit var targetViewModelFactory: TargetViewModelFactory
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,5 +51,6 @@ open class MyMapFragment<T>: Fragment() {
 
     private fun initViewModel() {
         viewModel = ViewModelProvider(this, viewModelFactory)[TechnicViewModel::class.java]
+        targetViewModel = ViewModelProvider(this, targetViewModelFactory)[TargetViewModel::class.java]
     }
 }

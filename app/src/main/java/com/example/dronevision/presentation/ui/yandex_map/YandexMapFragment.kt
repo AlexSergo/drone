@@ -12,6 +12,10 @@ import com.example.dronevision.R
 import com.example.dronevision.databinding.FragmentYandexMapBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
+import com.example.dronevision.presentation.delegates.GeoInformation
+import com.example.dronevision.presentation.delegates.GeoInformationImpl
+import com.example.dronevision.presentation.delegates.RemoteDatabaseHandler
+import com.example.dronevision.presentation.delegates.RemoteDatabaseHandlerImpl
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.*
 import com.example.dronevision.presentation.ui.bluetooth.Entity
@@ -33,13 +37,11 @@ import kotlin.math.roundToInt
 
 
 class YandexMapFragment :  MyMapFragment<PlacemarkMapObject>(), CameraListener,
-TargFragment.TargetFragmentCallback, IMap,
-    RemoteDatabaseHandler by RemoteDatabaseHandlerImpl(), GeoInformation by GeoInformationImpl() {
+TargFragment.TargetFragmentCallback, IMap{
     
     private lateinit var binding: FragmentYandexMapBinding
     private lateinit var droneMarker: PlacemarkMapObject
     private var aimMarker: PlacemarkMapObject? = null
-    private val technics = mutableListOf<Technic>()
 
     private lateinit var polylineONMap: PolylineMapObject
     private var polylineToAim: PolylineMapObject? = null
@@ -256,14 +258,16 @@ TargFragment.TargetFragmentCallback, IMap,
         polylineONMap.geometry = Polyline(listOf(droneMarker.geometry, cameraPositionTarget))
     }
 
-    override fun showLocationFromDrone(entities: List<Entity>) {
+    override fun showDataFromDrone(entities: List<Entity>) {
         val drone = entities[0]
         editDroneMarker(drone.lat, drone.lon, drone.asim.toFloat())
+
         val aim = entities[1]
         showAim(aim.lat, aim.lon)
+
         if (entities[0].calc_target) {
-            getTargetCoordinates(entities)
-            CalculateTargetCoordinates.targetLiveData.observe(viewLifecycleOwner) {
+            targetViewModel.getTargetCoordinates(entities)
+            targetViewModel.targetLiveData.observe(viewLifecycleOwner){
                 spawnTechnic(
                     TechnicTypes.ANOTHER,
                     Coordinates(x = it.lat, y = it.lon)
@@ -284,7 +288,7 @@ TargFragment.TargetFragmentCallback, IMap,
     }
 
     override fun changeGridState(isShow: Boolean) {
-
+        Toast.makeText(requireContext(), "Яндекс карты не позволяют активировать сетку", Toast.LENGTH_SHORT).show()
     }
 
     private fun showAim(latitude: Double, longitude: Double) {
@@ -373,22 +377,6 @@ TargFragment.TargetFragmentCallback, IMap,
             ),
             Animation(Animation.Type.SMOOTH, 1.0f), null
         )
-    }
-
-    private fun getTargetCoordinates(entities: List<Entity>) = lifecycleScope.launch(Dispatchers.IO) {
-        val drone = entities[0]
-        var lat = drone.lat
-        var lon = drone.lon
-        if (lat.isNaN() && lon.isNaN()) {
-            lat = 0.0
-            lon = 0.0
-        }
-        val alt = drone.alt
-        val ywr = drone.cam_deflect
-        val pt = drone.cam_angle
-        val asim = drone.asim
-        var findTarget = FindTarget(alt, lat, lon, asim + ywr, pt)
-        CalculateTargetCoordinates.targetLiveData.postValue(findTarget)
     }
 
     override fun onCameraPositionChanged(

@@ -5,8 +5,8 @@ import com.example.dronevision.domain.use_cases.DeleteAllUseCase
 import com.example.dronevision.domain.use_cases.DeleteTechnicUseCase
 import com.example.dronevision.domain.use_cases.GetTechnicsUseCase
 import com.example.dronevision.domain.use_cases.SaveTechnicUseCase
+import com.example.dronevision.presentation.ui.view_model.TargetViewModelFactory
 import com.example.dronevision.presentation.ui.yandex_map.TechnicViewModelFactory
-import com.example.dronevision.presentation.view_model.ViewModelFactory
 import dagger.Module
 import dagger.Provides
 
@@ -16,8 +16,11 @@ class AppModule(val context: Context) {
     @Provides
     fun provideContext(): Context = context
     
+   /* @Provides
+    fun provideViewModelFactory(): ViewModelFactory = ViewModelFactory()*/
+
     @Provides
-    fun provideViewModelFactory(): ViewModelFactory = ViewModelFactory()
+    fun provideTargetViewModelFactory(): TargetViewModelFactory = TargetViewModelFactory()
 
     @Provides
     fun provideTechnicViewModelFactory(

@@ -1,4 +1,4 @@
-package com.example.dronevision.presentation.ui
+package com.example.dronevision.presentation.delegates
 
 import com.example.dronevision.databinding.FragmentYandexMapBinding
 import com.example.dronevision.utils.MapTools

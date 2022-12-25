@@ -1,37 +1,30 @@
 package com.example.dronevision.presentation.ui.osmdroid_map
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.annotation.DrawableRes
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker
 import androidx.core.content.PermissionChecker.checkSelfPermission
-import com.example.dronevision.R
 import com.example.dronevision.databinding.FragmentOsmdroidBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
+import com.example.dronevision.presentation.delegates.*
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.*
 import com.example.dronevision.presentation.ui.bluetooth.Entity
-import org.osmdroid.events.MapAdapter
+import com.example.dronevision.utils.ImageTypes
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
-import org.osmdroid.tileprovider.modules.OfflineTileProvider
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.tileprovider.util.SimpleRegisterReceiver
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.overlay.Marker
@@ -41,16 +34,13 @@ import org.osmdroid.views.overlay.compass.CompassOverlay
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import org.osmdroid.views.overlay.Polyline
-import java.io.File
 import kotlin.math.abs
 
 
-class OsmdroidFragment : MyMapFragment<Overlay>(), IMap,
-    RemoteDatabaseHandler by RemoteDatabaseHandlerImpl() {
+class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
     
     private lateinit var binding: FragmentOsmdroidBinding
     private lateinit var rotationGestureOverlay: RotationGestureOverlay
-    private val dirName = Environment.getExternalStorageDirectory().path + "/Drone Vision/"
 
     private val overlayGrid = LatLonGridlineOverlay2()
     private lateinit var droneMarker: Marker
@@ -69,7 +59,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap,
     ): View {
         binding = FragmentOsmdroidBinding.inflate(inflater, container, false)
         
-        checkStoragePermissions()
+        checkStoragePermissions(requireActivity())
         setupOsmdroidMap()
         initDroneMarker()
         initTechnic()
@@ -81,38 +71,6 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap,
 
         onDatabaseChangeListener(databaseRef, this)
         return binding.root
-    }
-    
-    private fun checkStoragePermissions() {
-        if (Build.VERSION.SDK_INT >= 30) {
-            if (!Environment.isExternalStorageManager()) {
-                try {
-                    val intent = Intent("android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION")
-                    intent.addCategory("android.intent.category.DEFAULT")
-                    intent.data = Uri.parse(
-                        String.format(
-                            "package:%s",
-                            *arrayOf<Any>(requireContext().applicationContext.packageName)
-                        )
-                    )
-                    startActivityForResult(intent, 2296)
-                } catch (e: Exception) {
-                    val intent2 = Intent()
-                    intent2.action = "android.settings.MANAGE_ALL_FILES_ACCESS_PERMISSION"
-                    startActivityForResult(intent2, 2296)
-                }
-            }
-        } else if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(
-                requireContext(),
-                "android.permission.WRITE_EXTERNAL_STORAGE"
-            ) != PermissionChecker.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                requireActivity(),
-                arrayOf("android.permission.WRITE_EXTERNAL_STORAGE"),
-                1
-            )
-        }
     }
     
     private fun setupOsmdroidMap() = binding.run {
@@ -279,7 +237,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap,
        // polylineToAim?.parent?.remove(polylineToAim!!)
     }
 
-    override fun showLocationFromDrone(entities: List<Entity>) {
+    override fun showDataFromDrone(entities: List<Entity>) {
     }
     
     override fun showLocationDialog() {
@@ -293,61 +251,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap,
     }
     
     override fun offlineMode() {
-        
-        val folder = File(dirName)
-        if (folder.exists()) {
-            val listOfFiles = folder.listFiles()!!
-            Log.d("listOfFiles", listOfFiles.size.toString())
-            
-            if (listOfFiles.isNotEmpty()) {
-                val offlineArray: MutableList<String> = ArrayList()
-                for (file in listOfFiles) {
-                    val isFileMBTiles =
-                        file.name.substringAfterLast('.', "") == "mbtiles"
-                    if (file.isFile && isFileMBTiles) {
-                        offlineArray.add(file.name)
-                    }
-                }
-                if (offlineArray.size != 0) {
-                    val items = offlineArray.toTypedArray()
-                    val mapOfflineBuilder = AlertDialog.Builder(requireContext())
-                    mapOfflineBuilder.setTitle("Файлы БД оффлайн карт" as CharSequence)
-                    mapOfflineBuilder.create()
-                    mapOfflineBuilder.setItems(items as Array<CharSequence>,
-                        DialogInterface.OnClickListener { _, which ->
-                            
-                            val fileName: String = items[which]
-                            val path = Environment.getExternalStorageDirectory().path + "/Drone Vision/" + fileName
-                            val exitFile = File(path)
-                            try {
-                                binding.mapView.setTileProvider(
-                                    OfflineTileProvider(
-                                        SimpleRegisterReceiver(requireContext()),
-                                        arrayOf(exitFile)
-                                    )
-                                )
-                                binding.mapView.setTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE)
-                                binding.mapView.setUseDataConnection(false)
-                            } catch (e: java.lang.Exception) {
-                                e.printStackTrace()
-                            }
-                            
-                        }).show()
-                } else Toast.makeText(
-                    requireContext(),
-                    "Файлы mbtiles не найдены в $dirName",
-                    Toast.LENGTH_LONG
-                ).show()
-            } else Toast.makeText(
-                requireContext(),
-                "Файлы не найдены в $dirName",
-                Toast.LENGTH_LONG
-            ).show()
-        } else Toast.makeText(
-            requireContext(),
-            "Папка хранения $dirName не найдена",
-            Toast.LENGTH_LONG
-        ).show()
+       offlineMode(binding, requireContext())
     }
 
     override fun changeGridState(isShow: Boolean) {

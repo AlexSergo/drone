@@ -13,27 +13,23 @@ import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.dronevision.AbonentDialogFragment
-import com.example.dronevision.App
 import com.example.dronevision.R
 import com.example.dronevision.databinding.ActivityMainBinding
 import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.model.BluetoothListItem
 import com.example.dronevision.presentation.model.Message
 import com.example.dronevision.presentation.ui.bluetooth.*
-import com.example.dronevision.presentation.view_model.TechnicViewModel
-import com.example.dronevision.presentation.view_model.ViewModelFactory
+
 import com.example.dronevision.utils.HgtLoader
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.components.BuildConfig
 import org.osmdroid.config.Configuration
-import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(),
     NavigationView.OnNavigationItemSelectedListener, BluetoothReceiver.MessageListener {
@@ -43,15 +39,8 @@ class MainActivity : AppCompatActivity(),
     private lateinit var map: IMap
     private var dialog: SelectBluetoothFragment? = null
 
-    private lateinit var viewModel: TechnicViewModel
-    @Inject
-    lateinit var viewModelFactory: ViewModelFactory
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        (applicationContext as App).appComponent.inject(this)
-        viewModel = ViewModelProvider(this, viewModelFactory)[TechnicViewModel::class.java]
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -125,7 +114,7 @@ class MainActivity : AppCompatActivity(),
             if (message.isSystem)
                 Toast.makeText(this, message.message, Toast.LENGTH_LONG).show()
             if (entities != null)
-                map.showLocationFromDrone(entities)
+                map.showDataFromDrone(entities)
         }
     }
 

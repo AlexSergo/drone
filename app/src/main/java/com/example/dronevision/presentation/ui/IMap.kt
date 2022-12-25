@@ -8,7 +8,7 @@ import com.yandex.mapkit.map.MapType
 import org.osmdroid.views.overlay.Marker
 
 interface IMap{
-    fun showLocationFromDrone(entities: List<Entity>)
+    fun showDataFromDrone(entities: List<Entity>)
     fun showLocationDialog()
     fun deleteAll()
     fun offlineMode()

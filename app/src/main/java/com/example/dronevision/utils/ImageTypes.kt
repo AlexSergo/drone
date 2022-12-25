@@ -1,4 +1,4 @@
-package com.example.dronevision.presentation.ui
+package com.example.dronevision.utils
 
 import com.example.dronevision.R
 import com.example.dronevision.domain.model.TechnicTypes
