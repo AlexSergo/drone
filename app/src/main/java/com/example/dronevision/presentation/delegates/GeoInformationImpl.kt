@@ -1,33 +1,53 @@
 package com.example.dronevision.presentation.delegates
 
+import com.example.dronevision.databinding.FragmentOsmdroidBinding
 import com.example.dronevision.databinding.FragmentYandexMapBinding
 import com.example.dronevision.utils.MapTools
 import com.example.dronevision.utils.NGeoCalc
 import com.yandex.mapkit.geometry.Point
+import org.osmdroid.util.GeoPoint
 
 class GeoInformationImpl: GeoInformation {
     private var cameraLat: Double = 0.0
     private var cameraLon: Double = 0.0
-    private lateinit var binding: FragmentYandexMapBinding
+
     override fun showGeoInformation(binding: FragmentYandexMapBinding,
-                                    cameraLat: Double, cameraLon: Double,
+                                    cameraTarget: Point,
                                     azimuthPoint: Point) {
-        this.cameraLat = cameraLat
-        this.cameraLon = cameraLon
-        this.binding = binding
-        showWgs82OnCard()
-        calculateAzimuth(point = azimuthPoint)
-        showSk42OnCard()
+        this.cameraLat = cameraTarget.latitude
+        this.cameraLon = cameraTarget.longitude
+        val lat_lon = showWgs82OnCard()
+        val azimuth = calculateAzimuth(azimuthPoint.latitude, azimuthPoint.longitude)
+        val plane = showSk42OnCard()
+
+        binding.latitude.text = "Широта = " + lat_lon[0]
+        binding.longitude.text = "Долгота = " + lat_lon[1]
+        binding.plane.text = plane
+        binding.azimuth.text = "Азимут = $azimuth"
     }
 
-    private fun showWgs82OnCard() {
+    override fun showGeoInformation(binding: FragmentOsmdroidBinding,
+                                    cameraTarget: GeoPoint,
+                                    azimuthPoint: GeoPoint) {
+        this.cameraLat = cameraTarget.latitude
+        this.cameraLon = cameraTarget.longitude
+        val lat_lon = showWgs82OnCard().split(" ")
+        val azimuth = calculateAzimuth(azimuthPoint.latitude, azimuthPoint.longitude)
+        val plane = showSk42OnCard()
+
+        binding.latitude.text = "Широта = " + lat_lon[0]
+        binding.longitude.text = "Долгота = " + lat_lon[1]
+        binding.plane.text = plane
+        binding.azimuth.text = "Азимут = $azimuth"
+    }
+
+    private fun showWgs82OnCard(): String {
         val latitudeText = String.format("%.6f", cameraLat)
         val longitudeText = String.format("%.6f", cameraLon)
-        binding.latitude.text = "Широта = $latitudeText"
-        binding.longitude.text = "Долгота = $longitudeText"
+        return "$latitudeText $longitudeText"
     }
 
-    private fun showSk42OnCard() {
+    private fun showSk42OnCard(): String {
         val x = doubleArrayOf(0.0)
         val y = doubleArrayOf(0.0)
 
@@ -38,18 +58,16 @@ class GeoInformationImpl: GeoInformation {
             NGeoCalc.degreesToRadians(cameraLon),
             0.0
         )
-        binding.plane.text = String.format(
+        return String.format(
             "X= %d  Y= %08d", *arrayOf<Any>(
                 Integer.valueOf(x[0].toInt()), Integer.valueOf(y[0].toInt())
             )
         )
     }
 
-    private fun calculateAzimuth(point: Point) {
-        val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-        val azimuth = MapTools.angleBetween(point, cameraPositionTarget)
+    private fun calculateAzimuth(pointLat: Double, pointLon: Double): String {
+        val azimuth = MapTools.angleBetween(Point(pointLat, pointLon), Point(cameraLat, cameraLon))
         val azimuthText = String.format("%.6f", azimuth)
-        binding.azimuth.text = "Азимут = $azimuthText"
+        return azimuthText
     }
-
 }

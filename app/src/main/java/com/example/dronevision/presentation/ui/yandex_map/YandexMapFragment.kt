@@ -7,15 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
-import androidx.lifecycle.lifecycleScope
 import com.example.dronevision.R
 import com.example.dronevision.databinding.FragmentYandexMapBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
-import com.example.dronevision.presentation.delegates.GeoInformation
-import com.example.dronevision.presentation.delegates.GeoInformationImpl
-import com.example.dronevision.presentation.delegates.RemoteDatabaseHandler
-import com.example.dronevision.presentation.delegates.RemoteDatabaseHandlerImpl
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.*
 import com.example.dronevision.presentation.ui.bluetooth.Entity
@@ -30,8 +25,6 @@ import com.yandex.mapkit.geometry.Polyline
 import com.yandex.mapkit.map.*
 import com.yandex.mapkit.map.Map
 import com.yandex.runtime.image.ImageProvider
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -244,9 +237,7 @@ TargFragment.TargetFragmentCallback, IMap{
         }
 
         showGeoInformation(binding,
-            binding.mapView.map.cameraPosition.target.latitude,
-            binding.mapView.map.cameraPosition.target.longitude,
-            droneMarker.geometry)
+            binding.mapView.map.cameraPosition.target, droneMarker.geometry)
         editPolylineOnMapGeometry()
 
         binding.mapView.alpha = 0f
@@ -386,16 +377,13 @@ TargFragment.TargetFragmentCallback, IMap{
         finished: Boolean
     ) {
 
-        showGeoInformation(binding,
-            cameraPosition.target.latitude, cameraPosition.target.longitude,
-            droneMarker.geometry)
+        showGeoInformation(binding, cameraPosition.target, droneMarker.geometry)
 
         binding.compassButton.rotation = cameraPosition.azimuth * -1
 
         polylineONMap.geometry = Polyline(listOf(droneMarker.geometry, cameraPosition.target))
 
         val distance = (Geo.distance(droneMarker.geometry, cameraPosition.target) / 100).roundToInt() / 10.0
-
         binding.distance.text = "$distance km"
     }
 

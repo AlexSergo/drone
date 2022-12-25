@@ -1,22 +1,14 @@
 package com.example.dronevision.presentation.ui.osmdroid_map
 
-import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
-import androidx.core.app.ActivityCompat
-import androidx.core.content.PermissionChecker
-import androidx.core.content.PermissionChecker.checkSelfPermission
 import com.example.dronevision.databinding.FragmentOsmdroidBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
-import com.example.dronevision.presentation.delegates.*
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.*
 import com.example.dronevision.presentation.ui.bluetooth.Entity
@@ -88,9 +80,10 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
 
         mapView.addMapListener(object : MapListener{
             override fun onScroll(event: ScrollEvent?): Boolean {
-                setPolyline(polylineToCenter,
-                    listOf(droneMarker.position,
-                        GeoPoint(binding.mapView.mapCenter.latitude, binding.mapView.mapCenter.longitude)))
+                val cameraTarget =  GeoPoint(binding.mapView.mapCenter.latitude, binding.mapView.mapCenter.longitude)
+                showGeoInformation(binding, cameraTarget, droneMarker.position)
+
+                setPolyline(polylineToCenter, listOf(droneMarker.position, cameraTarget))
                 return true
             }
 
