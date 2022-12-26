@@ -29,6 +29,7 @@ import org.osmdroid.views.overlay.compass.CompassOverlay
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import org.osmdroid.views.overlay.Polyline
+import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider
 import kotlin.math.abs
 
 
@@ -96,46 +97,8 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
                 return true
             }
         })
-        
-        setupCompass()
-        setupZoomButtons()
-        setupDisplayMetrics()
-    }
-    
-    private fun setupCompass() = binding.run {
-        compassButton.setOnClickListener {
-            if (!rotationGestureOverlay.isEnabled) {
-                rotationGestureOverlay.isEnabled = true
-                lockerView.visibility = View.INVISIBLE
-            }
-            mapView.mapOrientation = 0.0f
-            compassButton.rotation = 0.0f
-        }
-        
-        compassButton.setOnLongClickListener {
-            if (!rotationGestureOverlay.isEnabled) false
-            rotationGestureOverlay.setEnabled(false)
-            lockerView.visibility = View.VISIBLE
-            true
-        }
-    }
-    
-    private fun setupZoomButtons() = binding.run {
-        zoomInButton.setOnClickListener { mapView.controller.zoomIn() }
-        zoomOutButton.setOnClickListener { mapView.controller.zoomOut() }
-    }
-    
-    private fun setupDisplayMetrics() = binding.run {
-        val displayMetrics = resources.displayMetrics
-        val scaleBarOverlay = ScaleBarOverlay(mapView)
-        scaleBarOverlay.unitsOfMeasure = ScaleBarOverlay.UnitsOfMeasure.metric
-        scaleBarOverlay.setCentred(true)
-        scaleBarOverlay.setTextSize(30.0f)
-        scaleBarOverlay.setScaleBarOffset(
-            displayMetrics.widthPixels / 2,
-            displayMetrics.heightPixels - (displayMetrics.density * 70.0f).toInt()
-        )
-        mapView.overlayManager.add(scaleBarOverlay)
+
+        setupManipulators(binding, rotationGestureOverlay)
     }
 
     override fun initDroneMarker() {

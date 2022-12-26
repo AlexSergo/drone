@@ -25,7 +25,8 @@ open class MyMapFragment<T>: Fragment(),
     OfflineMapHandler by OfflineMapHandlerImpl(),
     StoragePermissionHandler by StoragePermissionHandlerImpl(),
     GeoInformation by GeoInformationImpl(),
-    LocationDialogHandler by LocationDialogHandlerImpl(){
+    LocationDialogHandler by LocationDialogHandlerImpl(),
+    ManipulatorSetuper by ManipulatorSetuperImpl(){
 
     protected lateinit var viewModel: TechnicViewModel
     protected lateinit var targetViewModel: TargetViewModel

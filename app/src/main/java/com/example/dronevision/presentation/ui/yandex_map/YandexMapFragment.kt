@@ -54,8 +54,7 @@ TargFragment.TargetFragmentCallback, IMap{
         initDroneMarker()
         initTechnic()
     
-        setupCompassButton()
-        setupZoomButtons()
+        setupManipulators(binding)
         setCardViewExpand()
 
         onDatabaseChangeListener(databaseRef, this)
@@ -71,40 +70,6 @@ TargFragment.TargetFragmentCallback, IMap{
             binding.longitude.isVisible = isCardViewExpanded
             binding.latitude.isVisible = isCardViewExpanded
             binding.azimuth.isVisible = isCardViewExpanded
-        }
-    }
-
-    private fun setupCompassButton() {
-        binding.compassButton.setOnClickListener {
-            val cameraPosition = binding.mapView.map.cameraPosition
-            binding.mapView.map.move(
-                CameraPosition(
-                    cameraPosition.target,
-                    cameraPosition.zoom, 0.0f, cameraPosition.tilt
-                ), Animation(Animation.Type.SMOOTH, 1.0f), null
-            )
-        }
-    }
-
-    private fun setupZoomButtons() {
-        binding.zoomInButton.setOnClickListener {
-            val cameraPosition = binding.mapView.map.cameraPosition
-            binding.mapView.map.move(
-                CameraPosition(
-                    cameraPosition.target,
-                    cameraPosition.zoom + 1, cameraPosition.azimuth, cameraPosition.tilt
-                ), Animation(Animation.Type.SMOOTH, 1.0f), null
-            )
-        }
-
-        binding.zoomOutButton.setOnClickListener {
-            val cameraPosition = binding.mapView.map.cameraPosition
-            binding.mapView.map.move(
-                CameraPosition(
-                    cameraPosition.target,
-                    cameraPosition.zoom - 1, cameraPosition.azimuth, cameraPosition.tilt
-                ), Animation(Animation.Type.SMOOTH, 1.0f), null
-            )
         }
     }
 
@@ -180,7 +145,6 @@ TargFragment.TargetFragmentCallback, IMap{
         listOfTechnic.add(mark)
         return mark
     }
-
 
     override fun removeAim(){
         aimMarker?.parent?.remove(aimMarker!!)
