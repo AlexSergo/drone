@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import com.example.dronevision.databinding.FragmentOsmdroidBinding
 import com.example.dronevision.domain.model.Coordinates
@@ -82,7 +83,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
 
         mapView.addMapListener(object : MapListener{
             override fun onScroll(event: ScrollEvent?): Boolean {
-                val cameraTarget =  GeoPoint(binding.mapView.mapCenter.latitude, binding.mapView.mapCenter.longitude)
+                val cameraTarget = binding.mapView.mapCenter as GeoPoint
                 showGeoInformation(binding, cameraTarget, droneMarker.position)
 
                 setPolyline(polylineToCenter, listOf(droneMarker.position, cameraTarget))
@@ -147,9 +148,9 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
         polylineToAim.isVisible = false
     }
 
-    private fun setPolyline(polyline: Polyline, points: List<GeoPoint>){
+    private fun setPolyline(polyline: Polyline, points: List<GeoPoint>, color: Int = Color.BLUE){
         polyline.setPoints(points)
-        polyline.color = Color.BLUE
+        polyline.color = color
         binding.mapView.overlays.add(polyline)
         polylineToAim.isVisible = true
     }
@@ -226,9 +227,10 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
         if (marker == null)
             marker = Marker(binding.mapView)
         marker.position = GeoPoint(technic.coords.x, technic.coords.y)
-        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
         binding.mapView.overlays.add(marker)
         marker.icon = getDrawable(requireContext(), ImageTypes.imageMap[technic.type]!!)
+        binding.mapView.invalidate()
 
         return marker
     }
@@ -263,7 +265,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
                     type = TechnicTypes.AIM
             )
         )
-        setPolyline(polylineToAim!!, listOf(droneMarker.position, aimMarker!!.position))
+        setPolyline(polylineToAim, listOf(droneMarker.position, aimMarker!!.position), Color.RED)
     }
 
     private fun focusCamera(point: GeoPoint){
@@ -278,7 +280,6 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
                 else
                     focusCamera(droneMarker.position)
             }
-
         })
     }
     
@@ -298,6 +299,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
             binding.mapView.overlays.add(overlayGrid)
         else
             binding.mapView.overlays.remove(overlayGrid)
+        binding.mapView.invalidate()
     }
 
     override fun onResume() {

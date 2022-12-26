@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
-import com.example.dronevision.R
 import com.example.dronevision.databinding.FragmentYandexMapBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
@@ -17,7 +16,6 @@ import com.example.dronevision.presentation.ui.*
 import com.example.dronevision.presentation.ui.bluetooth.Entity
 import com.example.dronevision.presentation.ui.targ.TargFragment
 import com.example.dronevision.utils.*
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
@@ -265,6 +263,8 @@ TargFragment.TargetFragmentCallback, IMap{
     }
 
     override fun deleteAll() {
+        aimMarker = null
+        polylineToAim = null
         binding.mapView.map.mapObjects.clear()
         viewModel.deleteAll()
         listOfTechnic.clear()
@@ -280,12 +280,12 @@ TargFragment.TargetFragmentCallback, IMap{
     }
 
     private fun showAim(latitude: Double, longitude: Double) {
-        if (aimMarker != null || polylineToAim != null)
+        if (aimMarker != null)
             removeAim()
 
         aimMarker = binding.mapView.map.mapObjects.addPlacemark(
             Point(latitude, longitude),
-            ImageProvider.fromResource(requireContext(), R.drawable.ic_cross_center)
+            ImageProvider.fromResource(requireContext(), com.example.dronevision.R.drawable.ic_cross_center)
         )
         drawPolylineToAim(from = droneMarker.geometry, to = Point(latitude, longitude))
     }
@@ -311,7 +311,7 @@ TargFragment.TargetFragmentCallback, IMap{
     override fun initDroneMarker() {
         droneMarker = binding.mapView.map.mapObjects.addPlacemark(
             Point(0.0, 0.0),
-            ImageProvider.fromResource(requireContext(), R.drawable.gps_tacker2)
+            ImageProvider.fromResource(requireContext(), com.example.dronevision.R.drawable.gps_tacker2)
         )
         droneMarker.setIconStyle(IconStyle().setRotationType(RotationType.ROTATE))
         droneMarker.isVisible = false
