@@ -19,14 +19,12 @@ import com.example.dronevision.utils.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
-import com.yandex.mapkit.geometry.Geo
 import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.geometry.Polyline
 import com.yandex.mapkit.map.*
 import com.yandex.mapkit.map.Map
 import com.yandex.runtime.image.ImageProvider
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 
 class YandexMapFragment :  MyMapFragment<PlacemarkMapObject>(), CameraListener,
@@ -39,6 +37,8 @@ TargFragment.TargetFragmentCallback, IMap{
     private lateinit var polylineONMap: PolylineMapObject
     private var polylineToAim: PolylineMapObject? = null
 
+    private var paused = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         inject(this)
@@ -49,7 +49,7 @@ TargFragment.TargetFragmentCallback, IMap{
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentYandexMapBinding.inflate(inflater, container, false)
-    
+        paused = false
         binding.mapView.map.addCameraListener(this)
 
         initDroneMarker()
@@ -220,7 +220,7 @@ TargFragment.TargetFragmentCallback, IMap{
         databaseRef.setValue(sb.toString())
     }
 
-    private fun editDroneMarker(
+    private fun editDroneMarkerPosition(
         latitude: Double,
         longitude: Double,
         asim: Float,
@@ -232,15 +232,11 @@ TargFragment.TargetFragmentCallback, IMap{
             droneMarker.geometry = Point(latitude, longitude)
         }
         droneMarker.isVisible = true
-        droneMarker.addTapListener { mapObject, point ->
-            return@addTapListener true
-        }
 
         showGeoInformation(binding,
             binding.mapView.map.cameraPosition.target, droneMarker.geometry)
         editPolylineOnMapGeometry()
 
-        binding.mapView.alpha = 0f
         return droneMarker
     }
 
@@ -251,7 +247,7 @@ TargFragment.TargetFragmentCallback, IMap{
 
     override fun showDataFromDrone(entities: List<Entity>) {
         val drone = entities[0]
-        editDroneMarker(drone.lat, drone.lon, drone.asim.toFloat())
+        editDroneMarkerPosition(drone.lat, drone.lon, drone.asim.toFloat())
 
         val aim = entities[1]
         showAim(aim.lat, aim.lon)

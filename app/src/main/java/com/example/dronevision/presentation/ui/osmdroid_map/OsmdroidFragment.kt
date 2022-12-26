@@ -54,7 +54,6 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentOsmdroidBinding.inflate(inflater, container, false)
-        
         checkStoragePermissions(requireActivity())
         setupOsmdroidMap()
         initDroneMarker()
@@ -142,7 +141,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
     override fun initDroneMarker() {
         droneMarker = Marker(binding.mapView)
         drawMarker(droneMarker,
-            Technic( coords = Coordinates(x = 10.0, y = 0.0),
+            Technic( coords = Coordinates(x = 0.0, y = 0.0),
                 type = TechnicTypes.DRONE))
 
         polylineToCenter = Polyline()
@@ -237,6 +236,16 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
     }
 
     override fun showDataFromDrone(entities: List<Entity>) {
+        droneMarker.rotation = entities[0].asim.toFloat() + binding.mapView.mapOrientation
+        if (entities[0].lat.isNaN() && entities[0].lon.isNaN()) {
+            droneMarker.position = GeoPoint(0.0, 0.0)
+        } else {
+            droneMarker.position = GeoPoint(entities[0].lat, entities[0].lon)
+        }
+        val cameraTarget = GeoPoint(binding.mapView.mapCenter.latitude, binding.mapView.mapCenter.longitude)
+        droneMarker.setVisible(true)
+        showGeoInformation(binding, cameraTarget, droneMarker.position)
+        setPolyline(polylineToCenter, listOf(droneMarker.position, cameraTarget))
     }
     
     override fun showLocationDialog() {

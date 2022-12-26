@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity(),
                 it[1] = Entity(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false)
             }
         }
-
+        map = getCurrentMap()
         runOnUiThread {
             if (message.isSystem)
                 Toast.makeText(this, message.message, Toast.LENGTH_LONG).show()
@@ -119,6 +119,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        map = getCurrentMap()
         when (item.itemId) {
             R.id.targ01 -> {
                 map.spawnTechnic(TechnicTypes.LAUNCHER)
@@ -193,6 +194,7 @@ class MainActivity : AppCompatActivity(),
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                map = getCurrentMap()
                 return when (menuItem.itemId) {
                     R.id.bluetooth -> {
                         dialog?.show(supportFragmentManager, "ActionBottomDialog")
@@ -239,6 +241,18 @@ class MainActivity : AppCompatActivity(),
                 }
             }
         }, this, Lifecycle.State.RESUMED)
+    }
+
+    private fun getCurrentMap(): IMap {
+        val navFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
+        var fragment = navFragment?.childFragmentManager?.fragments?.get(0)
+        if (fragment != null) {
+            if (fragment.isVisible)
+                return fragment as IMap
+        }
+        fragment = navFragment?.childFragmentManager?.fragments?.get(1)
+        return fragment as IMap
     }
 
     override fun onSupportNavigateUp(): Boolean {
