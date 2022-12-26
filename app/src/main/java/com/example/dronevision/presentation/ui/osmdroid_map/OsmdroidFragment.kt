@@ -227,6 +227,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
         if (marker == null)
             marker = Marker(binding.mapView)
         marker.position = GeoPoint(technic.coords.x, technic.coords.y)
+        marker.isFlat = true
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
         binding.mapView.overlays.add(marker)
         marker.icon = getDrawable(requireContext(), ImageTypes.imageMap[technic.type]!!)
@@ -242,7 +243,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
     }
 
     override fun showDataFromDrone(entities: List<Entity>) {
-        droneMarker.rotation = entities[0].asim.toFloat() + binding.mapView.mapOrientation
+        droneMarker.rotation = -entities[0].asim.toFloat()
         if (entities[0].lat.isNaN() && entities[0].lon.isNaN()) {
             droneMarker.position = GeoPoint(0.0, 0.0)
         } else {
