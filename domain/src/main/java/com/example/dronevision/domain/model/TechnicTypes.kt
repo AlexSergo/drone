@@ -21,5 +21,6 @@ enum class TechnicTypes {
     TANK,
     GAP,
     ANOTHER,
-    DRONE
+    DRONE,
+    AIM
 }

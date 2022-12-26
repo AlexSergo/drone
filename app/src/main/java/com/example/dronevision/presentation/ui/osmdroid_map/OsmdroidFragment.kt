@@ -9,18 +9,17 @@ import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import com.example.dronevision.databinding.FragmentOsmdroidBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
+import com.example.dronevision.presentation.delegates.LocationDialogCallback
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.*
 import com.example.dronevision.presentation.ui.bluetooth.Entity
 import com.example.dronevision.utils.ImageTypes
-import com.yandex.mapkit.geometry.Geo
-import com.yandex.mapkit.geometry.Point
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.util.GeometryMath
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Overlay
@@ -30,7 +29,6 @@ import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import org.osmdroid.views.overlay.Polyline
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 
 class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
@@ -42,6 +40,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
     private lateinit var droneMarker: Marker
     private lateinit var polylineToCenter: Polyline
     private var aimMarker: Marker? = null
+    private var polylineToAim: Polyline = Polyline()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -145,12 +144,14 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
                 type = TechnicTypes.DRONE))
 
         polylineToCenter = Polyline()
+        polylineToAim.isVisible = false
     }
 
     private fun setPolyline(polyline: Polyline, points: List<GeoPoint>){
         polyline.setPoints(points)
         polyline.color = Color.BLUE
         binding.mapView.overlays.add(polyline)
+        polylineToAim.isVisible = true
     }
 
     override fun initTechnic() {
@@ -220,19 +221,22 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
         return mark
     }
 
-    private fun drawMarker(mark: Marker,technic: Technic): Marker{
-        mark.position = GeoPoint(technic.coords.x, technic.coords.y)
-        mark.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-        binding.mapView.overlays.add(mark)
-        mark.icon = getDrawable(requireContext(), ImageTypes.imageMap[technic.type]!!)
+    private fun drawMarker(mark: Marker?,technic: Technic): Marker{
+        var  marker = mark
+        if (marker == null)
+            marker = Marker(binding.mapView)
+        marker.position = GeoPoint(technic.coords.x, technic.coords.y)
+        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+        binding.mapView.overlays.add(marker)
+        marker.icon = getDrawable(requireContext(), ImageTypes.imageMap[technic.type]!!)
 
-        return mark
+        return marker
     }
 
     override fun removeAim(){
         aimMarker?.remove(binding.mapView)
         aimMarker = null
-       // polylineToAim?.parent?.remove(polylineToAim!!)
+        polylineToAim.isVisible = false
     }
 
     override fun showDataFromDrone(entities: List<Entity>) {
@@ -246,9 +250,36 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
         droneMarker.setVisible(true)
         showGeoInformation(binding, cameraTarget, droneMarker.position)
         setPolyline(polylineToCenter, listOf(droneMarker.position, cameraTarget))
+
+        showAim(GeoPoint(entities[1].lat, entities[1].lon))
+    }
+
+    private fun showAim(aim: GeoPoint){
+        if (aimMarker != null)
+            removeAim()
+
+        aimMarker = drawMarker(aimMarker,
+            Technic(coords = Coordinates(x = aim.latitude, y = aim.longitude),
+                    type = TechnicTypes.AIM
+            )
+        )
+        setPolyline(polylineToAim!!, listOf(droneMarker.position, aimMarker!!.position))
+    }
+
+    private fun focusCamera(point: GeoPoint){
+        binding.mapView.controller.animateTo(point)
     }
     
     override fun showLocationDialog() {
+        showLocationDialog(requireContext(), object : LocationDialogCallback {
+            override fun focusCamera() {
+                if (aimMarker != null)
+                    focusCamera(aimMarker!!.position)
+                else
+                    focusCamera(droneMarker.position)
+            }
+
+        })
     }
     
     override fun deleteAll() = binding.run {

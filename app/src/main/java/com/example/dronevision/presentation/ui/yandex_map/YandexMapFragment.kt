@@ -11,6 +11,7 @@ import com.example.dronevision.R
 import com.example.dronevision.databinding.FragmentYandexMapBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
+import com.example.dronevision.presentation.delegates.LocationDialogCallback
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.*
 import com.example.dronevision.presentation.ui.bluetooth.Entity
@@ -286,7 +287,6 @@ TargFragment.TargetFragmentCallback, IMap{
             Point(latitude, longitude),
             ImageProvider.fromResource(requireContext(), R.drawable.ic_cross_center)
         )
-            //focusCamera(latitude, longitude)
         drawPolylineToAim(from = droneMarker.geometry, to = Point(latitude, longitude))
     }
 
@@ -297,11 +297,10 @@ TargFragment.TargetFragmentCallback, IMap{
         polylineToAim?.outlineColor = Color.GREEN
     }
 
-    private fun focusCamera(latitude: Double, longitude: Double) {
+    private fun focusCamera(point: Point) {
         val cameraPosition = binding.mapView.map.cameraPosition
         binding.mapView.map.move(
-            CameraPosition(
-                Point(latitude, longitude),
+            CameraPosition(point,
                 cameraPosition.zoom + 1, 0f, 0f
             ),
             Animation(Animation.Type.SMOOTH, 1f),
@@ -327,43 +326,14 @@ TargFragment.TargetFragmentCallback, IMap{
     }
 
     override fun showLocationDialog() {
-        val locationDialogArray = arrayOf(
-            "Запросить у Р-187-П1",
-            "Запросить у Android",
-            "Снять с карты",
-            "Найти на карте",
-            "Передать Р-187-П1"
-        )
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Координаты")
-            .setItems(locationDialogArray) { dialog, which ->
-                when (which) {
-                    0 -> {}
-                    1 -> {}
-                    2 -> {}
-                    3 -> {
-                        if (aimMarker != null)
-                            aimMarker?.geometry?.let { focusCamera(it.latitude, aimMarker!!.geometry.longitude) }
-                        else
-                            getMarkerLocation()
-                    }
-                    4 -> {}
-                }
+        showLocationDialog(requireContext(), object : LocationDialogCallback{
+            override fun focusCamera() {
+                if (aimMarker != null)
+                    focusCamera(aimMarker!!.geometry)
+                else
+                    focusCamera(droneMarker.geometry)
             }
-            .show()
-    }
-
-    private fun getMarkerLocation() {
-        binding.mapView.map.move(
-            CameraPosition(
-                Point(droneMarker.geometry.latitude, droneMarker.geometry.longitude),
-                12.0f,
-                0.0f,
-                0.0f
-            ),
-            Animation(Animation.Type.SMOOTH, 1.0f), null
-        )
+        })
     }
 
     override fun onCameraPositionChanged(

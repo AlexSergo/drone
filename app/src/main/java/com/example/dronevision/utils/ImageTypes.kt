@@ -25,6 +25,7 @@ object ImageTypes {
         Pair(TechnicTypes.TANK, R.drawable.ic_31),
         Pair(TechnicTypes.ANOTHER, R.drawable.ic_99),
         Pair(TechnicTypes.GAP, R.drawable.ic_breach),
-        Pair(TechnicTypes.DRONE, R.drawable.gps_tacker2)
+        Pair(TechnicTypes.DRONE, R.drawable.gps_tacker2),
+        Pair(TechnicTypes.AIM, R.drawable.ic_cross_center)
     )
 }
