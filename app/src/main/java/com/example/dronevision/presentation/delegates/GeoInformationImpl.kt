@@ -16,7 +16,7 @@ class GeoInformationImpl: GeoInformation {
                                     azimuthPoint: Point) {
         this.cameraLat = cameraTarget.latitude
         this.cameraLon = cameraTarget.longitude
-        val lat_lon = showWgs82OnCard()
+        val lat_lon = showWgs82OnCard().split(" ")
         val azimuth = calculateAzimuth(azimuthPoint.latitude, azimuthPoint.longitude)
         val plane = showSk42OnCard()
 
