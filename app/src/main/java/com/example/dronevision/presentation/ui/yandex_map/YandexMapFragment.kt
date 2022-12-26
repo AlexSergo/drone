@@ -376,15 +376,13 @@ TargFragment.TargetFragmentCallback, IMap{
         cameraUpdateReason: CameraUpdateReason,
         finished: Boolean
     ) {
-
         showGeoInformation(binding, cameraPosition.target, droneMarker.geometry)
 
         binding.compassButton.rotation = cameraPosition.azimuth * -1
 
         polylineONMap.geometry = Polyline(listOf(droneMarker.geometry, cameraPosition.target))
 
-        val distance = (Geo.distance(droneMarker.geometry, cameraPosition.target) / 100).roundToInt() / 10.0
-        binding.distance.text = "$distance km"
+        binding.distance.text = "${getDistance(droneMarker.geometry, cameraPosition.target)} km"
     }
 
     override fun onStart() {

@@ -13,11 +13,14 @@ import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.*
 import com.example.dronevision.presentation.ui.bluetooth.Entity
 import com.example.dronevision.utils.ImageTypes
+import com.yandex.mapkit.geometry.Geo
+import com.yandex.mapkit.geometry.Point
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.util.GeometryMath
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Overlay
@@ -27,6 +30,7 @@ import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import org.osmdroid.views.overlay.Polyline
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 
 class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
@@ -84,6 +88,8 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
                 showGeoInformation(binding, cameraTarget, droneMarker.position)
 
                 setPolyline(polylineToCenter, listOf(droneMarker.position, cameraTarget))
+
+                binding.distance.text = "${getDistance(droneMarker.position, cameraTarget)} km"
                 return true
             }
 

@@ -14,7 +14,11 @@ import com.example.dronevision.presentation.ui.yandex_map.TechnicViewModelFactor
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.yandex.mapkit.geometry.Geo
+import com.yandex.mapkit.geometry.Point
+import org.osmdroid.util.GeoPoint
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 open class MyMapFragment<T>: Fragment(),
     RemoteDatabaseHandler by RemoteDatabaseHandlerImpl(),
@@ -52,5 +56,15 @@ open class MyMapFragment<T>: Fragment(),
     private fun initViewModel() {
         viewModel = ViewModelProvider(this, viewModelFactory)[TechnicViewModel::class.java]
         targetViewModel = ViewModelProvider(this, targetViewModelFactory)[TargetViewModel::class.java]
+    }
+
+    protected fun getDistance(from: Point, to: Point): Double{
+        return (Geo.distance(from, to) / 100).roundToInt() / 10.0
+    }
+
+    protected fun getDistance(from: GeoPoint, to: GeoPoint): Double{
+        return (Geo.distance(
+            Point(from.latitude, from.longitude),
+            Point(to.latitude, to.longitude)) / 100).roundToInt() / 10.0
     }
 }
