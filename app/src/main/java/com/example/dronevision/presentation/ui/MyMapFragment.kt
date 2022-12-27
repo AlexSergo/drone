@@ -6,11 +6,11 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.dronevision.App
 import com.example.dronevision.presentation.delegates.*
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment
-import com.example.dronevision.presentation.ui.view_model.TargetViewModel
-import com.example.dronevision.presentation.ui.view_model.TargetViewModelFactory
+import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidViewModel
+import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidViewModelFactory
 import com.example.dronevision.presentation.ui.yandex_map.YandexMapFragment
-import com.example.dronevision.presentation.ui.yandex_map.TechnicViewModel
-import com.example.dronevision.presentation.ui.yandex_map.TechnicViewModelFactory
+import com.example.dronevision.presentation.ui.yandex_map.YandexMapViewModel
+import com.example.dronevision.presentation.ui.yandex_map.YandexMapViewModelFactory
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
@@ -20,46 +20,44 @@ import org.osmdroid.util.GeoPoint
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-open class MyMapFragment<T>: Fragment(),
+open class MyMapFragment<T> : Fragment(),
     RemoteDatabaseHandler by RemoteDatabaseHandlerImpl(),
     OfflineMapHandler by OfflineMapHandlerImpl(),
     StoragePermissionHandler by StoragePermissionHandlerImpl(),
     GeoInformation by GeoInformationImpl(),
     LocationDialogHandler by LocationDialogHandlerImpl(),
-    ManipulatorSetuper by ManipulatorSetuperImpl(){
-
-    protected lateinit var viewModel: TechnicViewModel
-    protected lateinit var targetViewModel: TargetViewModel
+    ManipulatorSetuper by ManipulatorSetuperImpl() {
+    
+    protected lateinit var yandexMapViewModel: YandexMapViewModel
+    protected lateinit var osmdroidViewModel: OsmdroidViewModel
     protected lateinit var databaseRef: DatabaseReference
     protected val listOfTechnic = mutableListOf<T>()
-
+    
     @Inject
-    lateinit var viewModelFactory: TechnicViewModelFactory
+    lateinit var yandexMapViewModelFactory: YandexMapViewModelFactory
+    
     @Inject
-    lateinit var targetViewModelFactory: TargetViewModelFactory
-
+    lateinit var osmdroidViewModelFactory: OsmdroidViewModelFactory
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val database =
             Firebase.database("https://drone-6c66c-default-rtdb.asia-southeast1.firebasedatabase.app")
         databaseRef = database.getReference("message")
     }
-
+    
     protected fun inject(fragment: YandexMapFragment) {
         (requireContext().applicationContext as App).appComponent.inject(fragment)
-        initViewModel()
+        yandexMapViewModel =
+            ViewModelProvider(this, yandexMapViewModelFactory)[YandexMapViewModel::class.java]
     }
 
     protected fun inject(fragment: OsmdroidFragment) {
         (requireContext().applicationContext as App).appComponent.inject(fragment)
-        initViewModel()
+        osmdroidViewModel =
+            ViewModelProvider(this, osmdroidViewModelFactory)[OsmdroidViewModel::class.java]
     }
-
-    private fun initViewModel() {
-        viewModel = ViewModelProvider(this, viewModelFactory)[TechnicViewModel::class.java]
-        targetViewModel = ViewModelProvider(this, targetViewModelFactory)[TargetViewModel::class.java]
-    }
-
+    
     protected fun getDistance(from: Point, to: Point): Double{
         return (Geo.distance(from, to) / 100).roundToInt() / 10.0
     }

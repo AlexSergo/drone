@@ -5,8 +5,8 @@ import com.example.dronevision.domain.use_cases.DeleteAllUseCase
 import com.example.dronevision.domain.use_cases.DeleteTechnicUseCase
 import com.example.dronevision.domain.use_cases.GetTechnicsUseCase
 import com.example.dronevision.domain.use_cases.SaveTechnicUseCase
-import com.example.dronevision.presentation.ui.view_model.TargetViewModelFactory
-import com.example.dronevision.presentation.ui.yandex_map.TechnicViewModelFactory
+import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidViewModelFactory
+import com.example.dronevision.presentation.ui.yandex_map.YandexMapViewModelFactory
 import dagger.Module
 import dagger.Provides
 
@@ -16,23 +16,29 @@ class AppModule(val context: Context) {
     @Provides
     fun provideContext(): Context = context
     
-   /* @Provides
-    fun provideViewModelFactory(): ViewModelFactory = ViewModelFactory()*/
-
     @Provides
-    fun provideTargetViewModelFactory(): TargetViewModelFactory = TargetViewModelFactory()
-
-    @Provides
-    fun provideTechnicViewModelFactory(
+    fun provideOsmdroidViewModelFactory(
         getTechnicsUseCase: GetTechnicsUseCase,
         saveTechnicUseCase: SaveTechnicUseCase,
         deleteAllUseCase: DeleteAllUseCase,
         deleteTechnicUseCase: DeleteTechnicUseCase,
-    ): TechnicViewModelFactory =
-        TechnicViewModelFactory(
-            getTechnicsUseCase = getTechnicsUseCase,
-            saveTechnicUseCase = saveTechnicUseCase,
-            deleteAllUseCase = deleteAllUseCase,
-            deleteTechnicUseCase = deleteTechnicUseCase
-        )
+    ): OsmdroidViewModelFactory = OsmdroidViewModelFactory(
+        getTechnicsUseCase = getTechnicsUseCase,
+        saveTechnicUseCase = saveTechnicUseCase,
+        deleteAllUseCase = deleteAllUseCase,
+        deleteTechnicUseCase = deleteTechnicUseCase
+    )
+    
+    @Provides
+    fun provideYandexMapViewModelFactory(
+        getTechnicsUseCase: GetTechnicsUseCase,
+        saveTechnicUseCase: SaveTechnicUseCase,
+        deleteAllUseCase: DeleteAllUseCase,
+        deleteTechnicUseCase: DeleteTechnicUseCase,
+    ): YandexMapViewModelFactory = YandexMapViewModelFactory(
+        getTechnicsUseCase = getTechnicsUseCase,
+        saveTechnicUseCase = saveTechnicUseCase,
+        deleteAllUseCase = deleteAllUseCase,
+        deleteTechnicUseCase = deleteTechnicUseCase
+    )
 }

@@ -74,8 +74,8 @@ TargFragment.TargetFragmentCallback, IMap{
     }
 
     override fun initTechnic() {
-        viewModel.getTechnics()
-        viewModel.technicListLiveData.observe(viewLifecycleOwner) {
+        yandexMapViewModel.getTechnics()
+        yandexMapViewModel.technicListLiveData.observe(viewLifecycleOwner) {
             it?.let { list ->
                 list.forEach { technic ->
                     val mark = drawMarker(technic)
@@ -106,9 +106,9 @@ TargFragment.TargetFragmentCallback, IMap{
                     return
 
         val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-        viewModel.getTechnics()
+        yandexMapViewModel.getTechnics()
         var count = 0
-        viewModel.technicListLiveData.observe(viewLifecycleOwner) {
+        yandexMapViewModel.technicListLiveData.observe(viewLifecycleOwner) {
             it?.let {
                 count = it.size + 1
                 val mark: PlacemarkMapObject = if (coords != null)
@@ -117,7 +117,7 @@ TargFragment.TargetFragmentCallback, IMap{
                     setMark(cameraPositionTarget.latitude, cameraPositionTarget.longitude, type)
 
                 addClickListenerToMark(mark, type)
-                viewModel.saveTechnic(
+                yandexMapViewModel.saveTechnic(
                     Technic(
                         id = count,
                         type = type,
@@ -216,8 +216,8 @@ TargFragment.TargetFragmentCallback, IMap{
         showAim(aim.lat, aim.lon)
 
         if (entities[0].calc_target) {
-            targetViewModel.getTargetCoordinates(entities)
-            targetViewModel.targetLiveData.observe(viewLifecycleOwner){
+            yandexMapViewModel.getTargetCoordinates(entities)
+            yandexMapViewModel.targetLiveData.observe(viewLifecycleOwner){
                 spawnTechnic(
                     TechnicTypes.ANOTHER,
                     Coordinates(x = it.lat, y = it.lon)
@@ -230,7 +230,7 @@ TargFragment.TargetFragmentCallback, IMap{
         aimMarker = null
         polylineToAim = null
         binding.mapView.map.mapObjects.clear()
-        viewModel.deleteAll()
+        yandexMapViewModel.deleteAll()
         listOfTechnic.clear()
         initDroneMarker()
     }

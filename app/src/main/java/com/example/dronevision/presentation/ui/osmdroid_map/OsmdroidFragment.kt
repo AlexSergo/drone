@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import com.example.dronevision.databinding.FragmentOsmdroidBinding
 import com.example.dronevision.domain.model.Coordinates
@@ -15,7 +14,6 @@ import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.*
 import com.example.dronevision.presentation.ui.bluetooth.Entity
 import com.example.dronevision.utils.ImageTypes
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
@@ -24,16 +22,14 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Overlay
-import org.osmdroid.views.overlay.ScaleBarOverlay
+import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.compass.CompassOverlay
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
-import org.osmdroid.views.overlay.Polyline
-import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider
 import kotlin.math.abs
 
 
-class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
+class OsmdroidFragment : MyMapFragment<Overlay>(), IMap {
     
     private lateinit var binding: FragmentOsmdroidBinding
     private lateinit var rotationGestureOverlay: RotationGestureOverlay
@@ -119,8 +115,8 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
     }
 
     override fun initTechnic() {
-        viewModel.getTechnics()
-        viewModel.technicListLiveData.observe(viewLifecycleOwner) {
+        osmdroidViewModel.getTechnics()
+        osmdroidViewModel.technicListLiveData.observe(viewLifecycleOwner) {
             it?.let { list ->
                 list.forEach { technic ->
 
@@ -144,9 +140,9 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
             }
 
         val cameraPosition = binding.mapView.mapCenter
-        viewModel.getTechnics()
+        osmdroidViewModel.getTechnics()
         var count = 0
-        viewModel.technicListLiveData.observe(viewLifecycleOwner) {
+        osmdroidViewModel.technicListLiveData.observe(viewLifecycleOwner) {
             it?.let {
                 count = it.size + 1
                 val mark: Marker = if (coords != null)
@@ -155,7 +151,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
                     setMark(cameraPosition.latitude, cameraPosition.longitude, type)
 
                 //addClickListenerToMark(mark, type)
-                viewModel.saveTechnic(
+                osmdroidViewModel.saveTechnic(
                     Technic(
                         id = count,
                         type = type,
@@ -249,7 +245,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
     
     override fun deleteAll() = binding.run {
         mapView.overlays.removeAll(listOfTechnic)
-        viewModel.deleteAll()
+        osmdroidViewModel.deleteAll()
         listOfTechnic.clear()
         return@run
     }
@@ -266,6 +262,10 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap{
         binding.mapView.invalidate()
     }
 
+    fun setMapType() {
+    
+    }
+    
     override fun onResume() {
         super.onResume()
         binding.mapView.onResume()
