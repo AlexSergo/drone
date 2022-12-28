@@ -166,30 +166,36 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap {
     }
 
     private fun addClickListenerToMark(mark: Marker, type: TechnicTypes) {
+        val technic = Technic(coords = Coordinates(
+                x = mark.position.latitude,
+                y = mark.position.longitude
+            ), type = type)
+
         mark.setOnMarkerClickListener { marker, mapView ->
-            val targetFragment = TargFragment(
-                Technic(
-                    coords = Coordinates(
-                        x = mark.position.latitude,
-                        y = mark.position.longitude
-                    ),
-                    type = type
-                ), this
+            val targetFragment = TargFragment( technic = technic,
+                object : TargFragment.TargetFragmentCallback{
+                    override fun onBroadcastButtonClick(technic: Technic) {
+                        val sb = StringBuilder()
+                        sb.append(technic.type.name)
+                        sb.append(" ")
+                        sb.append(technic.coords.x)
+                        sb.append(" ")
+                        sb.append(technic.coords.y)
+                        databaseRef.setValue(sb.toString())
+                    }
+
+                    override fun deleteTarget() {
+                        binding.mapView.overlays.remove(mark)
+                        listOfTechnic.remove(mark)
+                        osmdroidViewModel.deleteTechnic(technic)
+                    }
+
+                }
             )
             targetFragment.show(parentFragmentManager, "targFragment")
             true
         }
 
-    }
-
-    override fun onBroadcastButtonClick(technic: Technic) {
-        val sb = StringBuilder()
-        sb.append(technic.type.name)
-        sb.append(" ")
-        sb.append(technic.coords.x)
-        sb.append(" ")
-        sb.append(technic.coords.y)
-        databaseRef.setValue(sb.toString())
     }
 
     private fun setMark(
@@ -269,6 +275,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap {
 
     private fun focusCamera(point: GeoPoint){
         binding.mapView.controller.animateTo(point)
+        binding.mapView.controller.zoomIn()
     }
     
     override fun showLocationDialog() {

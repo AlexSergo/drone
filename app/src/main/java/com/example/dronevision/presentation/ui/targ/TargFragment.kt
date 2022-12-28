@@ -8,8 +8,11 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.example.dronevision.databinding.FragmentTargBinding
 import com.example.dronevision.presentation.model.Technic
+import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Overlay
 
-class TargFragment(private val technic: Technic, private val targetFragmentCallback: TargetFragmentCallback) : DialogFragment() {
+class TargFragment(private val technic: Technic,
+                   private val targetFragmentCallback: TargetFragmentCallback) : DialogFragment() {
     
     private lateinit var binding: FragmentTargBinding
     
@@ -18,6 +21,7 @@ class TargFragment(private val technic: Technic, private val targetFragmentCallb
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentTargBinding.inflate(inflater, container, false)
+        binding.header.text = technic.type.name
         binding.latitudeValue.text = technic.coords.x.toString()
         binding.longitudeValue.text = technic.coords.y.toString()
         binding.findBtn.setOnClickListener {
@@ -30,12 +34,13 @@ class TargFragment(private val technic: Technic, private val targetFragmentCallb
         }
         binding.deleteBtn.setOnClickListener {
             Toast.makeText(requireContext(), "Кнопки пока не работают", Toast.LENGTH_SHORT).show()
-            dialog?.dismiss()
+            targetFragmentCallback.deleteTarget()
         }
         return binding.root
     }
 
     interface TargetFragmentCallback{
         fun onBroadcastButtonClick(technic: Technic)
+        fun deleteTarget()
     }
 }

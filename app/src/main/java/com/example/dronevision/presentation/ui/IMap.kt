@@ -8,7 +8,7 @@ import com.example.dronevision.presentation.ui.targ.TargFragment
 import com.yandex.mapkit.map.MapType
 import org.osmdroid.views.overlay.Marker
 
-interface IMap: TargFragment.TargetFragmentCallback{
+interface IMap{
     fun showDataFromDrone(entities: List<Entity>)
     fun showLocationDialog()
     fun deleteAll()

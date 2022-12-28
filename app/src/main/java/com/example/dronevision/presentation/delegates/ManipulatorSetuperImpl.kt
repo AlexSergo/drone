@@ -48,8 +48,8 @@ class ManipulatorSetuperImpl: ManipulatorSetuper {
             binding.mapView.map.move(
                 CameraPosition(
                     cameraPosition.target,
-                    cameraPosition.zoom + 1, cameraPosition.azimuth, cameraPosition.tilt
-                ), Animation(Animation.Type.SMOOTH, 1.0f), null
+                    cameraPosition.zoom + 1.5f, cameraPosition.azimuth, cameraPosition.tilt
+                ), Animation(Animation.Type.SMOOTH, 0.2f), null
             )
         }
 
@@ -58,15 +58,15 @@ class ManipulatorSetuperImpl: ManipulatorSetuper {
             binding.mapView.map.move(
                 CameraPosition(
                     cameraPosition.target,
-                    cameraPosition.zoom - 1, cameraPosition.azimuth, cameraPosition.tilt
-                ), Animation(Animation.Type.SMOOTH, 1.0f), null
+                    cameraPosition.zoom - 1.5f, cameraPosition.azimuth, cameraPosition.tilt
+                ), Animation(Animation.Type.SMOOTH, 0.2f), null
             )
         }
     }
 
     private fun setupZoomButtons(binding: FragmentOsmdroidBinding) {
-        binding.zoomInButton.setOnClickListener { binding.mapView.controller.zoomIn() }
-        binding.zoomOutButton.setOnClickListener { binding.mapView.controller.zoomOut() }
+        binding.zoomInButton.setOnClickListener { binding.mapView.controller.zoomIn(200) }
+        binding.zoomOutButton.setOnClickListener { binding.mapView.controller.zoomOut(200) }
     }
 
 /*    private fun setupDisplayMetrics(binding: FragmentOsmdroidBinding) = binding.run {

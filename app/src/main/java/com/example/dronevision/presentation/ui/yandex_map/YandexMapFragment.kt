@@ -151,6 +151,11 @@ IMap{
     }
 
     private fun addClickListenerToMark(mark: PlacemarkMapObject, type: TechnicTypes) {
+        val technic = Technic(coords = Coordinates(
+            x = mark.geometry.latitude,
+            y = mark.geometry.longitude
+        ), type = type)
+
         mark.addTapListener { mapObject, point ->
             val targFragment = TargFragment(
                 Technic(
@@ -159,21 +164,28 @@ IMap{
                         y = mark.geometry.longitude
                     ), type = type
                 ),
-                this
+                object: TargFragment.TargetFragmentCallback{
+                    override fun onBroadcastButtonClick(technic: Technic) {
+                        val sb = StringBuilder()
+                        sb.append(technic.type.name)
+                        sb.append(" ")
+                        sb.append(technic.coords.x)
+                        sb.append(" ")
+                        sb.append(technic.coords.y)
+                        databaseRef.setValue(sb.toString())
+                    }
+
+                    override fun deleteTarget() {
+                        binding.mapView.map.mapObjects.remove(mark)
+                        listOfTechnic.remove(mark)
+                        yandexMapViewModel.deleteTechnic(technic)
+                    }
+
+                }
             )
             targFragment.show(parentFragmentManager, "targFragment")
             true
         }
-    }
-    
-    override fun onBroadcastButtonClick(technic: Technic) {
-        val sb = StringBuilder()
-        sb.append(technic.type.name)
-        sb.append(" ")
-        sb.append(technic.coords.x)
-        sb.append(" ")
-        sb.append(technic.coords.y)
-        databaseRef.setValue(sb.toString())
     }
 
     private fun editDroneMarkerPosition(
