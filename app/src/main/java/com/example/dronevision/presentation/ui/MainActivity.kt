@@ -15,11 +15,10 @@ import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Lifecycle
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
 import com.example.dronevision.AbonentDialogFragment
 import com.example.dronevision.R
 import com.example.dronevision.databinding.ActivityMainBinding
@@ -27,6 +26,8 @@ import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.model.BluetoothListItem
 import com.example.dronevision.presentation.model.Message
 import com.example.dronevision.presentation.ui.bluetooth.*
+import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment
+import com.example.dronevision.presentation.ui.yandex_map.YandexMapFragment
 
 import com.example.dronevision.utils.HgtLoader
 import com.google.android.material.navigation.NavigationView
@@ -38,6 +39,7 @@ class MainActivity : AppCompatActivity(),
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private lateinit var navController: NavController
     private lateinit var map: IMap
     private var dialog: SelectBluetoothFragment? = null
 
@@ -52,10 +54,6 @@ class MainActivity : AppCompatActivity(),
         setupNavController()
         
         setupOsmdroidConfiguration()
-
-        val navFragment =
-            supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
-        map = navFragment?.childFragmentManager?.fragments?.get(0) as IMap
     }
     
     private fun setupOsmdroidConfiguration() {
@@ -71,17 +69,19 @@ class MainActivity : AppCompatActivity(),
 
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
-
+    
         val toggle = ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close)
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
-
+    
         val button = findViewById<ImageButton>(R.id.drawerButton)
         button.setOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
-
+    
         navView.setNavigationItemSelectedListener(this)
+    
+        navController = findNavController(R.id.nav_host_fragment_content_main)
     }
 
     private fun setupBluetooth() {
@@ -222,19 +222,17 @@ class MainActivity : AppCompatActivity(),
                         map.offlineMode()
                         true
                     }
-                    R.id.mapGridItem ->{
+                    R.id.mapGridItem -> {
                         menuItem.isChecked = !menuItem.isChecked
                         map.changeGridState(menuItem.isChecked)
                         true
                     }
-                    R.id.mapOsmItem ->{
-                        findNavController(R.id.nav_host_fragment_content_main)
-                            .navigate(R.id.action_yandexMapFragment_to_osmdroidFragment)
+                    R.id.mapOsmItem -> {
+                        if (map is YandexMapFragment) navigateToOsmdroidFragment()
                         true
                     }
-                    R.id.mapYandexItem ->{
-                        findNavController(R.id.nav_host_fragment_content_main)
-                            .navigate(R.id.action_osmdroidFragment_to_yandexMapFragment)
+                    R.id.mapYandexItem -> {
+                        if (map is OsmdroidFragment) navigateToYandexFragment()
                         true
                     }
                     else -> false
@@ -242,7 +240,17 @@ class MainActivity : AppCompatActivity(),
             }
         }, this, Lifecycle.State.RESUMED)
     }
-
+    
+    private fun navigateToYandexFragment() {
+        findNavController(R.id.nav_host_fragment_content_main)
+            .navigate(R.id.action_osmdroidFragment_to_yandexMapFragment)
+    }
+    
+    private fun navigateToOsmdroidFragment() {
+        findNavController(R.id.nav_host_fragment_content_main)
+            .navigate(R.id.action_yandexMapFragment_to_osmdroidFragment)
+    }
+    
     private fun getCurrentMap(): IMap {
         val navFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
@@ -254,9 +262,7 @@ class MainActivity : AppCompatActivity(),
         fragment = navFragment?.childFragmentManager?.fragments?.get(1)
         return fragment as IMap
     }
-
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
-    }
+    
+    override fun onSupportNavigateUp(): Boolean =
+        navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
 }
