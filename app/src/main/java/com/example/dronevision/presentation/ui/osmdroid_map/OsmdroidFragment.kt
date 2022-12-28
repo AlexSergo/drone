@@ -104,7 +104,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap {
         drawMarker(droneMarker,
             Technic( coords = Coordinates(x = 0.0, y = 0.0),
                 type = TechnicTypes.DRONE))
-
+        droneMarker.isFlat = true
         polylineToCenter = Polyline()
         polylineToAim.isVisible = false
     }
@@ -112,6 +112,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap {
     private fun setPolyline(polyline: Polyline, points: List<GeoPoint>, color: Int = Color.BLUE){
         polyline.setPoints(points)
         polyline.color = color
+        polyline.width = 0.2f
         binding.mapView.overlays.add(polyline)
         polylineToAim.isVisible = true
     }
@@ -215,7 +216,6 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap {
         if (marker == null)
             marker = Marker(binding.mapView)
         marker.position = GeoPoint(technic.coords.x, technic.coords.y)
-        marker.isFlat = true
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
         binding.mapView.overlays.add(marker)
         marker.icon = getDrawable(requireContext(), ImageTypes.imageMap[technic.type]!!)
@@ -264,7 +264,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap {
                     type = TechnicTypes.AIM
             )
         )
-        setPolyline(polylineToAim, listOf(droneMarker.position, aimMarker!!.position), Color.RED)
+        setPolyline(polylineToAim, listOf(droneMarker.position, aimMarker!!.position), Color.GREEN)
     }
 
     private fun focusCamera(point: GeoPoint){

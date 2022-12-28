@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
+import com.example.dronevision.R
 import com.example.dronevision.databinding.FragmentYandexMapBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
@@ -37,8 +38,6 @@ IMap{
     private lateinit var polylineONMap: PolylineMapObject
     private var polylineToAim: PolylineMapObject? = null
 
-    private var paused = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         inject(this)
@@ -49,7 +48,6 @@ IMap{
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentYandexMapBinding.inflate(inflater, container, false)
-        paused = false
         binding.mapView.map.addCameraListener(this)
 
         initDroneMarker()
@@ -212,12 +210,12 @@ IMap{
 
         if (entities[0].calc_target) {
             yandexMapViewModel.getTargetCoordinates(entities)
-            yandexMapViewModel.targetLiveData.observe(viewLifecycleOwner){
+            yandexMapViewModel.targetLiveData.observe(this, Observer {
                 spawnTechnic(
                     TechnicTypes.ANOTHER,
                     Coordinates(x = it.lat, y = it.lon)
                 )
-            }
+            })
         }
     }
 
@@ -253,6 +251,7 @@ IMap{
         val polyline = Polyline(listOf(from, to))
         polylineToAim = binding.mapView.map.mapObjects.addPolyline(polyline)
         polylineONMap.strokeWidth = 0.2f
+        polylineONMap.setStrokeColor(R.color.green)
         polylineToAim?.outlineColor = Color.GREEN
     }
 
