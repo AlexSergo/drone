@@ -14,6 +14,7 @@ import com.example.dronevision.presentation.delegates.LocationDialogCallback
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.*
 import com.example.dronevision.presentation.ui.bluetooth.Entity
+import com.example.dronevision.presentation.ui.targ.TargFragment
 import com.example.dronevision.utils.ImageTypes
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
@@ -125,7 +126,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap {
                     drawMarker(mark, technic)
 
                     listOfTechnic.add(mark)
-                   // addClickListenerToMark(mark, technic.type)
+                    addClickListenerToMark(mark, technic.type)
                 }
             }
         }
@@ -151,7 +152,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap {
                 else
                     setMark(cameraPosition.latitude, cameraPosition.longitude, type)
 
-                //addClickListenerToMark(mark, type)
+                addClickListenerToMark(mark, type)
                 osmdroidViewModel.saveTechnic(
                     Technic(
                         id = count,
@@ -161,6 +162,33 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap {
                 )
             }
         })
+    }
+
+    private fun addClickListenerToMark(mark: Marker, type: TechnicTypes) {
+        mark.setOnMarkerClickListener { marker, mapView ->
+            val targetFragment = TargFragment(
+                Technic(
+                    coords = Coordinates(
+                        x = mark.position.latitude,
+                        y = mark.position.longitude
+                    ),
+                    type = type
+                ), this
+            )
+            targetFragment.show(parentFragmentManager, "targFragment")
+            true
+        }
+
+    }
+
+    override fun onBroadcastButtonClick(technic: Technic) {
+        val sb = StringBuilder()
+        sb.append(technic.type.name)
+        sb.append(" ")
+        sb.append(technic.coords.x)
+        sb.append(" ")
+        sb.append(technic.coords.y)
+        databaseRef.setValue(sb.toString())
     }
 
     private fun setMark(
@@ -215,6 +243,16 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap {
         setPolyline(polylineToCenter, listOf(droneMarker.position, cameraTarget))
 
         showAim(GeoPoint(entities[1].lat, entities[1].lon))
+
+        if (entities[0].calc_target) {
+            osmdroidViewModel.getTargetCoordinates(entities)
+            osmdroidViewModel.targetLiveData.observe(this, Observer {
+                spawnTechnic(
+                    TechnicTypes.ANOTHER,
+                    Coordinates(x = it.lat, y = it.lon)
+                )
+            })
+        }
     }
 
     private fun showAim(aim: GeoPoint){
@@ -248,6 +286,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap {
         mapView.overlays.removeAll(listOfTechnic)
         osmdroidViewModel.deleteAll()
         listOfTechnic.clear()
+        binding.mapView.invalidate()
         return@run
     }
     

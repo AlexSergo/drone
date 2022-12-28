@@ -28,7 +28,7 @@ import kotlin.math.abs
 
 
 class YandexMapFragment :  MyMapFragment<PlacemarkMapObject>(), CameraListener,
-TargFragment.TargetFragmentCallback, IMap{
+IMap{
     
     private lateinit var binding: FragmentYandexMapBinding
     private lateinit var droneMarker: PlacemarkMapObject
@@ -59,7 +59,6 @@ TargFragment.TargetFragmentCallback, IMap{
         setCardViewExpand()
 
         onDatabaseChangeListener(databaseRef, this)
-        
         return binding.root
     }
     
@@ -155,11 +154,6 @@ TargFragment.TargetFragmentCallback, IMap{
 
     private fun addClickListenerToMark(mark: PlacemarkMapObject, type: TechnicTypes) {
         mark.addTapListener { mapObject, point ->
-            Toast.makeText(
-                requireContext(),
-                "${mark.geometry.latitude} ${mark.geometry.longitude}",
-                Toast.LENGTH_SHORT
-            ).show()
             val targFragment = TargFragment(
                 Technic(
                     coords = Coordinates(
