@@ -8,16 +8,18 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import com.example.dronevision.R
 import com.example.dronevision.databinding.FragmentYandexMapBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.delegates.LocationDialogCallback
 import com.example.dronevision.presentation.model.Technic
-import com.example.dronevision.presentation.ui.*
+import com.example.dronevision.presentation.ui.IMap
+import com.example.dronevision.presentation.ui.MyMapFragment
 import com.example.dronevision.presentation.ui.bluetooth.Entity
 import com.example.dronevision.presentation.ui.targ.TargFragment
-import com.example.dronevision.utils.*
+import com.example.dronevision.utils.ImageTypes
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
@@ -25,21 +27,19 @@ import com.yandex.mapkit.geometry.Polyline
 import com.yandex.mapkit.map.*
 import com.yandex.mapkit.map.Map
 import com.yandex.runtime.image.ImageProvider
-import org.osmdroid.views.overlay.Overlay
 import kotlin.math.abs
 
 
-class YandexMapFragment :  MyMapFragment(), CameraListener,
-IMap{
+class YandexMapFragment : MyMapFragment(), CameraListener, IMap {
     
     private lateinit var binding: FragmentYandexMapBinding
     private lateinit var droneMarker: PlacemarkMapObject
     private var aimMarker: PlacemarkMapObject? = null
     private val listOfTechnic = mutableListOf<PlacemarkMapObject>()
-
+    
     private lateinit var polylineONMap: PolylineMapObject
     private var polylineToAim: PolylineMapObject? = null
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         inject(this)
@@ -102,30 +102,29 @@ IMap{
         if (coords != null)
             for (technic in listOfTechnic)
                 if (technic.geometry.latitude == coords.x &&
-                    technic.geometry.longitude == coords.y)
+                    technic.geometry.longitude == coords.y
+                )
                     return
-
+    
         val cameraPositionTarget = binding.mapView.map.cameraPosition.target
         yandexMapViewModel.getTechnics()
         var count = 0
-        yandexMapViewModel.technicListLiveData.observe(this, Observer{
-            it?.let {
-                count = it.size + 1
-                val mark: PlacemarkMapObject = if (coords != null)
-                    setMark(coords.x, coords.y, type)
-                else
-                    setMark(cameraPositionTarget.latitude, cameraPositionTarget.longitude, type)
-
-                addClickListenerToMark(mark, type)
-                yandexMapViewModel.saveTechnic(
-                    Technic(
-                        id = count,
-                        type = type,
-                        Coordinates(x = mark.geometry.latitude, y = mark.geometry.longitude)
-                    )
+        yandexMapViewModel.technicListLiveData.observe(this) { technicList ->
+            count = technicList.size + 1
+            val mark: PlacemarkMapObject = if (coords != null)
+                setMark(coords.x, coords.y, type)
+            else
+                setMark(cameraPositionTarget.latitude, cameraPositionTarget.longitude, type)
+    
+            addClickListenerToMark(mark, type)
+            yandexMapViewModel.saveTechnic(
+                Technic(
+                    id = count,
+                    type = type,
+                    Coordinates(x = mark.geometry.latitude, y = mark.geometry.longitude)
                 )
-            }
-        })
+            )
+        }
     }
 
     private fun setMark(
@@ -287,18 +286,23 @@ IMap{
         )
         droneMarker.setIconStyle(IconStyle().setRotationType(RotationType.ROTATE))
         droneMarker.isVisible = false
-
+    
         val cameraPositionTarget = binding.mapView.map.cameraPosition.target
         val latitude = cameraPositionTarget.latitude
         val longitude = cameraPositionTarget.longitude
-
+    
         val polyline = Polyline(listOf(Point(latitude, longitude), Point(0.0, 0.0)))
         polylineONMap = binding.mapView.map.mapObjects.addPolyline(polyline)
         polylineONMap.strokeWidth = 0.2f
     }
-
+    
+    override fun setMapType(mapType: Int) {
+        val action = YandexMapFragmentDirections.actionYandexMapFragmentToOsmdroidFragment()
+        findNavController().navigate(action)
+    }
+    
     override fun showLocationDialog() {
-        showLocationDialog(requireContext(), object : LocationDialogCallback{
+        showLocationDialog(requireContext(), object : LocationDialogCallback {
             override fun focusCamera() {
                 if (aimMarker != null)
                     focusCamera(aimMarker!!.geometry)
@@ -315,11 +319,8 @@ IMap{
         finished: Boolean
     ) {
         showGeoInformation(binding, cameraPosition.target, droneMarker.geometry)
-
         binding.compassButton.rotation = cameraPosition.azimuth * -1
-
         polylineONMap.geometry = Polyline(listOf(droneMarker.geometry, cameraPosition.target))
-
         binding.distance.text = "${getDistance(droneMarker.geometry, cameraPosition.target)} km"
     }
 

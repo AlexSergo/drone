@@ -1,8 +1,9 @@
-package com.example.lifecalendar.di
+package com.example.dronevision.di
 
 import android.content.Context
 import com.example.dronevision.data.source.local.DroneVisionDatabase
-import com.example.dronevision.data.source.local.TechnicDao
+import com.example.dronevision.data.source.local.dao.SessionStateDao
+import com.example.dronevision.data.source.local.dao.TechnicDao
 import dagger.Module
 import dagger.Provides
 
@@ -10,6 +11,10 @@ import dagger.Provides
 class DatabaseModule {
     
     @Provides
-    fun provideDao(context: Context): TechnicDao =
+    fun provideTechnicDao(context: Context): TechnicDao =
         DroneVisionDatabase.getInstance(context).technicsDao()
+    
+    @Provides
+    fun provideSessionStateDao(context: Context): SessionStateDao =
+        DroneVisionDatabase.getInstance(context).SessionStateDao()
 }

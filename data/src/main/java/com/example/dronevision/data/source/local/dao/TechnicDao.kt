@@ -1,12 +1,13 @@
-package com.example.dronevision.data.source.local
+package com.example.dronevision.data.source.local.dao
 
+import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.dronevision.data.source.local.model.TechnicEntity
 
-@androidx.room.Dao
+@Dao
 interface TechnicDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveTechnic(technic: TechnicEntity)
@@ -18,5 +19,5 @@ interface TechnicDao {
     suspend fun deleteTechnic(technic: TechnicEntity)
 
     @Query("DELETE FROM technics")
-    suspend fun  deleteAll()
+    suspend fun  deleteAllTechnics()
 }

@@ -3,12 +3,16 @@ package com.example.dronevision.data.source.local
 import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.dronevision.data.source.local.dao.SessionStateDao
+import com.example.dronevision.data.source.local.dao.TechnicDao
+import com.example.dronevision.data.source.local.model.SessionStateEntity
 import com.example.dronevision.data.source.local.model.TechnicEntity
 
-@androidx.room.Database(entities = [TechnicEntity::class], version = 1, exportSchema = false)
+@androidx.room.Database(entities = [TechnicEntity::class, SessionStateEntity::class], version = 2, exportSchema = false)
 abstract class DroneVisionDatabase : RoomDatabase() {
     
     abstract fun technicsDao(): TechnicDao
+    abstract fun SessionStateDao(): SessionStateDao
     
     companion object {
         @Volatile

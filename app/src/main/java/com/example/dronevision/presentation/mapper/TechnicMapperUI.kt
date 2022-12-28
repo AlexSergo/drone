@@ -1,4 +1,4 @@
-package com.example.dronevision.presentation.mapperUI
+package com.example.dronevision.presentation.mapper
 
 import com.example.dronevision.domain.model.TechnicDTO
 import com.example.dronevision.presentation.model.Technic

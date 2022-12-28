@@ -2,16 +2,15 @@ package com.example.dronevision.presentation.ui.osmdroid_map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.dronevision.domain.use_cases.DeleteAllUseCase
-import com.example.dronevision.domain.use_cases.DeleteTechnicUseCase
-import com.example.dronevision.domain.use_cases.GetTechnicsUseCase
-import com.example.dronevision.domain.use_cases.SaveTechnicUseCase
+import com.example.dronevision.domain.use_cases.*
 
 class OsmdroidViewModelFactory(
     private val getTechnicsUseCase: GetTechnicsUseCase,
     private val saveTechnicUseCase: SaveTechnicUseCase,
     private val deleteAllUseCase: DeleteAllUseCase,
-    private val deleteTechnicUseCase: DeleteTechnicUseCase
+    private val deleteTechnicUseCase: DeleteTechnicUseCase,
+    private val saveSessionStateUseCase: SaveSessionStateUseCase,
+    private val getSessionStateUseCase: GetSessionStateUseCase
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -20,7 +19,9 @@ class OsmdroidViewModelFactory(
                 getTechnicsUseCase = getTechnicsUseCase,
                 saveTechnicUseCase = saveTechnicUseCase,
                 deleteAllUseCase = deleteAllUseCase,
-                deleteTechnicUseCase = deleteTechnicUseCase
+                deleteTechnicUseCase = deleteTechnicUseCase,
+                saveSessionStateUseCase = saveSessionStateUseCase,
+                getSessionStateUseCase = getSessionStateUseCase
             ) as T
         throw IllegalAccessException("ViewModel not found!")
     }

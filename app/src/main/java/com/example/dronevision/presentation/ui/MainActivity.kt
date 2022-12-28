@@ -2,7 +2,7 @@ package com.example.dronevision.presentation.ui
 
 import android.bluetooth.BluetoothManager
 import android.os.Bundle
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -30,6 +30,7 @@ import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment
 import com.example.dronevision.presentation.ui.yandex_map.YandexMapFragment
 
 import com.example.dronevision.utils.HgtLoader
+import com.example.dronevision.utils.MapType
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.components.BuildConfig
 import org.osmdroid.config.Configuration
@@ -235,6 +236,14 @@ class MainActivity : AppCompatActivity(),
                         if (map is OsmdroidFragment) navigateToYandexFragment()
                         true
                     }
+                    R.id.mapHybridItem -> {
+                        map.setMapType(MapType.GOOGLE_HYB.value)
+                        true
+                    }
+                    R.id.mapSatelliteItem -> {
+                        map.setMapType(MapType.GOOGLE_SAT.value)
+                        true
+                    }
                     else -> false
                 }
             }
@@ -254,12 +263,11 @@ class MainActivity : AppCompatActivity(),
     private fun getCurrentMap(): IMap {
         val navFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
-        var fragment = navFragment?.childFragmentManager?.fragments?.get(0)
+        val fragment = navFragment?.childFragmentManager?.fragments?.get(0)
         if (fragment != null) {
             if (fragment.isVisible)
                 return fragment as IMap
         }
-        fragment = navFragment?.childFragmentManager?.fragments?.get(1)
         return fragment as IMap
     }
     

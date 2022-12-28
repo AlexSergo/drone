@@ -14,7 +14,7 @@
     <fragment
         android:id="@+id/osmdroidFragment"
         android:name="com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment"
-        android:label="OsmdroidFragment" >
+        android:label="Street Map" >
         <action
             android:id="@+id/action_osmdroidFragment_to_yandexMapFragment"
             app:destination="@id/yandexMapFragment" />

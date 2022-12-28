@@ -14,9 +14,6 @@
                 android:id="@+id/mapYandexItem"
                 android:title="Яндекс Карты" />
             <item
-                android:id="@+id/mapRoadmapItem"
-                android:title="Cхема" />
-            <item
                 android:id="@+id/mapSatelliteItem"
                 android:title="Спутник" />
             <item

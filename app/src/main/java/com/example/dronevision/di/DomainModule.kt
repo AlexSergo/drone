@@ -1,10 +1,8 @@
-package com.example.lifecalendar.di
+package com.example.dronevision.di
 
+import com.example.dronevision.domain.repository.SessionStateRepository
 import com.example.dronevision.domain.repository.TechnicRepository
-import com.example.dronevision.domain.use_cases.DeleteAllUseCase
-import com.example.dronevision.domain.use_cases.DeleteTechnicUseCase
-import com.example.dronevision.domain.use_cases.GetTechnicsUseCase
-import com.example.dronevision.domain.use_cases.SaveTechnicUseCase
+import com.example.dronevision.domain.use_cases.*
 import dagger.Module
 import dagger.Provides
 
@@ -26,4 +24,12 @@ class DomainModule {
     @Provides
     fun provideSaveTechnicUseCase(technicRepository: TechnicRepository): SaveTechnicUseCase =
         SaveTechnicUseCase(technicRepository = technicRepository)
+    
+    @Provides
+    fun provideGetSessionStateUseCase(sessionStateRepository: SessionStateRepository): GetSessionStateUseCase =
+        GetSessionStateUseCase(sessionStateRepository = sessionStateRepository)
+    
+    @Provides
+    fun provideSaveSessionStateUseCase(sessionStateRepository: SessionStateRepository): SaveSessionStateUseCase =
+        SaveSessionStateUseCase(sessionStateRepository = sessionStateRepository)
 }
