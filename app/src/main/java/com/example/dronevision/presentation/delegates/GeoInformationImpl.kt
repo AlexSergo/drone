@@ -4,12 +4,24 @@ import com.example.dronevision.databinding.FragmentOsmdroidBinding
 import com.example.dronevision.databinding.FragmentYandexMapBinding
 import com.example.dronevision.utils.MapTools
 import com.example.dronevision.utils.NGeoCalc
+import com.yandex.mapkit.geometry.Geo
 import com.yandex.mapkit.geometry.Point
 import org.osmdroid.util.GeoPoint
+import kotlin.math.roundToInt
 
 class GeoInformationImpl: GeoInformation {
     private var cameraLat: Double = 0.0
     private var cameraLon: Double = 0.0
+
+    override fun getDistance(from: Point, to: Point): Double{
+        return (Geo.distance(from, to) / 100).roundToInt() / 10.0
+    }
+
+    override fun getDistance(from: GeoPoint, to: GeoPoint): Double{
+        return (Geo.distance(
+            Point(from.latitude, from.longitude),
+            Point(to.latitude, to.longitude)) / 100).roundToInt() / 10.0
+    }
 
     override fun showGeoInformation(binding: FragmentYandexMapBinding,
                                     cameraTarget: Point,

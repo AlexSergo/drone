@@ -31,7 +31,7 @@ import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import kotlin.math.abs
 
 
-class OsmdroidFragment : MyMapFragment<Overlay>(), IMap {
+class OsmdroidFragment : MyMapFragment(), IMap {
     
     private lateinit var binding: FragmentOsmdroidBinding
     private lateinit var rotationGestureOverlay: RotationGestureOverlay
@@ -41,6 +41,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap {
     private lateinit var polylineToCenter: Polyline
     private var aimMarker: Marker? = null
     private var polylineToAim: Polyline = Polyline()
+    private val listOfTechnic = mutableListOf<Overlay>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {

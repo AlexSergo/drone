@@ -20,7 +20,7 @@ import org.osmdroid.util.GeoPoint
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-open class MyMapFragment<T> : Fragment(),
+open class MyMapFragment: Fragment(),
     RemoteDatabaseHandler by RemoteDatabaseHandlerImpl(),
     OfflineMapHandler by OfflineMapHandlerImpl(),
     StoragePermissionHandler by StoragePermissionHandlerImpl(),
@@ -31,7 +31,6 @@ open class MyMapFragment<T> : Fragment(),
     protected lateinit var yandexMapViewModel: YandexMapViewModel
     protected lateinit var osmdroidViewModel: OsmdroidViewModel
     protected lateinit var databaseRef: DatabaseReference
-    protected val listOfTechnic = mutableListOf<T>()
     
     @Inject
     lateinit var yandexMapViewModelFactory: YandexMapViewModelFactory
@@ -56,15 +55,5 @@ open class MyMapFragment<T> : Fragment(),
         (requireContext().applicationContext as App).appComponent.inject(fragment)
         osmdroidViewModel =
             ViewModelProvider(this, osmdroidViewModelFactory)[OsmdroidViewModel::class.java]
-    }
-    
-    protected fun getDistance(from: Point, to: Point): Double{
-        return (Geo.distance(from, to) / 100).roundToInt() / 10.0
-    }
-
-    protected fun getDistance(from: GeoPoint, to: GeoPoint): Double{
-        return (Geo.distance(
-            Point(from.latitude, from.longitude),
-            Point(to.latitude, to.longitude)) / 100).roundToInt() / 10.0
     }
 }

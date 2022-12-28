@@ -14,4 +14,8 @@ interface GeoInformation {
     fun showGeoInformation(binding: FragmentOsmdroidBinding,
                            cameraTarget: GeoPoint,
                                     azimuthPoint: GeoPoint)
+
+    fun getDistance(from: Point, to: Point): Double
+
+    fun getDistance(from: GeoPoint, to: GeoPoint): Double
 }

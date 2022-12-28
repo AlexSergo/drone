@@ -25,15 +25,17 @@ import com.yandex.mapkit.geometry.Polyline
 import com.yandex.mapkit.map.*
 import com.yandex.mapkit.map.Map
 import com.yandex.runtime.image.ImageProvider
+import org.osmdroid.views.overlay.Overlay
 import kotlin.math.abs
 
 
-class YandexMapFragment :  MyMapFragment<PlacemarkMapObject>(), CameraListener,
+class YandexMapFragment :  MyMapFragment(), CameraListener,
 IMap{
     
     private lateinit var binding: FragmentYandexMapBinding
     private lateinit var droneMarker: PlacemarkMapObject
     private var aimMarker: PlacemarkMapObject? = null
+    private val listOfTechnic = mutableListOf<PlacemarkMapObject>()
 
     private lateinit var polylineONMap: PolylineMapObject
     private var polylineToAim: PolylineMapObject? = null
