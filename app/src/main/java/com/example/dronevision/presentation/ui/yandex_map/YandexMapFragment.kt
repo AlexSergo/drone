@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
+import androidx.lifecycle.Observer
 import com.example.dronevision.databinding.FragmentYandexMapBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
@@ -108,7 +109,7 @@ TargFragment.TargetFragmentCallback, IMap{
         val cameraPositionTarget = binding.mapView.map.cameraPosition.target
         yandexMapViewModel.getTechnics()
         var count = 0
-        yandexMapViewModel.technicListLiveData.observe(viewLifecycleOwner) {
+        yandexMapViewModel.technicListLiveData.observe(this, Observer{
             it?.let {
                 count = it.size + 1
                 val mark: PlacemarkMapObject = if (coords != null)
@@ -125,7 +126,7 @@ TargFragment.TargetFragmentCallback, IMap{
                     )
                 )
             }
-        }
+        })
     }
 
     private fun setMark(

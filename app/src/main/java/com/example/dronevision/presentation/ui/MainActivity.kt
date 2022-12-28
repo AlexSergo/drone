@@ -6,7 +6,9 @@ import android.preference.PreferenceManager
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.ImageButton
 import android.widget.Toast
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.core.view.MenuHost
@@ -65,11 +67,16 @@ class MainActivity : AppCompatActivity(),
     
     private fun setupNavController() {
         setSupportActionBar(binding.appBarMain.toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false);
 
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         val navController = findNavController(R.id.nav_host_fragment_content_main)
 
+        val toggle = ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close)
+        drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
+/*
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.targ01, R.id.targ04, R.id.targ08, R.id.targ10, R.id.targ12, R.id.targ14,
@@ -77,9 +84,14 @@ class MainActivity : AppCompatActivity(),
                 R.id.targ24, R.id.targ25, R.id.targ27, R.id.targ29, R.id.targ30, R.id.targ31,
                 R.id.breach, R.id.targ99
             ), drawerLayout
-        )
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
+        )*/
+       // setupActionBarWithNavController(navController, appBarConfiguration)
+        //navView.setupWithNavController(navController)
+
+        val button = findViewById<ImageButton>(R.id.drawerButton)
+        button.setOnClickListener {
+            binding.drawerLayout.openDrawer(GravityCompat.START)
+        }
 
         navView.setNavigationItemSelectedListener(this)
     }
