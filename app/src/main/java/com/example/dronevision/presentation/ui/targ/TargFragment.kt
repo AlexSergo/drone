@@ -22,12 +22,15 @@ class TargFragment(private val technic: Technic, private val targetFragmentCallb
         binding.longitudeValue.text = technic.coords.y.toString()
         binding.findBtn.setOnClickListener {
             Toast.makeText(requireContext(), "Кнопки пока не работают", Toast.LENGTH_SHORT).show()
+            dialog?.dismiss()
         }
         binding.broadcastBtn.setOnClickListener {
             targetFragmentCallback.onBroadcastButtonClick(technic)
+            dialog?.dismiss()
         }
         binding.deleteBtn.setOnClickListener {
             Toast.makeText(requireContext(), "Кнопки пока не работают", Toast.LENGTH_SHORT).show()
+            dialog?.dismiss()
         }
         return binding.root
     }

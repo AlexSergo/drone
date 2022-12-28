@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
+import androidx.lifecycle.Observer
 import com.example.dronevision.databinding.FragmentOsmdroidBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
@@ -142,7 +143,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap {
         val cameraPosition = binding.mapView.mapCenter
         osmdroidViewModel.getTechnics()
         var count = 0
-        osmdroidViewModel.technicListLiveData.observe(viewLifecycleOwner) {
+        osmdroidViewModel.technicListLiveData.observe(this, Observer {
             it?.let {
                 count = it.size + 1
                 val mark: Marker = if (coords != null)
@@ -159,7 +160,7 @@ class OsmdroidFragment : MyMapFragment<Overlay>(), IMap {
                     )
                 )
             }
-        }
+        })
     }
 
     private fun setMark(
