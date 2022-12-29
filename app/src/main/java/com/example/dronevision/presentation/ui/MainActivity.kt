@@ -2,10 +2,12 @@ package com.example.dronevision.presentation.ui
 
 import android.bluetooth.BluetoothManager
 import android.os.Bundle
-import androidx.preference.PreferenceManager
+import android.preference.PreferenceManager
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.View
+import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -189,9 +191,11 @@ class MainActivity : AppCompatActivity(),
 
     private fun setupOptionsMenu() {
         val menuHost: MenuHost = this
+        var checkBox: MenuItem? = null
         menuHost.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.main, menu)
+                checkBox = menu.findItem(R.id.mapGridItem)
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -224,16 +228,20 @@ class MainActivity : AppCompatActivity(),
                         true
                     }
                     R.id.mapGridItem -> {
-                        menuItem.isChecked = !menuItem.isChecked
+                        if (map is OsmdroidFragment) menuItem.isChecked = !menuItem.isChecked
                         map.changeGridState(menuItem.isChecked)
                         true
                     }
                     R.id.mapOsmItem -> {
-                        if (map is YandexMapFragment) navigateToOsmdroidFragment()
+                        if (map is YandexMapFragment)
+                            navigateToOsmdroidFragment()
                         true
                     }
                     R.id.mapYandexItem -> {
-                        if (map is OsmdroidFragment) navigateToYandexFragment()
+                        if (map is OsmdroidFragment) {
+                            navigateToYandexFragment()
+                            checkBox?.isChecked = false
+                        }
                         true
                     }
                     R.id.mapHybridItem -> {
