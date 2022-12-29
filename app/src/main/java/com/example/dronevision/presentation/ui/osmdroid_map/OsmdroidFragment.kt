@@ -7,12 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.util.Pair
-import androidx.lifecycle.Observer
-import androidx.navigation.fragment.findNavController
 import com.example.dronevision.databinding.FragmentOsmdroidBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.delegates.LocationDialogCallback
+import com.example.dronevision.presentation.model.SessionState
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.IMap
 import com.example.dronevision.presentation.ui.MyMapFragment
@@ -63,7 +62,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
         setupOsmdroidMap()
         initDroneMarker()
         initTechnic()
-//        setupLastSessionState()
+        setupLastSessionState()
         setPolyline(
             polylineToCenter,
             listOf(
@@ -77,10 +76,18 @@ class OsmdroidFragment : MyMapFragment(), IMap {
     }
     
     private fun setupLastSessionState() {
-        osmdroidViewModel.getSessionState()
+        try {
+            osmdroidViewModel.getSessionState()
+        } catch (e: Exception) {
+            osmdroidViewModel.saveSessionState(
+                SessionState(currentMap = MapType.OSM.value, isGrid = false)
+            )
+            osmdroidViewModel.getSessionState()
+        }
+    
         osmdroidViewModel.sessionStateLiveData.observe(viewLifecycleOwner) { sessionState ->
-            changeGridState(sessionState.grid)
-            setMapType(sessionState.map)
+            changeGridState(sessionState.isGrid)
+            setMapType(sessionState.currentMap)
         }
     }
     
@@ -93,10 +100,18 @@ class OsmdroidFragment : MyMapFragment(), IMap {
                         binding.mapView
                     )
                 )
+                osmdroidViewModel.saveCurrentMapState(mapType)
             }
             MapType.YANDEX_MAP.value -> {
-                val action = OsmdroidFragmentDirections.actionOsmdroidFragmentToYandexMapFragment()
-                findNavController().navigate(action)
+                /*val action = OsmdroidFragmentDirections.actionOsmdroidFragmentToYandexMapFragment()
+                findNavController().navigate(action)*/
+                binding.mapView.setTileSource(
+                    MapTools.getYandexMapTile(
+                        requireContext(),
+                        binding.mapView
+                    )
+                )
+                osmdroidViewModel.saveCurrentMapState(mapType)
             }
             MapType.GOOGLE_HYB.value -> {
                 binding.mapView.setTileSource(
@@ -106,15 +121,17 @@ class OsmdroidFragment : MyMapFragment(), IMap {
                         Pair("Google hybrid", "y")
                     )
                 )
+                osmdroidViewModel.saveCurrentMapState(mapType)
             }
             MapType.GOOGLE_SAT.value -> {
                 binding.mapView.setTileSource(
                     MapTools.getGoogleMapTile(
                         requireContext(),
                         binding.mapView,
-                        Pair("Google maps", "m")
+                        Pair("Google sattelite", "s")
                     )
                 )
+                osmdroidViewModel.saveCurrentMapState(mapType)
             }
             MapType.OFFLINE.value -> {
             
@@ -177,46 +194,44 @@ class OsmdroidFragment : MyMapFragment(), IMap {
         osmdroidViewModel.technicListLiveData.observe(viewLifecycleOwner) {
             it?.let { list ->
                 list.forEach { technic ->
-
                     val mark = Marker(binding.mapView)
                     drawMarker(mark, technic)
-
+    
                     listOfTechnic.add(mark)
                     addClickListenerToMark(mark, technic.type)
                 }
             }
         }
     }
-
-    override fun spawnTechnic(type: TechnicTypes, coords: Coordinates?){
+    
+    override fun spawnTechnic(type: TechnicTypes, coords: Coordinates?) {
         if (coords != null)
             for (technic in listOfTechnic) {
                 technic as Marker
                 if (technic.position.latitude == coords.x &&
                     technic.position.longitude == coords.y
-                )
-                    return
+                ) return
             }
-    
+        
         val cameraPosition = binding.mapView.mapCenter
         osmdroidViewModel.getTechnics()
         var count = 0
-        osmdroidViewModel.technicListLiveData.observe(this, { technicList ->
+        osmdroidViewModel.technicListLiveData.observe(this) { technicList ->
             count = technicList.size + 1
             val mark: Marker = if (coords != null)
                 setMark(coords.x, coords.y, type)
             else
                 setMark(cameraPosition.latitude, cameraPosition.longitude, type)
-        
+            
             addClickListenerToMark(mark, type)
             osmdroidViewModel.saveTechnic(
                 Technic(
                     id = count,
                     type = type,
-                        Coordinates(x = mark.position.latitude, y = mark.position.longitude)
-                    )
+                    Coordinates(x = mark.position.latitude, y = mark.position.longitude)
                 )
-        })
+            )
+        }
     }
 
     private fun addClickListenerToMark(mark: Marker, type: TechnicTypes) {
@@ -306,12 +321,12 @@ class OsmdroidFragment : MyMapFragment(), IMap {
 
         if (entities[0].calc_target) {
             osmdroidViewModel.getTargetCoordinates(entities)
-            osmdroidViewModel.targetLiveData.observe(this, {
+            osmdroidViewModel.targetLiveData.observe(this) { findTarget ->
                 spawnTechnic(
                     TechnicTypes.ANOTHER,
-                    Coordinates(x = it.lat, y = it.lon)
+                    Coordinates(x = findTarget.lat, y = findTarget.lon)
                 )
-            })
+            }
         }
     }
 
@@ -355,11 +370,14 @@ class OsmdroidFragment : MyMapFragment(), IMap {
        offlineMode(binding, requireContext())
     }
     
-    override fun changeGridState(isShow: Boolean) {
-        if (isShow)
+    override fun changeGridState(isGrid: Boolean) {
+        if (isGrid) {
             binding.mapView.overlays.add(overlayGrid)
-        else
+            osmdroidViewModel.saveGridState(isGrid)
+        } else {
             binding.mapView.overlays.remove(overlayGrid)
+            osmdroidViewModel.saveGridState(isGrid)
+        }
         binding.mapView.invalidate()
     }
     

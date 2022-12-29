@@ -73,4 +73,27 @@ object MapTools {
             }
         }
     }
+    
+    fun getYandexMapTile(context: Context?, mapView: MapView): OnlineTileSourceBase {
+        mapView.setUseDataConnection(true)
+        mapView.tileProvider = MapTileProviderBasic(context)
+        val str =
+            "https://core-renderer-tiles.maps.yandex.net/tiles?l=map&v=2.28.0&x={x}&y={y}&z={z}&lang=ru-RU"
+        return object : OnlineTileSourceBase(
+            "Yandex Map",
+            1,
+            19,
+            256,
+            ".png",
+            arrayOf("https://core-renderer-tiles.maps.yandex.net/tiles?l=map&v=2.28.0&x={x}&y={y}&z={z}&lang=ru-RU"),
+            "© Yandex"
+        ) {
+            override fun getTileURLString(pMapTileIndex: Long): String {
+                val x = MapTileIndex.getX(pMapTileIndex)
+                val y = MapTileIndex.getY(pMapTileIndex)
+                return str.replace("{z}", MapTileIndex.getZoom(pMapTileIndex).toString())
+                    .replace("{x}", x.toString()).replace("{y}", y.toString())
+            }
+        }
+    }
 }

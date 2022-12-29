@@ -7,6 +7,6 @@ import androidx.room.PrimaryKey
 data class SessionStateEntity(
     @PrimaryKey
     val id: Int,
-    val map: Int,
-    val grid: Boolean,
+    val currentMap: Int,
+    val isGrid: Boolean,
 )

@@ -29,6 +29,6 @@ class LocalDataSource(
         sessionStateDao.saveSessionState(sessionStateEntity)
     }
     
-    suspend fun getSessionState(): SessionStateEntity = sessionStateDao.getSessionState()
+    suspend fun getSessionState(): SessionStateEntity? = sessionStateDao.getSessionState()
     
 }

@@ -11,6 +11,7 @@ import com.example.dronevision.presentation.model.SessionState
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.bluetooth.Entity
 import com.example.dronevision.utils.FindTarget
+import com.example.dronevision.utils.MapType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -71,13 +72,36 @@ class OsmdroidViewModel(
     
     fun getSessionState() = viewModelScope.launch(Dispatchers.IO) {
         val sessionStateDto = getSessionStateUseCase.execute()
-        val sessionState = SessionStateMapperUi.mapSessionStateDtoToUi(sessionStateDto)
-        _sessionStateLiveData.postValue(sessionState)
+        if (sessionStateDto != null) {
+            val sessionState = SessionStateMapperUi.mapSessionStateDtoToUi(sessionStateDto)
+            _sessionStateLiveData.postValue(sessionState)
+        } else {
+            val sessionState =
+                SessionStateMapperUi.mapSessionState(currentMap = MapType.OSM.value, isGrid = false)
+            saveSessionState(sessionState)
+            _sessionStateLiveData.postValue(sessionState)
+        }
     }
     
     fun saveSessionState(sessionState: SessionState) = viewModelScope.launch(Dispatchers.IO) {
         val sessionStateDto = SessionStateMapperUi.mapSessionStateUiToDto(sessionState)
         saveSessionStateUseCase.execute(sessionStateDto)
+    }
+    
+    fun saveGridState(isGrid: Boolean) = viewModelScope.launch(Dispatchers.IO) {
+        _sessionStateLiveData.value?.let { sessionState ->
+            val sessionStateUpdated = SessionStateMapperUi.mapIsGridState(sessionState, isGrid)
+            val sessionStateDto = SessionStateMapperUi.mapSessionStateUiToDto(sessionStateUpdated)
+            saveSessionStateUseCase.execute(sessionStateDto)
+        }
+    }
+    
+    fun saveCurrentMapState(currentMap: Int) = viewModelScope.launch(Dispatchers.IO) {
+        _sessionStateLiveData.value?.let { sessionState ->
+            val sessionStateUpdated = SessionStateMapperUi.mapCurrentMapState(sessionState, currentMap)
+            val sessionStateDto = SessionStateMapperUi.mapSessionStateUiToDto(sessionStateUpdated)
+            saveSessionStateUseCase.execute(sessionStateDto)
+        }
     }
 }
 

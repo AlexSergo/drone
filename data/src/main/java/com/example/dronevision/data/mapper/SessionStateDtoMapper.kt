@@ -7,13 +7,13 @@ object SessionStateDtoMapper {
     fun mapSessionStateDtoToEntity(sessionStateDto: SessionStateDto): SessionStateEntity =
         SessionStateEntity(
             id = 1,
-            map = sessionStateDto.map,
-            grid = sessionStateDto.grid
+            currentMap = sessionStateDto.currentMap,
+            isGrid = sessionStateDto.isGrid
         )
     
     fun mapSessionStateEntityToDto(sessionStateEntity: SessionStateEntity): SessionStateDto =
         SessionStateDto(
-            map = sessionStateEntity.map,
-            grid = sessionStateEntity.grid
+            currentMap = sessionStateEntity.currentMap,
+            isGrid = sessionStateEntity.isGrid
         )
 }

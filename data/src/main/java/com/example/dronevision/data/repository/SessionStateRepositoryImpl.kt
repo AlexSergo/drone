@@ -8,12 +8,14 @@ import com.example.dronevision.domain.repository.SessionStateRepository
 class SessionStateRepositoryImpl(private val localDataSource: LocalDataSource) : SessionStateRepository {
     
     override suspend fun saveSessionState(sessionStateDto: SessionStateDto) {
-        val sessionStateDto = SessionStateDtoMapper.mapSessionStateDtoToEntity(sessionStateDto)
-        localDataSource.saveSessionState(sessionStateDto)
+        val sessionStateEntity = SessionStateDtoMapper.mapSessionStateDtoToEntity(sessionStateDto)
+        localDataSource.saveSessionState(sessionStateEntity)
     }
     
-    override suspend fun getSessionState(): SessionStateDto {
-        val sessionStateEntity = localDataSource.getSessionState()
-        return SessionStateDtoMapper.mapSessionStateEntityToDto(sessionStateEntity)
+    override suspend fun getSessionState(): SessionStateDto? {
+        localDataSource.getSessionState()?.let { sessionStateEntity ->
+            return SessionStateDtoMapper.mapSessionStateEntityToDto(sessionStateEntity)
+        }
+        return null
     }
 }

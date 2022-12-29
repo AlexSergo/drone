@@ -233,15 +233,17 @@ class MainActivity : AppCompatActivity(),
                         true
                     }
                     R.id.mapOsmItem -> {
-                        if (map is YandexMapFragment)
-                            navigateToOsmdroidFragment()
+                        /*if (map is YandexMapFragment)
+                            navigateToOsmdroidFragment()*/
+                        map.setMapType(MapType.OSM.value)
                         true
                     }
                     R.id.mapYandexItem -> {
-                        if (map is OsmdroidFragment) {
+                        /*if (map is OsmdroidFragment) {
                             navigateToYandexFragment()
                             checkBox?.isChecked = false
-                        }
+                        }*/
+                        map.setMapType(MapType.YANDEX_MAP.value)
                         true
                     }
                     R.id.mapHybridItem -> {

@@ -9,5 +9,5 @@ interface SessionStateDao {
     suspend fun saveSessionState(sessionStateEntity: SessionStateEntity)
     
     @Query("SELECT * FROM state_session LIMIT 1")
-    suspend fun getSessionState(): SessionStateEntity
+    suspend fun getSessionState(): SessionStateEntity?
 }

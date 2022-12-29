@@ -5,14 +5,17 @@ import com.example.dronevision.presentation.model.SessionState
 
 object SessionStateMapperUi {
     fun mapSessionStateUiToDto(sessionState: SessionState): SessionStateDto =
-        SessionStateDto(
-            map = sessionState.map,
-            grid = sessionState.grid
-        )
+        SessionStateDto(currentMap = sessionState.currentMap, isGrid = sessionState.isGrid)
     
     fun mapSessionStateDtoToUi(sessionStateDto: SessionStateDto): SessionState =
-        SessionState(
-            map = sessionStateDto.map,
-            grid = sessionStateDto.grid
-        )
+        SessionState(currentMap = sessionStateDto.currentMap, isGrid = sessionStateDto.isGrid)
+    
+    fun mapSessionState(currentMap: Int, isGrid: Boolean): SessionState =
+        SessionState(currentMap = currentMap, isGrid = isGrid)
+    
+    fun mapIsGridState(sessionState: SessionState, isGrid: Boolean): SessionState =
+        sessionState.copy(isGrid = isGrid)
+    
+    fun mapCurrentMapState(sessionState: SessionState, currentMap: Int): SessionState =
+        sessionState.copy(currentMap = currentMap)
 }

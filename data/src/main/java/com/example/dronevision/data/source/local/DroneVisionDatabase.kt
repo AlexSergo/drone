@@ -8,7 +8,7 @@ import com.example.dronevision.data.source.local.dao.TechnicDao
 import com.example.dronevision.data.source.local.model.SessionStateEntity
 import com.example.dronevision.data.source.local.model.TechnicEntity
 
-@androidx.room.Database(entities = [TechnicEntity::class, SessionStateEntity::class], version = 2, exportSchema = false)
+@androidx.room.Database(entities = [TechnicEntity::class, SessionStateEntity::class], version = 3, exportSchema = false)
 abstract class DroneVisionDatabase : RoomDatabase() {
     
     abstract fun technicsDao(): TechnicDao

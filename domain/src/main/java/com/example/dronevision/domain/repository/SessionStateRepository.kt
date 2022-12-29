@@ -4,5 +4,5 @@ import com.example.dronevision.domain.model.SessionStateDto
 
 interface SessionStateRepository {
     suspend fun saveSessionState(sessionStateDto: SessionStateDto)
-    suspend fun getSessionState(): SessionStateDto
+    suspend fun getSessionState(): SessionStateDto?
 }

@@ -213,7 +213,7 @@ class YandexMapFragment : MyMapFragment(), CameraListener, IMap {
         val cameraPositionTarget = binding.mapView.map.cameraPosition.target
         polylineONMap.geometry = Polyline(listOf(droneMarker.geometry, cameraPositionTarget))
     }
-
+    
     override fun showDataFromDrone(entities: List<Entity>) {
         val drone = entities[0]
         editDroneMarkerPosition(drone.lat, drone.lon, drone.asim.toFloat())
