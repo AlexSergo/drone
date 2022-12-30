@@ -5,7 +5,7 @@ import com.example.dronevision.databinding.FragmentYandexMapBinding
 import com.yandex.mapkit.geometry.Point
 import org.osmdroid.util.GeoPoint
 
-interface GeoInformation {
+interface GeoInformationHandler {
     fun showGeoInformation(
         binding: FragmentYandexMapBinding,
         cameraTarget: Point,

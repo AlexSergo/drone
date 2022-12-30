@@ -14,17 +14,13 @@ import com.example.dronevision.presentation.ui.yandex_map.YandexMapViewModelFact
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import com.yandex.mapkit.geometry.Geo
-import com.yandex.mapkit.geometry.Point
-import org.osmdroid.util.GeoPoint
 import javax.inject.Inject
-import kotlin.math.roundToInt
 
 open class MyMapFragment: Fragment(),
     RemoteDatabaseHandler by RemoteDatabaseHandlerImpl(),
     OfflineMapHandler by OfflineMapHandlerImpl(),
     StoragePermissionHandler by StoragePermissionHandlerImpl(),
-    GeoInformation by GeoInformationImpl(),
+    GeoInformationHandler by GeoInformationHandlerImpl(),
     LocationDialogHandler by LocationDialogHandlerImpl(),
     ManipulatorSetuper by ManipulatorSetuperImpl() {
     

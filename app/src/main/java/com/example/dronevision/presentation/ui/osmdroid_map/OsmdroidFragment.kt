@@ -42,8 +42,8 @@ class OsmdroidFragment : MyMapFragment(), IMap {
 
     private val overlayGrid = LatLonGridlineOverlay2()
     private lateinit var droneMarker: Marker
-    private lateinit var polylineToCenter: Polyline
     private var aimMarker: Marker? = null
+    private lateinit var polylineToCenter: Polyline
     private var polylineToAim: Polyline = Polyline()
     private val listOfTechnic = mutableListOf<Overlay>()
 
@@ -59,6 +59,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
     ): View {
         binding = FragmentOsmdroidBinding.inflate(inflater, container, false)
         checkStoragePermissions(requireActivity())
+
         setupOsmdroidMap()
         initDroneMarker()
         initTechnic()

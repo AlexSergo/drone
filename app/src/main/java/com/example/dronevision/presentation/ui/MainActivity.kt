@@ -1,18 +1,14 @@
 package com.example.dronevision.presentation.ui
 
-import android.bluetooth.BluetoothManager
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.view.View
-import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.getSystemService
 import androidx.core.view.GravityCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -32,7 +28,6 @@ import com.example.dronevision.presentation.model.BluetoothListItem
 import com.example.dronevision.presentation.model.Message
 import com.example.dronevision.presentation.ui.bluetooth.*
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment
-import com.example.dronevision.presentation.ui.yandex_map.YandexMapFragment
 
 import com.example.dronevision.utils.HgtLoader
 import com.example.dronevision.utils.MapType
@@ -41,7 +36,7 @@ import com.google.firebase.components.BuildConfig
 import org.osmdroid.config.Configuration
 
 class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerImpl(),
-    NavigationView.OnNavigationItemSelectedListener, BluetoothReceiver.MessageListener {
+    NavigationView.OnNavigationItemSelectedListener{
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
@@ -56,17 +51,35 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         setContentView(binding.root)
 
         setupOptionsMenu()
+        setupDrawer()
         setupNavController()
-
-        val connection = setupBluetooth(context = this,
-            systemService = getSystemService(BLUETOOTH_SERVICE),
-            messageListener = this)
-        setupBluetoothDialog(connection)
+        setupBluetoothDialog()
 
         setupOsmdroidConfiguration()
     }
 
-    private fun setupBluetoothDialog(connection: BluetoothConnection) {
+    private fun setupBluetoothDialog() {
+        val connection = setupBluetooth(context = this,
+            systemService = getSystemService(BLUETOOTH_SERVICE),
+            messageListener = object : BluetoothReceiver.MessageListener{
+
+                override fun onReceive(message: Message, entities: MutableList<Entity>?) {
+                    entities?.let {
+                        if (it[0].lat.isNaN() || it[0].lon.isNaN()) {
+                            it[0] = Entity(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false)
+                            it[1] = Entity(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false)
+                        }
+                    }
+                    map = getCurrentMap()
+                    runOnUiThread {
+                        if (message.isSystem)
+                            Toast.makeText(applicationContext, message.message, Toast.LENGTH_LONG).show()
+                        if (entities != null)
+                            map.showDataFromDrone(entities)
+                    }
+                }
+            })
+
         dialog = SelectBluetoothFragment(connection.getAdapter(), object : BluetoothCallback {
             override fun onClick(item: BluetoothListItem) {
                 item.let {
@@ -83,42 +96,28 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         provider.osmdroidTileCache = externalCacheDir
         provider.load(this, PreferenceManager.getDefaultSharedPreferences(this))
     }
-    
-    private fun setupNavController() {
+
+    private fun setupDrawer(){
         setSupportActionBar(binding.appBarMain.toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false);
 
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
-    
+
         val toggle = ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close)
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
-    
+
         val button = findViewById<ImageButton>(R.id.drawerButton)
         button.setOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
-    
-        navView.setNavigationItemSelectedListener(this)
-    
-        navController = findNavController(R.id.nav_host_fragment_content_main)
-    }
 
-    override fun onReceive(message: Message, entities: MutableList<Entity>?) {
-        entities?.let {
-            if (it[0].lat.isNaN() || it[0].lon.isNaN()) {
-                it[0] = Entity(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false)
-                it[1] = Entity(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false)
-            }
-        }
-        map = getCurrentMap()
-        runOnUiThread {
-            if (message.isSystem)
-                Toast.makeText(this, message.message, Toast.LENGTH_LONG).show()
-            if (entities != null)
-                map.showDataFromDrone(entities)
-        }
+        navView.setNavigationItemSelectedListener(this)
+    }
+    
+    private fun setupNavController() {
+        navController = findNavController(R.id.nav_host_fragment_content_main)
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {

@@ -9,7 +9,7 @@ import com.yandex.mapkit.geometry.Point
 import org.osmdroid.util.GeoPoint
 import kotlin.math.roundToInt
 
-class GeoInformationImpl: GeoInformation {
+class GeoInformationHandlerImpl: GeoInformationHandler {
     private var cameraLat: Double = 0.0
     private var cameraLon: Double = 0.0
 
