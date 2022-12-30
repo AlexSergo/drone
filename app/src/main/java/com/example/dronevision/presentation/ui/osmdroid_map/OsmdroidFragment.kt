@@ -11,7 +11,6 @@ import com.example.dronevision.databinding.FragmentOsmdroidBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.delegates.LocationDialogCallback
-import com.example.dronevision.presentation.model.SessionState
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.IMap
 import com.example.dronevision.presentation.ui.MyMapFragment
@@ -77,14 +76,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
     }
     
     private fun setupLastSessionState() {
-        try {
-            osmdroidViewModel.getSessionState()
-        } catch (e: Exception) {
-            osmdroidViewModel.saveSessionState(
-                SessionState(currentMap = MapType.OSM.value, isGrid = false)
-            )
-            osmdroidViewModel.getSessionState()
-        }
+        osmdroidViewModel.getSessionState()
     
         osmdroidViewModel.sessionStateLiveData.observe(viewLifecycleOwner) { sessionState ->
             changeGridState(sessionState.isGrid)

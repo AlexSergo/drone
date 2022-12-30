@@ -9,7 +9,7 @@ interface IMap {
     fun showLocationDialog()
     fun deleteAll()
     fun offlineMode()
-    fun changeGridState(isShow: Boolean)
+    fun changeGridState(isGrid: Boolean)
     fun initTechnic()
     fun spawnTechnic(type: TechnicTypes, coords: Coordinates? = null)
     fun removeAim()
