@@ -12,6 +12,7 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.getSystemService
 import androidx.core.view.GravityCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -25,6 +26,8 @@ import com.example.dronevision.AbonentDialogFragment
 import com.example.dronevision.R
 import com.example.dronevision.databinding.ActivityMainBinding
 import com.example.dronevision.domain.model.TechnicTypes
+import com.example.dronevision.presentation.delegates.BluetoothHandler
+import com.example.dronevision.presentation.delegates.BluetoothHandlerImpl
 import com.example.dronevision.presentation.model.BluetoothListItem
 import com.example.dronevision.presentation.model.Message
 import com.example.dronevision.presentation.ui.bluetooth.*
@@ -37,7 +40,7 @@ import com.google.android.material.navigation.NavigationView
 import com.google.firebase.components.BuildConfig
 import org.osmdroid.config.Configuration
 
-class MainActivity : AppCompatActivity(),
+class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerImpl(),
     NavigationView.OnNavigationItemSelectedListener, BluetoothReceiver.MessageListener {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -53,12 +56,27 @@ class MainActivity : AppCompatActivity(),
         setContentView(binding.root)
 
         setupOptionsMenu()
-        setupBluetooth()
         setupNavController()
-        
+
+        val connection = setupBluetooth(context = this,
+            systemService = getSystemService(BLUETOOTH_SERVICE),
+            messageListener = this)
+        setupBluetoothDialog(connection)
+
         setupOsmdroidConfiguration()
     }
-    
+
+    private fun setupBluetoothDialog(connection: BluetoothConnection) {
+        dialog = SelectBluetoothFragment(connection.getAdapter(), object : BluetoothCallback {
+            override fun onClick(item: BluetoothListItem) {
+                item.let {
+                    connection.connect(it.mac)
+                }
+                dialog?.dismiss()
+            }
+        })
+    }
+
     private fun setupOsmdroidConfiguration() {
         val provider = Configuration.getInstance()
         provider.userAgentValue = BuildConfig.APPLICATION_ID
@@ -85,24 +103,6 @@ class MainActivity : AppCompatActivity(),
         navView.setNavigationItemSelectedListener(this)
     
         navController = findNavController(R.id.nav_host_fragment_content_main)
-    }
-
-    private fun setupBluetooth() {
-        val bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
-        val bluetoothAdapter = bluetoothManager.adapter
-        val bluetoothConnection = BluetoothConnection(
-            bluetoothAdapter,
-            context = this, listener = this
-        )
-
-        dialog = SelectBluetoothFragment(bluetoothAdapter, object : BluetoothCallback {
-            override fun onClick(item: BluetoothListItem) {
-                item.let {
-                    bluetoothConnection.connect(it.mac)
-                }
-                dialog?.dismiss()
-            }
-        })
     }
 
     override fun onReceive(message: Message, entities: MutableList<Entity>?) {
@@ -191,11 +191,10 @@ class MainActivity : AppCompatActivity(),
 
     private fun setupOptionsMenu() {
         val menuHost: MenuHost = this
-        var checkBox: MenuItem? = null
+
         menuHost.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.main, menu)
-                checkBox = menu.findItem(R.id.mapGridItem)
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {

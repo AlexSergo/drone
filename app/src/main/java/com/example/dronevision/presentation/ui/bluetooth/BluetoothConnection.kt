@@ -11,6 +11,10 @@ class BluetoothConnection(
 
     lateinit var connectionThread: ConnectThread
 
+    fun getAdapter(): BluetoothAdapter {
+        return adapter
+    }
+
     fun connect(mac: String){
         if (!adapter.isEnabled || mac.isEmpty())
             return
