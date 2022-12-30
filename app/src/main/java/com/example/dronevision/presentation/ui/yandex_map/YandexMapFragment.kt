@@ -37,7 +37,7 @@ class YandexMapFragment : MyMapFragment(), CameraListener, IMap {
     private var aimMarker: PlacemarkMapObject? = null
     private val listOfTechnic = mutableListOf<PlacemarkMapObject>()
     
-    private lateinit var polylineONMap: PolylineMapObject
+    private lateinit var polylineToCenter: PolylineMapObject
     private var polylineToAim: PolylineMapObject? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -211,7 +211,7 @@ class YandexMapFragment : MyMapFragment(), CameraListener, IMap {
 
     private fun editPolylineOnMapGeometry() {
         val cameraPositionTarget = binding.mapView.map.cameraPosition.target
-        polylineONMap.geometry = Polyline(listOf(droneMarker.geometry, cameraPositionTarget))
+        polylineToCenter.geometry = Polyline(listOf(droneMarker.geometry, cameraPositionTarget))
     }
     
     override fun showDataFromDrone(entities: List<Entity>) {
@@ -263,8 +263,8 @@ class YandexMapFragment : MyMapFragment(), CameraListener, IMap {
     private fun drawPolylineToAim(from: Point, to: Point) {
         val polyline = Polyline(listOf(from, to))
         polylineToAim = binding.mapView.map.mapObjects.addPolyline(polyline)
-        polylineONMap.strokeWidth = 0.2f
-        polylineONMap.setStrokeColor(R.color.green)
+        polylineToCenter.strokeWidth = 0.2f
+        polylineToCenter.setStrokeColor(R.color.green)
         polylineToAim?.outlineColor = Color.GREEN
     }
 
@@ -292,8 +292,8 @@ class YandexMapFragment : MyMapFragment(), CameraListener, IMap {
         val longitude = cameraPositionTarget.longitude
     
         val polyline = Polyline(listOf(Point(latitude, longitude), Point(0.0, 0.0)))
-        polylineONMap = binding.mapView.map.mapObjects.addPolyline(polyline)
-        polylineONMap.strokeWidth = 0.2f
+        polylineToCenter = binding.mapView.map.mapObjects.addPolyline(polyline)
+        polylineToCenter.strokeWidth = 0.2f
     }
     
     override fun setMapType(mapType: Int) {
@@ -320,7 +320,7 @@ class YandexMapFragment : MyMapFragment(), CameraListener, IMap {
     ) {
         showGeoInformation(binding, cameraPosition.target, droneMarker.geometry)
         binding.compassButton.rotation = cameraPosition.azimuth * -1
-        polylineONMap.geometry = Polyline(listOf(droneMarker.geometry, cameraPosition.target))
+        polylineToCenter.geometry = Polyline(listOf(droneMarker.geometry, cameraPosition.target))
         binding.distance.text = "${getDistance(droneMarker.geometry, cameraPosition.target)} km"
     }
 
