@@ -132,6 +132,8 @@ class OsmdroidFragment : MyMapFragment(), IMap {
     private fun setupOsmdroidMap() = binding.run {
         mapView.setTileSource(TileSourceFactory.MAPNIK)
         mapView.controller.setZoom(2.0)
+        binding.mapView.minZoomLevel = 3.0
+        
         val compassOverlay = CompassOverlay(requireContext().applicationContext, mapView)
         compassOverlay.enableCompass()
         mapView.overlays.add(compassOverlay)
@@ -157,7 +159,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
                 return true
             }
         })
-
+        
         setupManipulators(binding, rotationGestureOverlay)
     }
 

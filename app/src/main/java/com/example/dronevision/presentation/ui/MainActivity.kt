@@ -110,9 +110,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
 
         dialog = SelectBluetoothFragment(connection.getAdapter(), object : BluetoothCallback {
             override fun onClick(item: BluetoothListItem) {
-                item.let {
-                    connection.connect(it.mac)
-                }
+                item.let { connection.connect(it.mac) }
                 dialog?.dismiss()
             }
         })
