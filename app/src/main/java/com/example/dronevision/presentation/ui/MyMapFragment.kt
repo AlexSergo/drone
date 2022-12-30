@@ -26,20 +26,12 @@ open class MyMapFragment: Fragment(),
     
     protected lateinit var yandexMapViewModel: YandexMapViewModel
     protected lateinit var osmdroidViewModel: OsmdroidViewModel
-    protected lateinit var databaseRef: DatabaseReference
     
     @Inject
     lateinit var yandexMapViewModelFactory: YandexMapViewModelFactory
     
     @Inject
     lateinit var osmdroidViewModelFactory: OsmdroidViewModelFactory
-    
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val database =
-            Firebase.database("https://drone-6c66c-default-rtdb.asia-southeast1.firebasedatabase.app")
-        databaseRef = database.getReference("message")
-    }
     
     protected fun inject(fragment: YandexMapFragment) {
         (requireContext().applicationContext as App).appComponent.inject(fragment)

@@ -58,7 +58,7 @@ class YandexMapFragment : MyMapFragment(), CameraListener, IMap {
         setupManipulators(binding)
         setCardViewExpand()
 
-        onDatabaseChangeListener(databaseRef, this)
+        onDatabaseChangeListener(this)
         return binding.root
     }
     
@@ -167,13 +167,7 @@ class YandexMapFragment : MyMapFragment(), CameraListener, IMap {
                 ),
                 object: TargetFragment.TargetFragmentCallback{
                     override fun onBroadcastButtonClick(technic: Technic) {
-                        val sb = StringBuilder()
-                        sb.append(technic.type.name)
-                        sb.append(" ")
-                        sb.append(technic.coords.x)
-                        sb.append(" ")
-                        sb.append(technic.coords.y)
-                        databaseRef.setValue(sb.toString())
+                        sendMessage(technic)
                     }
 
                     override fun deleteTarget() {

@@ -72,7 +72,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
             )
         )
     
-        onDatabaseChangeListener(databaseRef, this)
+        onDatabaseChangeListener(this)
         return binding.root
     }
     
@@ -245,13 +245,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
             val targetFragment = TargetFragment( technic = technic,
                 object : TargetFragment.TargetFragmentCallback{
                     override fun onBroadcastButtonClick(technic: Technic) {
-                        val sb = StringBuilder()
-                        sb.append(technic.type.name)
-                        sb.append(" ")
-                        sb.append(technic.coords.x)
-                        sb.append(" ")
-                        sb.append(technic.coords.y)
-                        databaseRef.setValue(sb.toString())
+                       sendMessage(technic)
                     }
 
                     override fun deleteTarget() {
