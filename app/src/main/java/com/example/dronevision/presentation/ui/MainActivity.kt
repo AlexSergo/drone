@@ -1,6 +1,7 @@
 package com.example.dronevision.presentation.ui
 
 import android.os.Bundle
+import android.os.Environment
 import androidx.preference.PreferenceManager
 import android.view.Menu
 import android.view.MenuInflater
@@ -39,6 +40,7 @@ import com.example.dronevision.utils.MapType
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.components.BuildConfig
 import org.osmdroid.config.Configuration
+import java.io.File
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerImpl(),
@@ -59,11 +61,23 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
+        createAppFolder()
         initViewModel()
         setupOptionsMenu()
         setupDrawer()
         setupBluetoothDialog()
         setupOsmdroidConfiguration()
+    }
+    
+    private fun createAppFolder() { // TODO: Перенести куда нибудь функцию
+        val rootDirName = Environment.getExternalStorageDirectory().path
+        val dirName = "$rootDirName/Drone Vision/"
+        val folder = File(dirName)
+    
+        if (!folder.exists()) {
+            val newFile = File(rootDirName, "Drone Vision")
+            newFile.mkdir()
+        }
     }
     
     private fun initViewModel() {
@@ -240,7 +254,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         true
                     }
                     R.id.mapOfflineItem -> {
-                        map.offlineMode()
+                        map.setMapType(MapType.OFFLINE.value)
                         true
                     }
                     R.id.mapGridItem -> {

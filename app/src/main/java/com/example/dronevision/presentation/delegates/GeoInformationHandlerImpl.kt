@@ -1,11 +1,8 @@
 package com.example.dronevision.presentation.delegates
 
 import com.example.dronevision.databinding.FragmentOsmdroidBinding
-import com.example.dronevision.databinding.FragmentYandexMapBinding
 import com.example.dronevision.utils.MapTools
 import com.example.dronevision.utils.NGeoCalc
-import com.yandex.mapkit.geometry.Geo
-import com.yandex.mapkit.geometry.Point
 import org.osmdroid.util.GeoPoint
 import kotlin.math.roundToInt
 
@@ -13,29 +10,8 @@ class GeoInformationHandlerImpl: GeoInformationHandler {
     private var cameraLat: Double = 0.0
     private var cameraLon: Double = 0.0
 
-    override fun getDistance(from: Point, to: Point): Double{
-        return (Geo.distance(from, to) / 100).roundToInt() / 10.0
-    }
-
     override fun getDistance(from: GeoPoint, to: GeoPoint): Double{
-        return (Geo.distance(
-            Point(from.latitude, from.longitude),
-            Point(to.latitude, to.longitude)) / 100).roundToInt() / 10.0
-    }
-
-    override fun showGeoInformation(binding: FragmentYandexMapBinding,
-                                    cameraTarget: Point,
-                                    azimuthPoint: Point) {
-        this.cameraLat = cameraTarget.latitude
-        this.cameraLon = cameraTarget.longitude
-        val lat_lon = showWgs82OnCard().split(" ")
-        val azimuth = calculateAzimuth(azimuthPoint.latitude, azimuthPoint.longitude)
-        val plane = showSk42OnCard()
-
-        binding.latitude.text = "Широта = " + lat_lon[0]
-        binding.longitude.text = "Долгота = " + lat_lon[1]
-        binding.plane.text = plane
-        binding.azimuth.text = "Азимут = $azimuth"
+        return (MapTools.distanceBetween(from, to) / 100).roundToInt() / 10.0
     }
 
     override fun showGeoInformation(binding: FragmentOsmdroidBinding,
@@ -78,7 +54,7 @@ class GeoInformationHandlerImpl: GeoInformationHandler {
     }
 
     private fun calculateAzimuth(pointLat: Double, pointLon: Double): String {
-        val azimuth = MapTools.angleBetween(Point(pointLat, pointLon), Point(cameraLat, cameraLon))
+        val azimuth = MapTools.angleBetween(GeoPoint(pointLat, pointLon), GeoPoint(cameraLat, cameraLon))
         val azimuthText = String.format("%.6f", azimuth)
         return azimuthText
     }

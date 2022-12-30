@@ -12,8 +12,8 @@ import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.delegates.LocationDialogCallback
 import com.example.dronevision.presentation.model.Technic
-import com.example.dronevision.presentation.ui.MyMapFragment
 import com.example.dronevision.presentation.model.bluetooth.Entity
+import com.example.dronevision.presentation.ui.MyMapFragment
 import com.example.dronevision.presentation.ui.targ.TargetFragment
 import com.example.dronevision.utils.ImageTypes
 import com.example.dronevision.utils.MapTools
@@ -124,7 +124,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
                 osmdroidViewModel.saveCurrentMapState(mapType)
             }
             MapType.OFFLINE.value -> {
-            
+                offlineMode(binding, requireContext())
             }
         }
     }

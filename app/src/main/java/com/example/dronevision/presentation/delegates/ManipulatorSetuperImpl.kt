@@ -1,29 +1,10 @@
 package com.example.dronevision.presentation.delegates
 
-import android.content.Context
 import android.view.View
 import com.example.dronevision.databinding.FragmentOsmdroidBinding
-import com.example.dronevision.databinding.FragmentYandexMapBinding
-import com.yandex.mapkit.Animation
-import com.yandex.mapkit.map.CameraPosition
-import org.osmdroid.views.overlay.ScaleBarOverlay
-import org.osmdroid.views.overlay.compass.CompassOverlay
-import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 
 class ManipulatorSetuperImpl: ManipulatorSetuper {
-    private fun setupCompass(binding: FragmentYandexMapBinding) {
-        binding.compassButton.setOnClickListener {
-            val cameraPosition = binding.mapView.map.cameraPosition
-            binding.mapView.map.move(
-                CameraPosition(
-                    cameraPosition.target,
-                    cameraPosition.zoom, 0.0f, cameraPosition.tilt
-                ), Animation(Animation.Type.SMOOTH, 1.0f), null
-            )
-        }
-    }
-
     private fun setupCompass(binding: FragmentOsmdroidBinding, rotationGestureOverlay: RotationGestureOverlay) {
         binding.compassButton.setOnClickListener {
             if (!rotationGestureOverlay.isEnabled) {
@@ -39,28 +20,6 @@ class ManipulatorSetuperImpl: ManipulatorSetuper {
             rotationGestureOverlay.setEnabled(false)
             binding.lockerView.visibility = View.VISIBLE
             true
-        }
-    }
-
-    private fun setupZoomButtons(binding: FragmentYandexMapBinding) {
-        binding.zoomInButton.setOnClickListener {
-            val cameraPosition = binding.mapView.map.cameraPosition
-            binding.mapView.map.move(
-                CameraPosition(
-                    cameraPosition.target,
-                    cameraPosition.zoom + 1.5f, cameraPosition.azimuth, cameraPosition.tilt
-                ), Animation(Animation.Type.SMOOTH, 0.2f), null
-            )
-        }
-
-        binding.zoomOutButton.setOnClickListener {
-            val cameraPosition = binding.mapView.map.cameraPosition
-            binding.mapView.map.move(
-                CameraPosition(
-                    cameraPosition.target,
-                    cameraPosition.zoom - 1.5f, cameraPosition.azimuth, cameraPosition.tilt
-                ), Animation(Animation.Type.SMOOTH, 0.2f), null
-            )
         }
     }
 
@@ -81,11 +40,6 @@ class ManipulatorSetuperImpl: ManipulatorSetuper {
         )
         mapView.overlayManager.add(scaleBarOverlay)
     }*/
-
-    override fun setupManipulators(binding: FragmentYandexMapBinding) {
-        setupCompass(binding)
-        setupZoomButtons(binding)
-    }
 
     override fun setupManipulators(binding: FragmentOsmdroidBinding, rotationGestureOverlay: RotationGestureOverlay) {
         setupCompass(binding, rotationGestureOverlay)

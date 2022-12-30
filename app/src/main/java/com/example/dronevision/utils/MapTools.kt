@@ -2,9 +2,9 @@ package com.example.dronevision.utils
 
 import android.content.Context
 import androidx.core.util.Pair
-import com.yandex.mapkit.geometry.Point
 import org.osmdroid.tileprovider.MapTileProviderBasic
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
+import org.osmdroid.util.GeoPoint
 import org.osmdroid.util.MapTileIndex
 import org.osmdroid.views.MapView
 import java.util.*
@@ -13,8 +13,9 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 object MapTools {
+    private const val EARTH_RADIUS = 6378140.0
     
-    fun angleBetween(a: Point, b: Point): Double {
+    fun angleBetween(a: GeoPoint, b: GeoPoint): Double {
         val lat1 = Math.toRadians(a.latitude)
         val lng1 = Math.toRadians(a.longitude)
         val lat2 = Math.toRadians(b.latitude)
@@ -95,5 +96,23 @@ object MapTools {
                     .replace("{x}", x.toString()).replace("{y}", y.toString())
             }
         }
+    }
+    
+    fun distanceBetween(a: GeoPoint, b: GeoPoint): Double {
+        val lat1 = Math.toRadians(a.latitude)
+        val lng1 = Math.toRadians(a.longitude)
+        val lat2 = Math.toRadians(b.latitude)
+        val d = lat1
+        val cordlen = Math.pow(
+            Math.sin((lat2 - lat1) / 2.0),
+            2.0
+        ) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(
+            Math.sin((Math.toRadians(b.longitude) - lng1) / 2.0), 2.0
+        )
+        val d2 = lng1
+        return EARTH_RADIUS * Math.atan2(
+            Math.sqrt(cordlen),
+            Math.sqrt(1.0 - cordlen)
+        ) * 2.0
     }
 }
