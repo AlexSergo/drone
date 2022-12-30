@@ -49,8 +49,4 @@ class SelectBluetoothFragment(
         }
         recyclerViewAdapter.setData(tempList)
     }
-
-    companion object{
-        const val DEVICE_KEY = "device_key"
-    }
 }
