@@ -1,8 +1,9 @@
 package com.example.dronevision.presentation.ui.bluetooth
 
 import android.bluetooth.BluetoothSocket
-import com.example.dronevision.presentation.model.Message
-import com.google.gson.Gson
+import com.example.dronevision.presentation.model.bluetooth.Entities
+import com.example.dronevision.presentation.model.bluetooth.Entity
+import com.example.dronevision.presentation.model.bluetooth.Message
 import com.google.gson.GsonBuilder
 import java.io.IOException
 import java.io.InputStream

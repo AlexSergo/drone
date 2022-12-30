@@ -17,8 +17,8 @@ import com.example.dronevision.presentation.delegates.LocationDialogCallback
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.IMap
 import com.example.dronevision.presentation.ui.MyMapFragment
-import com.example.dronevision.presentation.ui.bluetooth.Entity
-import com.example.dronevision.presentation.ui.targ.TargFragment
+import com.example.dronevision.presentation.model.bluetooth.Entity
+import com.example.dronevision.presentation.ui.targ.TargetFragment
 import com.example.dronevision.utils.ImageTypes
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
@@ -158,14 +158,14 @@ class YandexMapFragment : MyMapFragment(), CameraListener, IMap {
         ), type = type)
 
         mark.addTapListener { mapObject, point ->
-            val targFragment = TargFragment(
+            val targFragment = TargetFragment(
                 Technic(
                     coords = Coordinates(
                         x = mark.geometry.latitude,
                         y = mark.geometry.longitude
                     ), type = type
                 ),
-                object: TargFragment.TargetFragmentCallback{
+                object: TargetFragment.TargetFragmentCallback{
                     override fun onBroadcastButtonClick(technic: Technic) {
                         val sb = StringBuilder()
                         sb.append(technic.type.name)

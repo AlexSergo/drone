@@ -1,4 +1,4 @@
-package com.example.dronevision.presentation.ui.bluetooth
+package com.example.dronevision.presentation.model.bluetooth
 
 import com.google.gson.annotations.SerializedName
 

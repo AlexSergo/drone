@@ -8,11 +8,9 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.example.dronevision.databinding.FragmentTargBinding
 import com.example.dronevision.presentation.model.Technic
-import org.osmdroid.views.overlay.Marker
-import org.osmdroid.views.overlay.Overlay
 
-class TargFragment(private val technic: Technic,
-                   private val targetFragmentCallback: TargetFragmentCallback) : DialogFragment() {
+class TargetFragment(private val technic: Technic,
+                     private val targetFragmentCallback: TargetFragmentCallback) : DialogFragment() {
     
     private lateinit var binding: FragmentTargBinding
     

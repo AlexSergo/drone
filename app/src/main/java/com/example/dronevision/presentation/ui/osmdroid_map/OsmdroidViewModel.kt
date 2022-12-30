@@ -9,7 +9,7 @@ import com.example.dronevision.presentation.mapper.SessionStateMapperUi
 import com.example.dronevision.presentation.mapper.TechnicMapperUI
 import com.example.dronevision.presentation.model.SessionState
 import com.example.dronevision.presentation.model.Technic
-import com.example.dronevision.presentation.ui.bluetooth.Entity
+import com.example.dronevision.presentation.model.bluetooth.Entity
 import com.example.dronevision.utils.FindTarget
 import com.example.dronevision.utils.MapType
 import kotlinx.coroutines.Dispatchers

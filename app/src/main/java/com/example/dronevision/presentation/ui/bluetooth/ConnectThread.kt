@@ -6,7 +6,7 @@ import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
-import com.example.dronevision.presentation.model.Message
+import com.example.dronevision.presentation.model.bluetooth.Message
 import java.io.IOException
 import java.util.*
 

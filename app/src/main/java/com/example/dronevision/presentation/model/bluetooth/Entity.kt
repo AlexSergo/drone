@@ -1,6 +1,4 @@
-package com.example.dronevision.presentation.ui.bluetooth
-
-import java.io.Serializable
+package com.example.dronevision.presentation.model.bluetooth
 
 
 class Entity (

@@ -10,7 +10,7 @@ import com.example.dronevision.domain.use_cases.GetTechnicsUseCase
 import com.example.dronevision.domain.use_cases.SaveTechnicUseCase
 import com.example.dronevision.presentation.mapper.TechnicMapperUI
 import com.example.dronevision.presentation.model.Technic
-import com.example.dronevision.presentation.ui.bluetooth.Entity
+import com.example.dronevision.presentation.model.bluetooth.Entity
 import com.example.dronevision.utils.FindTarget
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -24,8 +24,9 @@ import com.example.dronevision.databinding.ActivityMainBinding
 import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.delegates.BluetoothHandler
 import com.example.dronevision.presentation.delegates.BluetoothHandlerImpl
-import com.example.dronevision.presentation.model.BluetoothListItem
-import com.example.dronevision.presentation.model.Message
+import com.example.dronevision.presentation.model.bluetooth.BluetoothListItem
+import com.example.dronevision.presentation.model.bluetooth.Entity
+import com.example.dronevision.presentation.model.bluetooth.Message
 import com.example.dronevision.presentation.ui.bluetooth.*
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment
 

@@ -15,8 +15,8 @@ import com.example.dronevision.presentation.model.SessionState
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.IMap
 import com.example.dronevision.presentation.ui.MyMapFragment
-import com.example.dronevision.presentation.ui.bluetooth.Entity
-import com.example.dronevision.presentation.ui.targ.TargFragment
+import com.example.dronevision.presentation.model.bluetooth.Entity
+import com.example.dronevision.presentation.ui.targ.TargetFragment
 import com.example.dronevision.utils.ImageTypes
 import com.example.dronevision.utils.MapTools
 import com.example.dronevision.utils.MapType
@@ -242,8 +242,8 @@ class OsmdroidFragment : MyMapFragment(), IMap {
             ), type = type)
 
         mark.setOnMarkerClickListener { marker, mapView ->
-            val targetFragment = TargFragment( technic = technic,
-                object : TargFragment.TargetFragmentCallback{
+            val targetFragment = TargetFragment( technic = technic,
+                object : TargetFragment.TargetFragmentCallback{
                     override fun onBroadcastButtonClick(technic: Technic) {
                         val sb = StringBuilder()
                         sb.append(technic.type.name)
