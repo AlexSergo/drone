@@ -2,8 +2,8 @@ package com.example.dronevision.di
 
 import android.content.Context
 import com.example.dronevision.domain.use_cases.*
+import com.example.dronevision.presentation.ui.MainViewModelFactory
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidViewModelFactory
-import com.example.dronevision.presentation.ui.yandex_map.YandexMapViewModelFactory
 import dagger.Module
 import dagger.Provides
 
@@ -31,15 +31,11 @@ class AppModule(val context: Context) {
     )
     
     @Provides
-    fun provideYandexMapViewModelFactory(
-        getTechnicsUseCase: GetTechnicsUseCase,
-        saveTechnicUseCase: SaveTechnicUseCase,
-        deleteAllUseCase: DeleteAllUseCase,
-        deleteTechnicUseCase: DeleteTechnicUseCase,
-    ): YandexMapViewModelFactory = YandexMapViewModelFactory(
-        getTechnicsUseCase = getTechnicsUseCase,
-        saveTechnicUseCase = saveTechnicUseCase,
-        deleteAllUseCase = deleteAllUseCase,
-        deleteTechnicUseCase = deleteTechnicUseCase
+    fun provideMainViewModelFactory(
+        saveSessionStateUseCase: SaveSessionStateUseCase,
+        getSessionStateUseCase: GetSessionStateUseCase
+    ): MainViewModelFactory = MainViewModelFactory(
+        saveSessionStateUseCase = saveSessionStateUseCase,
+        getSessionStateUseCase = getSessionStateUseCase
     )
 }

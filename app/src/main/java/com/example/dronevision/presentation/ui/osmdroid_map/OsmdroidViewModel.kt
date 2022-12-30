@@ -83,7 +83,7 @@ class OsmdroidViewModel(
         }
     }
     
-    fun saveSessionState(sessionState: SessionState) = viewModelScope.launch(Dispatchers.IO) {
+    private fun saveSessionState(sessionState: SessionState) = viewModelScope.launch(Dispatchers.IO) {
         val sessionStateDto = SessionStateMapperUi.mapSessionStateUiToDto(sessionState)
         saveSessionStateUseCase.execute(sessionStateDto)
     }

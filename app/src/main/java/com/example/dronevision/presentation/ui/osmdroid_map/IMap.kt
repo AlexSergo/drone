@@ -1,4 +1,4 @@
-package com.example.dronevision.presentation.ui
+package com.example.dronevision.presentation.ui.osmdroid_map
 
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes

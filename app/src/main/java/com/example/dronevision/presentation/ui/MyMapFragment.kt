@@ -1,6 +1,5 @@
 package com.example.dronevision.presentation.ui
 
-import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.dronevision.App
@@ -8,12 +7,6 @@ import com.example.dronevision.presentation.delegates.*
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidViewModel
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidViewModelFactory
-import com.example.dronevision.presentation.ui.yandex_map.YandexMapFragment
-import com.example.dronevision.presentation.ui.yandex_map.YandexMapViewModel
-import com.example.dronevision.presentation.ui.yandex_map.YandexMapViewModelFactory
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
 import javax.inject.Inject
 
 open class MyMapFragment: Fragment(),
@@ -24,20 +17,10 @@ open class MyMapFragment: Fragment(),
     LocationDialogHandler by LocationDialogHandlerImpl(),
     ManipulatorSetuper by ManipulatorSetuperImpl() {
     
-    protected lateinit var yandexMapViewModel: YandexMapViewModel
     protected lateinit var osmdroidViewModel: OsmdroidViewModel
     
     @Inject
-    lateinit var yandexMapViewModelFactory: YandexMapViewModelFactory
-    
-    @Inject
     lateinit var osmdroidViewModelFactory: OsmdroidViewModelFactory
-    
-    protected fun inject(fragment: YandexMapFragment) {
-        (requireContext().applicationContext as App).appComponent.inject(fragment)
-        yandexMapViewModel =
-            ViewModelProvider(this, yandexMapViewModelFactory)[YandexMapViewModel::class.java]
-    }
 
     protected fun inject(fragment: OsmdroidFragment) {
         (requireContext().applicationContext as App).appComponent.inject(fragment)

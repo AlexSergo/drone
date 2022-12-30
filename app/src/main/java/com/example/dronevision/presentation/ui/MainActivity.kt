@@ -1,7 +1,7 @@
 package com.example.dronevision.presentation.ui
 
 import android.os.Bundle
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -14,11 +14,13 @@ import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import com.example.dronevision.AbonentDialogFragment
+import com.example.dronevision.App
 import com.example.dronevision.R
 import com.example.dronevision.databinding.ActivityMainBinding
 import com.example.dronevision.domain.model.TechnicTypes
@@ -27,43 +29,55 @@ import com.example.dronevision.presentation.delegates.BluetoothHandlerImpl
 import com.example.dronevision.presentation.model.bluetooth.BluetoothListItem
 import com.example.dronevision.presentation.model.bluetooth.Entity
 import com.example.dronevision.presentation.model.bluetooth.Message
-import com.example.dronevision.presentation.ui.bluetooth.*
+import com.example.dronevision.presentation.ui.bluetooth.BluetoothCallback
+import com.example.dronevision.presentation.ui.bluetooth.BluetoothReceiver
+import com.example.dronevision.presentation.ui.bluetooth.SelectBluetoothFragment
+import com.example.dronevision.presentation.ui.osmdroid_map.IMap
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment
-
 import com.example.dronevision.utils.HgtLoader
 import com.example.dronevision.utils.MapType
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.components.BuildConfig
 import org.osmdroid.config.Configuration
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerImpl(),
-    NavigationView.OnNavigationItemSelectedListener{
-
+    NavigationView.OnNavigationItemSelectedListener {
+    
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private lateinit var map: IMap
     private var dialog: SelectBluetoothFragment? = null
-
+    private lateinit var mainViewModel: MainViewModel
+    
+    @Inject
+    lateinit var mainViewModelFactory: MainViewModelFactory
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        
+        initViewModel()
         setupOptionsMenu()
         setupDrawer()
-        setupNavController()
         setupBluetoothDialog()
-
         setupOsmdroidConfiguration()
     }
-
+    
+    private fun initViewModel() {
+        (applicationContext as App).appComponent.inject(this)
+        mainViewModel =
+            ViewModelProvider(this, mainViewModelFactory)[MainViewModel::class.java]
+    }
+    
     private fun setupBluetoothDialog() {
-        val connection = setupBluetooth(context = this,
+        val connection = setupBluetooth(
+            context = this,
             systemService = getSystemService(BLUETOOTH_SERVICE),
-            messageListener = object : BluetoothReceiver.MessageListener{
-
+            messageListener = object : BluetoothReceiver.MessageListener {
+                
                 override fun onReceive(message: Message, entities: MutableList<Entity>?) {
                     entities?.let {
                         if (it[0].lat.isNaN() || it[0].lon.isNaN()) {
@@ -71,7 +85,6 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                             it[1] = Entity(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false)
                         }
                     }
-                    map = getCurrentMap()
                     runOnUiThread {
                         if (message.isSystem)
                             Toast.makeText(applicationContext, message.message, Toast.LENGTH_LONG).show()
@@ -104,25 +117,29 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
 
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
-
+    
         val toggle = ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close)
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
-
+    
         val button = findViewById<ImageButton>(R.id.drawerButton)
         button.setOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
-
+    
         navView.setNavigationItemSelectedListener(this)
+        navController = findNavController(R.id.nav_host_fragment_content_main)
+        initMap()
     }
     
-    private fun setupNavController() {
-        navController = findNavController(R.id.nav_host_fragment_content_main)
+    private fun initMap() {
+        val navFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
+        val fragment = navFragment?.childFragmentManager?.fragments?.get(0)
+        map = fragment as IMap
     }
-
+    
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        map = getCurrentMap()
         when (item.itemId) {
             R.id.targ01 -> {
                 map.spawnTechnic(TechnicTypes.LAUNCHER)
@@ -195,10 +212,10 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         menuHost.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.main, menu)
+                setupMenuState(menu)
             }
-
+    
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                map = getCurrentMap()
                 return when (menuItem.itemId) {
                     R.id.bluetooth -> {
                         dialog?.show(supportFragmentManager, "ActionBottomDialog")
@@ -232,16 +249,10 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         true
                     }
                     R.id.mapOsmItem -> {
-                        /*if (map is YandexMapFragment)
-                            navigateToOsmdroidFragment()*/
                         map.setMapType(MapType.OSM.value)
                         true
                     }
                     R.id.mapYandexItem -> {
-                        /*if (map is OsmdroidFragment) {
-                            navigateToYandexFragment()
-                            checkBox?.isChecked = false
-                        }*/
                         map.setMapType(MapType.YANDEX_MAP.value)
                         true
                     }
@@ -259,25 +270,12 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         }, this, Lifecycle.State.RESUMED)
     }
     
-    private fun navigateToYandexFragment() {
-        findNavController(R.id.nav_host_fragment_content_main)
-            .navigate(R.id.action_osmdroidFragment_to_yandexMapFragment)
-    }
-    
-    private fun navigateToOsmdroidFragment() {
-        findNavController(R.id.nav_host_fragment_content_main)
-            .navigate(R.id.action_yandexMapFragment_to_osmdroidFragment)
-    }
-    
-    private fun getCurrentMap(): IMap {
-        val navFragment =
-            supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
-        val fragment = navFragment?.childFragmentManager?.fragments?.get(0)
-        if (fragment != null) {
-            if (fragment.isVisible)
-                return fragment as IMap
+    private fun setupMenuState(menu: Menu) {
+        mainViewModel.getSessionState()
+        val mapGridItem = menu.findItem(R.id.mapGridItem)
+        mainViewModel.sessionStateLiveData.observe(this) { sessionState ->
+            mapGridItem.isChecked = sessionState.isGrid
         }
-        return fragment as IMap
     }
     
     override fun onSupportNavigateUp(): Boolean =

@@ -1,8 +1,7 @@
 package com.example.dronevision.presentation.delegates
 
 import com.example.dronevision.presentation.model.Technic
-import com.example.dronevision.presentation.ui.IMap
-import com.google.firebase.database.DatabaseReference
+import com.example.dronevision.presentation.ui.osmdroid_map.IMap
 
 interface RemoteDatabaseHandler{
     fun onDatabaseChangeListener(map: IMap)

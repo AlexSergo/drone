@@ -12,7 +12,6 @@ import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.delegates.LocationDialogCallback
 import com.example.dronevision.presentation.model.Technic
-import com.example.dronevision.presentation.ui.IMap
 import com.example.dronevision.presentation.ui.MyMapFragment
 import com.example.dronevision.presentation.model.bluetooth.Entity
 import com.example.dronevision.presentation.ui.targ.TargetFragment
@@ -96,8 +95,6 @@ class OsmdroidFragment : MyMapFragment(), IMap {
                 osmdroidViewModel.saveCurrentMapState(mapType)
             }
             MapType.YANDEX_MAP.value -> {
-                /*val action = OsmdroidFragmentDirections.actionOsmdroidFragmentToYandexMapFragment()
-                findNavController().navigate(action)*/
                 binding.mapView.setTileSource(
                     MapTools.getYandexMapTile(
                         requireContext(),
