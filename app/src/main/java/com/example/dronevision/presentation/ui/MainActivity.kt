@@ -1,8 +1,9 @@
 package com.example.dronevision.presentation.ui
 
+
 import android.os.Bundle
 import android.os.Environment
-import androidx.preference.PreferenceManager
+import android.preference.PreferenceManager
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -27,6 +28,8 @@ import com.example.dronevision.databinding.ActivityMainBinding
 import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.delegates.BluetoothHandler
 import com.example.dronevision.presentation.delegates.BluetoothHandlerImpl
+import com.example.dronevision.presentation.delegates.DeviceId
+import com.example.dronevision.presentation.delegates.DeviceIdIml
 import com.example.dronevision.presentation.model.bluetooth.BluetoothListItem
 import com.example.dronevision.presentation.model.bluetooth.Entity
 import com.example.dronevision.presentation.model.bluetooth.Message
@@ -44,6 +47,7 @@ import java.io.File
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerImpl(),
+    DeviceId by DeviceIdIml(),
     NavigationView.OnNavigationItemSelectedListener {
     
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -60,6 +64,9 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val mac = getDeviceId(context = applicationContext)
+        println(mac)
         
         createAppFolder()
         initViewModel()
