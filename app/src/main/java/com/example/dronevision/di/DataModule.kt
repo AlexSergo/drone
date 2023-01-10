@@ -1,5 +1,6 @@
 package com.example.dronevision.di
 
+import com.example.dronevision.data.repository.DroneVisionServiceRepositoryImpl
 import com.example.dronevision.data.repository.SessionStateRepositoryImpl
 import com.example.dronevision.data.repository.TechnicRepositoryImpl
 import com.example.dronevision.data.source.LocalDataSource
@@ -7,6 +8,7 @@ import com.example.dronevision.data.source.RemoteDataSource
 import com.example.dronevision.data.source.local.dao.SessionStateDao
 import com.example.dronevision.data.source.local.dao.TechnicDao
 import com.example.dronevision.data.source.remote.DroneVisionService
+import com.example.dronevision.domain.repository.DroneVisionServiceRepository
 import com.example.dronevision.domain.repository.SessionStateRepository
 import com.example.dronevision.domain.repository.TechnicRepository
 import dagger.Module
@@ -33,4 +35,8 @@ class DataModule {
     @Provides
     fun provideSessionStateRepository(localDataSource: LocalDataSource): SessionStateRepository =
         SessionStateRepositoryImpl(localDataSource = localDataSource)
+
+    @Provides
+    fun provideDroneVisionServiceRepository(remoteDataSource: RemoteDataSource): DroneVisionServiceRepository =
+        DroneVisionServiceRepositoryImpl(remoteDataSource = remoteDataSource)
 }

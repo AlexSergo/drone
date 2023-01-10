@@ -33,9 +33,11 @@ class AppModule(val context: Context) {
     @Provides
     fun provideMainViewModelFactory(
         saveSessionStateUseCase: SaveSessionStateUseCase,
-        getSessionStateUseCase: GetSessionStateUseCase
+        getSessionStateUseCase: GetSessionStateUseCase,
+        getIdUseCase: GetIdUseCase
     ): MainViewModelFactory = MainViewModelFactory(
         saveSessionStateUseCase = saveSessionStateUseCase,
-        getSessionStateUseCase = getSessionStateUseCase
+        getSessionStateUseCase = getSessionStateUseCase,
+        getIdUseCase = getIdUseCase
     )
 }

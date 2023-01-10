@@ -1,5 +1,6 @@
 package com.example.dronevision.di
 
+import com.example.dronevision.domain.repository.DroneVisionServiceRepository
 import com.example.dronevision.domain.repository.SessionStateRepository
 import com.example.dronevision.domain.repository.TechnicRepository
 import com.example.dronevision.domain.use_cases.*
@@ -32,4 +33,8 @@ class DomainModule {
     @Provides
     fun provideSaveSessionStateUseCase(sessionStateRepository: SessionStateRepository): SaveSessionStateUseCase =
         SaveSessionStateUseCase(sessionStateRepository = sessionStateRepository)
+
+    @Provides
+    fun provideGetIdUseCase(droneVisionServiceRepository: DroneVisionServiceRepository): GetIdUseCase =
+        GetIdUseCase(repository = droneVisionServiceRepository)
 }

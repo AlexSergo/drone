@@ -16,6 +16,7 @@ import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -38,8 +39,10 @@ import com.example.dronevision.presentation.ui.bluetooth.BluetoothReceiver
 import com.example.dronevision.presentation.ui.bluetooth.SelectBluetoothFragment
 import com.example.dronevision.presentation.ui.osmdroid_map.IMap
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment
+import com.example.dronevision.utils.Hash
 import com.example.dronevision.utils.HgtLoader
 import com.example.dronevision.utils.MapType
+import com.example.dronevision.utils.SharedPreferences
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.components.BuildConfig
 import org.osmdroid.config.Configuration
@@ -56,6 +59,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
     private lateinit var map: IMap
     private var dialog: SelectBluetoothFragment? = null
     private lateinit var mainViewModel: MainViewModel
+    private lateinit var sharedPreferences: SharedPreferences
     
     @Inject
     lateinit var mainViewModelFactory: MainViewModelFactory
@@ -64,12 +68,11 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        sharedPreferences = SharedPreferences(applicationContext)
 
-        val mac = getDeviceId(context = applicationContext)
-        println(mac)
-        
         createAppFolder()
         initViewModel()
+        //checkRegistration() TODO: Раскоментить когда будет серверная часть
         setupOptionsMenu()
         setupDrawer()
         setupBluetoothDialog()
@@ -91,6 +94,32 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         (applicationContext as App).appComponent.inject(this)
         mainViewModel =
             ViewModelProvider(this, mainViewModelFactory)[MainViewModel::class.java]
+    }
+
+    private fun checkRegistration(){
+        val id = getDeviceId(context = applicationContext)
+        if (id != null) {
+            val hash = sharedPreferences.getValue("AUTH_TOKEN")
+            if (hash == null) {
+                mainViewModel.getId(id)
+                mainViewModel.idLiveData.observe(this, Observer {
+                    it?.let { hash ->
+                        if (hash == Hash.md5(id)) {
+                            sharedPreferences.save("AUTH_TOKEN", hash)
+                            setupOptionsMenu()
+                            setupDrawer()
+                            setupBluetoothDialog()
+                        }
+                    }
+                })
+            }
+            else
+                if (hash == Hash.md5(id)) {
+                    setupOptionsMenu()
+                    setupDrawer()
+                    setupBluetoothDialog()
+                }
+        }
     }
     
     private fun setupBluetoothDialog() {
