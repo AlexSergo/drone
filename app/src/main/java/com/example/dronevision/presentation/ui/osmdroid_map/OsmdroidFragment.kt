@@ -124,7 +124,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
                 osmdroidViewModel.saveCurrentMapState(mapType)
             }
             MapType.OFFLINE.value -> {
-                offlineMode(binding, requireContext())
+                offlineMode(binding.mapView, requireContext())
             }
         }
     }
@@ -353,7 +353,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
     }
     
     override fun offlineMode() {
-       offlineMode(binding, requireContext())
+       offlineMode(binding.mapView, requireContext())
     }
     
     override fun changeGridState(isGrid: Boolean) {

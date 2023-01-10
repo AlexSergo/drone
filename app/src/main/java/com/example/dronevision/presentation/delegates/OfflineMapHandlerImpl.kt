@@ -6,33 +6,27 @@ import android.os.Environment
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.example.dronevision.databinding.FragmentOsmdroidBinding
+import com.example.dronevision.utils.FileTools.createAppFolder
 import org.osmdroid.tileprovider.modules.OfflineTileProvider
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.tileprovider.util.SimpleRegisterReceiver
+import org.osmdroid.views.MapView
 import java.io.File
 
 class OfflineMapHandlerImpl: OfflineMapHandler {
-    override fun offlineMode(binding: FragmentOsmdroidBinding, context: Context) {
-        val rootDirName = Environment.getExternalStorageDirectory().path
-        val dirName = "$rootDirName/Drone Vision/"
-        val folder = File(dirName)
-        
-        if (folder.exists()) {
-            openFile(folder, binding, context, dirName)
-        } else {
-            val newFile = File(rootDirName, "Drone Vision")
-            newFile.mkdir()
-            val newFolder = File(dirName)
-            openFile(newFolder, binding, context, dirName)
-        }
+    private val rootDirName = Environment.getExternalStorageDirectory().path
+    private val dirName = "$rootDirName/Drone Vision/"
+    
+    override fun offlineMode(mapView: MapView, context: Context) {
+        createAppFolder()
+        openFile(mapView, context)
     }
     
     private fun openFile(
-        folder: File,
-        binding: FragmentOsmdroidBinding,
+        mapView: MapView,
         context: Context,
-        dirName: String
     ) {
+        val folder = File(dirName)
         val listOfFiles = folder.listFiles()!!
         
         if (listOfFiles.isNotEmpty()) {
@@ -57,18 +51,17 @@ class OfflineMapHandlerImpl: OfflineMapHandler {
                             Environment.getExternalStorageDirectory().path + "/Drone Vision/" + fileName
                         val exitFile = File(path)
                         try {
-                            binding.mapView.setTileProvider(
+                            mapView.setTileProvider(
                                 OfflineTileProvider(
                                     SimpleRegisterReceiver(context),
                                     arrayOf(exitFile)
                                 )
                             )
-                            binding.mapView.setTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE)
-                            binding.mapView.setUseDataConnection(false)
+                            mapView.setTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE)
+                            mapView.setUseDataConnection(false)
                         } catch (e: java.lang.Exception) {
                             e.printStackTrace()
                         }
-                        
                     }).show()
             } else Toast.makeText(
                 context,

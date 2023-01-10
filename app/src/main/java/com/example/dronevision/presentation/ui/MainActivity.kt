@@ -16,7 +16,6 @@ import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -40,6 +39,7 @@ import com.example.dronevision.presentation.ui.bluetooth.SelectBluetoothFragment
 import com.example.dronevision.presentation.ui.osmdroid_map.IMap
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment
 import com.example.dronevision.utils.Hash
+import com.example.dronevision.utils.FileTools.createAppFolder
 import com.example.dronevision.utils.HgtLoader
 import com.example.dronevision.utils.MapType
 import com.example.dronevision.utils.SharedPreferences
@@ -79,16 +79,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         setupOsmdroidConfiguration()
     }
     
-    private fun createAppFolder() { // TODO: Перенести куда нибудь функцию
-        val rootDirName = Environment.getExternalStorageDirectory().path
-        val dirName = "$rootDirName/Drone Vision/"
-        val folder = File(dirName)
     
-        if (!folder.exists()) {
-            val newFile = File(rootDirName, "Drone Vision")
-            newFile.mkdir()
-        }
-    }
     
     private fun initViewModel() {
         (applicationContext as App).appComponent.inject(this)
