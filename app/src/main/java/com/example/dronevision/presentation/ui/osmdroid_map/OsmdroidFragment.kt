@@ -27,7 +27,6 @@ import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Overlay
 import org.osmdroid.views.overlay.Polyline
-import org.osmdroid.views.overlay.compass.CompassOverlay
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import kotlin.math.abs
@@ -44,8 +43,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
     private lateinit var polylineToCenter: Polyline
     private var polylineToAim: Polyline = Polyline()
     private val listOfTechnic = mutableListOf<Overlay>()
-
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         inject(this)
@@ -57,7 +55,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
     ): View {
         binding = FragmentOsmdroidBinding.inflate(inflater, container, false)
         checkStoragePermissions(requireActivity())
-
+    
         setupOsmdroidMap()
         initDroneMarker()
         initTechnic()
@@ -133,10 +131,6 @@ class OsmdroidFragment : MyMapFragment(), IMap {
         mapView.setTileSource(TileSourceFactory.MAPNIK)
         mapView.controller.setZoom(2.0)
         binding.mapView.minZoomLevel = 3.0
-        
-        val compassOverlay = CompassOverlay(requireContext().applicationContext, mapView)
-        compassOverlay.enableCompass()
-        mapView.overlays.add(compassOverlay)
         
         mapView.setMultiTouchControls(true)
         mapView.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)

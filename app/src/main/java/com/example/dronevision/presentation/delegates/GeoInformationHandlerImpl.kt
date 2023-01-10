@@ -27,6 +27,7 @@ class GeoInformationHandlerImpl: GeoInformationHandler {
         binding.longitude.text = "Долгота = " + lat_lon[1]
         binding.plane.text = plane
         binding.azimuth.text = "Азимут = $azimuth"
+        binding.compassButton.rotation = binding.mapView.mapOrientation
     }
 
     private fun showWgs82OnCard(): String {
