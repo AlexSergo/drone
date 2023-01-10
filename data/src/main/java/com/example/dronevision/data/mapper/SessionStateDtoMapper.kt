@@ -8,12 +8,24 @@ object SessionStateDtoMapper {
         SessionStateEntity(
             id = 1,
             currentMap = sessionStateDto.currentMap,
-            isGrid = sessionStateDto.isGrid
+            isGrid = sessionStateDto.isGrid,
+            azimuth = sessionStateDto.azimuth,
+            latitude = sessionStateDto.latitude,
+            longitude = sessionStateDto.longitude,
+            plane = sessionStateDto.plane,
+            mapOrientation = sessionStateDto.mapOrientation,
+            cameraZoomLevel = sessionStateDto.cameraZoomLevel,
         )
     
     fun mapSessionStateEntityToDto(sessionStateEntity: SessionStateEntity): SessionStateDto =
         SessionStateDto(
             currentMap = sessionStateEntity.currentMap,
-            isGrid = sessionStateEntity.isGrid
+            isGrid = sessionStateEntity.isGrid,
+            azimuth = sessionStateEntity.azimuth,
+            latitude = sessionStateEntity.latitude,
+            longitude = sessionStateEntity.longitude,
+            plane = sessionStateEntity.plane,
+            mapOrientation = sessionStateEntity.mapOrientation,
+            cameraZoomLevel = sessionStateEntity.cameraZoomLevel,
         )
 }

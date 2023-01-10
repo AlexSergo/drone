@@ -78,6 +78,12 @@ class OsmdroidFragment : MyMapFragment(), IMap {
         osmdroidViewModel.sessionStateLiveData.observe(viewLifecycleOwner) { sessionState ->
             changeGridState(sessionState.isGrid)
             setMapType(sessionState.currentMap)
+            binding.mapView.mapOrientation = sessionState.mapOrientation
+            binding.azimuth.text = sessionState.azimuth
+            binding.plane.text = sessionState.plane
+            val mapController = binding.mapView.controller
+            mapController.setZoom(sessionState.cameraZoomLevel)
+            mapController.setCenter(GeoPoint(sessionState.latitude, sessionState.longitude))
         }
     }
     
@@ -129,7 +135,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
     
     private fun setupOsmdroidMap() = binding.run {
         mapView.setTileSource(TileSourceFactory.MAPNIK)
-        mapView.controller.setZoom(2.0)
+        mapView.controller.setZoom(3.0)
         binding.mapView.minZoomLevel = 3.0
         
         mapView.setMultiTouchControls(true)
@@ -374,5 +380,14 @@ class OsmdroidFragment : MyMapFragment(), IMap {
     override fun onDetach() {
         super.onDetach()
         binding.mapView.onDetach()
+    }
+    
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        osmdroidViewModel.onSaveInstanceState(
+            azimuth = binding.azimuth.text.toString(),
+            plane = binding.plane.text.toString(),
+            mapView = binding.mapView
+        )
     }
 }

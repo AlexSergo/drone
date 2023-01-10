@@ -9,4 +9,10 @@ data class SessionStateEntity(
     val id: Int,
     val currentMap: Int,
     val isGrid: Boolean,
+    val azimuth: String,
+    val latitude: Double,
+    val longitude: Double,
+    val plane: String,
+    val mapOrientation: Float,
+    val cameraZoomLevel: Double
 )

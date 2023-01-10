@@ -31,7 +31,16 @@ class MainViewModel(
             _sessionStateLiveData.postValue(sessionState)
         } else {
             val sessionState =
-                SessionStateMapperUi.mapSessionState(currentMap = MapType.OSM.value, isGrid = false)
+                SessionStateMapperUi.mapSessionState(
+                    currentMap = MapType.OSM.value,
+                    isGrid = false,
+                    azimuth = "0.0",
+                    latitude = 0.0,
+                    longitude = 0.0,
+                    plane = "X=- Y=-",
+                    mapOrientation = 0.0f,
+                    cameraZoomLevel = 2.0
+                )
             saveSessionState(sessionState)
             _sessionStateLiveData.postValue(sessionState)
         }

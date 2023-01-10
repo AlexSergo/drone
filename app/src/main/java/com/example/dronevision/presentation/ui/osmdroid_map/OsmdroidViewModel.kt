@@ -11,9 +11,9 @@ import com.example.dronevision.presentation.model.SessionState
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.model.bluetooth.Entity
 import com.example.dronevision.utils.FindTarget
-import com.example.dronevision.utils.MapType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.osmdroid.views.MapView
 
 class OsmdroidViewModel(
     private val getTechnicsUseCase: GetTechnicsUseCase,
@@ -75,11 +75,6 @@ class OsmdroidViewModel(
         if (sessionStateDto != null) {
             val sessionState = SessionStateMapperUi.mapSessionStateDtoToUi(sessionStateDto)
             _sessionStateLiveData.postValue(sessionState)
-        } else {
-            val sessionState =
-                SessionStateMapperUi.mapSessionState(currentMap = MapType.OSM.value, isGrid = false)
-            saveSessionState(sessionState)
-            _sessionStateLiveData.postValue(sessionState)
         }
     }
     
@@ -98,9 +93,33 @@ class OsmdroidViewModel(
     
     fun saveCurrentMapState(currentMap: Int) = viewModelScope.launch(Dispatchers.IO) {
         _sessionStateLiveData.value?.let { sessionState ->
-            val sessionStateUpdated = SessionStateMapperUi.mapCurrentMapState(sessionState, currentMap)
+            val sessionStateUpdated =
+                SessionStateMapperUi.mapCurrentMapState(sessionState, currentMap)
             val sessionStateDto = SessionStateMapperUi.mapSessionStateUiToDto(sessionStateUpdated)
             saveSessionStateUseCase.execute(sessionStateDto)
+        }
+    }
+    
+    fun onSaveInstanceState(
+        azimuth: String,
+        plane: String,
+        mapView: MapView
+    ) {
+        val latitude = mapView.mapCenter.latitude
+        val longitude = mapView.mapCenter.longitude
+        val mapOrientation = mapView.mapOrientation
+        val cameraZoomLevel = mapView.zoomLevelDouble
+        sessionStateLiveData.value?.let { oldSessionState ->
+            val newSessionState = SessionStateMapperUi.mapSessionStateOnSaveInstance(
+                azimuth = azimuth,
+                plane = plane,
+                latitude = latitude,
+                longitude = longitude,
+                mapOrientation = mapOrientation,
+                cameraZoomLevel = cameraZoomLevel,
+                oldSessionState = oldSessionState
+            )
+            saveSessionState(newSessionState)
         }
     }
 }

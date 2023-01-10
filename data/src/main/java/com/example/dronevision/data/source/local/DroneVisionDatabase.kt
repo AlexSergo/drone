@@ -8,7 +8,7 @@ import com.example.dronevision.data.source.local.dao.TechnicDao
 import com.example.dronevision.data.source.local.model.SessionStateEntity
 import com.example.dronevision.data.source.local.model.TechnicEntity
 
-@androidx.room.Database(entities = [TechnicEntity::class, SessionStateEntity::class], version = 3, exportSchema = false)
+@androidx.room.Database(entities = [TechnicEntity::class, SessionStateEntity::class], version = 4, exportSchema = false)
 abstract class DroneVisionDatabase : RoomDatabase() {
     
     abstract fun technicsDao(): TechnicDao
@@ -17,7 +17,7 @@ abstract class DroneVisionDatabase : RoomDatabase() {
     companion object {
         @Volatile
         private var INSTANCE: DroneVisionDatabase? = null
-        private const val DATABASE_NAME = "life_calendar_database"
+        private const val DATABASE_NAME = "drone_vision_database"
         
         fun getInstance(context: Context): DroneVisionDatabase {
             var tempInstance = INSTANCE
