@@ -2,6 +2,7 @@ package com.example.dronevision.di
 
 import com.example.dronevision.domain.repository.DroneVisionServiceRepository
 import com.example.dronevision.domain.repository.SessionStateRepository
+import com.example.dronevision.domain.repository.SubscribersRepository
 import com.example.dronevision.domain.repository.TechnicRepository
 import com.example.dronevision.domain.use_cases.*
 import dagger.Module
@@ -37,4 +38,12 @@ class DomainModule {
     @Provides
     fun provideGetIdUseCase(droneVisionServiceRepository: DroneVisionServiceRepository): GetIdUseCase =
         GetIdUseCase(repository = droneVisionServiceRepository)
+
+    @Provides
+    fun provideGetSubscribersUseCase(subscribersRepository: SubscribersRepository): GetSubscribersUseCase =
+        GetSubscribersUseCase(repository = subscribersRepository)
+
+    @Provides
+    fun provideSaveSubscriberUseCase(subscribersRepository: SubscribersRepository): SaveSubscriberUseCase =
+        SaveSubscriberUseCase(repository = subscribersRepository)
 }

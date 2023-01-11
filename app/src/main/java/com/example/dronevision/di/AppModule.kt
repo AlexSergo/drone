@@ -1,8 +1,10 @@
 package com.example.dronevision.di
 
 import android.content.Context
+import androidx.lifecycle.ViewModelProvider
 import com.example.dronevision.domain.use_cases.*
 import com.example.dronevision.presentation.ui.MainViewModelFactory
+import com.example.dronevision.presentation.ui.SubscriberViewModelFactory
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidViewModelFactory
 import dagger.Module
 import dagger.Provides
@@ -39,5 +41,14 @@ class AppModule(val context: Context) {
         saveSessionStateUseCase = saveSessionStateUseCase,
         getSessionStateUseCase = getSessionStateUseCase,
         getIdUseCase = getIdUseCase
+    )
+
+    @Provides
+    fun provideSubscriberViewModelFactory(
+        saveSubscriberUseCase: SaveSubscriberUseCase,
+        getSubscribersUseCase: GetSubscribersUseCase
+    ): SubscriberViewModelFactory = SubscriberViewModelFactory(
+        saveSubscriberUseCase = saveSubscriberUseCase,
+        getSubscribersUseCase = getSubscribersUseCase
     )
 }

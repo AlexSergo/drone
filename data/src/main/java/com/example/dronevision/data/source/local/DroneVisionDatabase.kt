@@ -4,15 +4,18 @@ import android.content.Context
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.dronevision.data.source.local.dao.SessionStateDao
+import com.example.dronevision.data.source.local.dao.SubscribersDao
 import com.example.dronevision.data.source.local.dao.TechnicDao
 import com.example.dronevision.data.source.local.model.SessionStateEntity
+import com.example.dronevision.data.source.local.model.SubscriberEntity
 import com.example.dronevision.data.source.local.model.TechnicEntity
 
-@androidx.room.Database(entities = [TechnicEntity::class, SessionStateEntity::class], version = 4, exportSchema = false)
+@androidx.room.Database(entities = [TechnicEntity::class, SessionStateEntity::class, SubscriberEntity::class], version = 5, exportSchema = false)
 abstract class DroneVisionDatabase : RoomDatabase() {
     
     abstract fun technicsDao(): TechnicDao
     abstract fun SessionStateDao(): SessionStateDao
+    abstract fun SubscribersDao(): SubscribersDao
     
     companion object {
         @Volatile

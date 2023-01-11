@@ -21,15 +21,12 @@ import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
-import com.example.dronevision.AbonentDialogFragment
 import com.example.dronevision.App
 import com.example.dronevision.R
 import com.example.dronevision.databinding.ActivityMainBinding
 import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.delegates.BluetoothHandler
 import com.example.dronevision.presentation.delegates.BluetoothHandlerImpl
-import com.example.dronevision.presentation.delegates.DeviceId
-import com.example.dronevision.presentation.delegates.DeviceIdIml
 import com.example.dronevision.presentation.model.bluetooth.BluetoothListItem
 import com.example.dronevision.presentation.model.bluetooth.Entity
 import com.example.dronevision.presentation.model.bluetooth.Message
@@ -46,7 +43,6 @@ import org.osmdroid.config.Configuration
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerImpl(),
-    DeviceId by DeviceIdIml(),
     NavigationView.OnNavigationItemSelectedListener {
     
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -86,7 +82,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
     }
 
     private fun checkRegistration(){
-        val id = getDeviceId(context = applicationContext)
+        val id = Device.getDeviceId(applicationContext)
         if (id != null) {
             val hash = sharedPreferences.getValue("AUTH_TOKEN")
             if (hash == null) {
@@ -263,7 +259,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         true
                     }
                     R.id.abonentAddItem -> {
-                        val abonentDialogFragment = AbonentDialogFragment()
+                        val abonentDialogFragment = SubscriberDialogFragment()
                         abonentDialogFragment.show(supportFragmentManager, "myDialog")
                         true
                     }
