@@ -38,11 +38,8 @@ import com.example.dronevision.presentation.ui.bluetooth.BluetoothReceiver
 import com.example.dronevision.presentation.ui.bluetooth.SelectBluetoothFragment
 import com.example.dronevision.presentation.ui.osmdroid_map.IMap
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment
+import com.example.dronevision.utils.*
 import com.example.dronevision.utils.FileTools.createAppFolder
-import com.example.dronevision.utils.Hash
-import com.example.dronevision.utils.HgtLoader
-import com.example.dronevision.utils.MapType
-import com.example.dronevision.utils.SharedPreferences
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.components.BuildConfig
 import org.osmdroid.config.Configuration
@@ -71,6 +68,8 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
 
         createAppFolder()
         initViewModel()
+        val id = Device.getDeviceId(applicationContext)
+        println(id)
         //checkRegistration() TODO: Раскоментить когда будет серверная часть
         setupOptionsMenu()
         setupDrawer()

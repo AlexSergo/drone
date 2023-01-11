@@ -18,8 +18,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 class SelectBluetoothFragment(
     private var bluetoothAdapter: BluetoothAdapter?,
     private val bluetoothCallback: BluetoothCallback
-) :
-    BottomSheetDialogFragment() {
+) : BottomSheetDialogFragment() {
     
     private lateinit var binding: FragmentSelectBluetoothBinding
     private lateinit var recyclerViewAdapter: BluetoothRecyclerViewAdapter

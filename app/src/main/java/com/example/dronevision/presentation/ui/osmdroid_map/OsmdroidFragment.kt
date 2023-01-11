@@ -236,7 +236,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
             val targetFragment = TargetFragment( technic = technic,
                 object : TargetFragment.TargetFragmentCallback{
                     override fun onBroadcastButtonClick(technic: Technic) {
-                       sendMessage(technic)
+                       sendMessage("",technic)
                     }
 
                     override fun deleteTarget() {

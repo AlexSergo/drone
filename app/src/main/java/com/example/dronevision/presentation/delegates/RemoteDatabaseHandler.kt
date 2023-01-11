@@ -5,5 +5,5 @@ import com.example.dronevision.presentation.ui.osmdroid_map.IMap
 
 interface RemoteDatabaseHandler{
     fun onDatabaseChangeListener(map: IMap)
-    fun sendMessage(technic: Technic)
+    fun sendMessage(destinationId: String, technic: Technic)
 }
