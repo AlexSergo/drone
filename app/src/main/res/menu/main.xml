@@ -74,9 +74,9 @@
         android:title="Удалить все"
         app:showAsAction="never" />
     <item
-        android:id="@+id/about"
+        android:id="@+id/Id"
         android:orderInCategory="107"
-        android:title="О программе"
+        android:title="Мой ID"
         app:showAsAction="never" />
     <item
         android:id="@+id/addHeightMaps"
