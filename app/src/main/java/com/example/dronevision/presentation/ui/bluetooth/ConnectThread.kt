@@ -1,6 +1,7 @@
 package com.example.dronevision.presentation.ui.bluetooth
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.Context
@@ -10,6 +11,7 @@ import com.example.dronevision.presentation.model.bluetooth.Message
 import java.io.IOException
 import java.util.*
 
+@SuppressLint("MissingPermission")
 class ConnectThread(private val device: BluetoothDevice,
                     private val context: Context,
                     private val listener: BluetoothReceiver.MessageListener): Thread() {
@@ -20,32 +22,22 @@ class ConnectThread(private val device: BluetoothDevice,
 
     init {
         try {
-            if (ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.BLUETOOTH_CONNECT
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
+
                 socket = device.createRfcommSocketToServiceRecord(UUID.fromString(uuid))
-            }
+
         }catch (_: IOException){
 
         }
     }
 
+    @SuppressLint("MissingPermission")
     override fun run() {
         try {
             listener.onReceive(Message("Подключение...", true))
-            if (ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.BLUETOOTH_CONNECT
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
                 socket?.connect()
                 receiveThread = BluetoothReceiver(socket!!, listener)
                 receiveThread.start()
                 listener.onReceive(Message("Подключено!", true))
-
-            }
         }catch (e: IOException){
             listener.onReceive(Message("Невозможно подключиться!", true))
             closeConnection()

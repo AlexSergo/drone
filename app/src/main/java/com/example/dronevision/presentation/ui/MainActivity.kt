@@ -1,6 +1,8 @@
 package com.example.dronevision.presentation.ui
 
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.view.Menu
@@ -10,6 +12,7 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.view.GravityCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -64,6 +67,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         setContentView(binding.root)
         sharedPreferences = SharedPreferences(applicationContext)
 
+        checkPermissions()
         createAppFolder()
         initViewModel()
         val id = Device.getDeviceId(applicationContext)
@@ -74,9 +78,27 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         setupBluetoothDialog()
         setupOsmdroidConfiguration()
     }
-    
-    
-    
+
+    private fun checkPermissions() {
+            val permission1 = ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            val permission2 = ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.BLUETOOTH_SCAN);
+            if (permission1 != PackageManager.PERMISSION_GRANTED) {
+                // We do not have permission so immediate the consumer
+                ActivityCompat.requestPermissions(
+                    this,
+                    Constants.PERMISSIONS_STORAGE,
+                    1
+                );
+            } else if (permission2 != PackageManager.PERMISSION_GRANTED){
+                ActivityCompat.requestPermissions(
+                    this,
+                    Constants.PERMISSIONS_LOCATION,
+                    1
+                );
+            }
+    }
+
+
     private fun initViewModel() {
         (applicationContext as App).appComponent.inject(this)
         mainViewModel =
