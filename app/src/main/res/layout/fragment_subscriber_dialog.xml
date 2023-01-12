@@ -44,9 +44,10 @@
         </LinearLayout>
 
             <EditText
+                android:layout_marginTop="8dp"
                 app:layout_constraintStart_toEndOf="@id/names"
-                app:layout_constraintTop_toBottomOf="@id/editTextID"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text"
                 android:id="@+id/editTextName"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -56,9 +57,10 @@
 
 
             <EditText
+                android:layout_marginTop="6dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/names"
-                app:layout_constraintTop_toTopOf="@id/names"
+                app:layout_constraintTop_toBottomOf="@id/editTextName"
                 android:id="@+id/editTextID"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

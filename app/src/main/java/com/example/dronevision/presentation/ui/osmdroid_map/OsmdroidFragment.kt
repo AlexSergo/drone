@@ -20,6 +20,7 @@ import com.example.dronevision.presentation.model.bluetooth.Entity
 import com.example.dronevision.presentation.ui.MainActivity
 import com.example.dronevision.presentation.ui.MyMapFragment
 import com.example.dronevision.presentation.ui.targ.TargetFragment
+import com.example.dronevision.utils.Device
 import com.example.dronevision.utils.ImageTypes
 import com.example.dronevision.utils.MapTools
 import com.example.dronevision.utils.MapType
@@ -80,7 +81,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
             )
         )
     
-        onDatabaseChangeListener(this)
+        onDatabaseChangeListener(Device.getDeviceId(requireContext()),this)
         return binding.root
     }
     
@@ -254,8 +255,8 @@ class OsmdroidFragment : MyMapFragment(), IMap {
         mark.setOnMarkerClickListener { marker, mapView ->
             val targetFragment = TargetFragment( technic = technic,
                 object : TargetFragment.TargetFragmentCallback{
-                    override fun onBroadcastButtonClick(technic: Technic) {
-                       sendMessage("",technic)
+                    override fun onBroadcastButtonClick(destinationId: String, technic: Technic) {
+                       sendMessage(destinationId, technic)
                     }
 
                     override fun deleteTarget() {

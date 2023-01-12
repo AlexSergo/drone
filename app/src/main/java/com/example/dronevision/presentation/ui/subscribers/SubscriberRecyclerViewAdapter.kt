@@ -8,7 +8,8 @@ import com.example.dronevision.R
 import com.example.dronevision.databinding.SubscriberListItemBinding
 import com.example.dronevision.presentation.model.Subscriber
 
-class SubscriberRecyclerViewAdapter: RecyclerView.Adapter<SubscriberRecyclerViewAdapter.ItemHolder>() {
+class SubscriberRecyclerViewAdapter(private val callback: SubscriberListCallback? = null)
+    : RecyclerView.Adapter<SubscriberRecyclerViewAdapter.ItemHolder>() {
 
     private var subscribers = mutableListOf<Subscriber>()
 
@@ -23,7 +24,7 @@ class SubscriberRecyclerViewAdapter: RecyclerView.Adapter<SubscriberRecyclerView
 
     override fun onBindViewHolder(holder: ItemHolder, position: Int) {
         subscribers.getOrNull(position)?.let {
-            holder.setData(it)
+            holder.setData(it, callback)
         }
     }
 
@@ -35,9 +36,12 @@ class SubscriberRecyclerViewAdapter: RecyclerView.Adapter<SubscriberRecyclerView
 
         private val binding = SubscriberListItemBinding.bind(view)
 
-        fun setData(subscriber: Subscriber){
+        fun setData(subscriber: Subscriber, callback: SubscriberListCallback?){
             binding.subscriberName.text = subscriber.name
             binding.subscriberAddress.text = subscriber.id
+            binding.item.setOnClickListener {
+                callback?.select(subscriber)
+            }
         }
 
         companion object{

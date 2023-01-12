@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -13,7 +12,7 @@ import com.example.dronevision.databinding.FragmentSubscriberListDialogBinding
 import javax.inject.Inject
 
 
-class SubscriberListDialog : DialogFragment() {
+class SubscriberListDialog(private val subscriberCallback: SubscriberListCallback? = null) : DialogFragment() {
 
     private lateinit var binding: FragmentSubscriberListDialogBinding
     private lateinit var viewModel: SubscriberViewModel
@@ -30,7 +29,7 @@ class SubscriberListDialog : DialogFragment() {
 
         initModelView()
         binding = FragmentSubscriberListDialogBinding.inflate(layoutInflater)
-        adapter = SubscriberRecyclerViewAdapter()
+        adapter = SubscriberRecyclerViewAdapter(subscriberCallback)
         binding.recyclerView.adapter = adapter
 
         viewModel.getSubscribers()

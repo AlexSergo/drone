@@ -327,7 +327,8 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         true
                     }
                     R.id.Id ->{
-
+                        val androidIdDialog = AndroidIdFragment()
+                        androidIdDialog.show(supportFragmentManager, "id_dialog")
                         true
                     }
                     else -> false

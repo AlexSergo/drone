@@ -21,14 +21,16 @@ class RemoteDatabaseHandlerImpl: RemoteDatabaseHandler {
 
     private var databaseRef: DatabaseReference? = null
     private var firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    private var database =
+        Firebase.database("https://drone-6c66c-default-rtdb.asia-southeast1.firebasedatabase.app")
 
-    override fun onDatabaseChangeListener(map : IMap) {
+    override fun onDatabaseChangeListener(id: String, map : IMap) {
         checkNull()
-        databaseRef?.addValueEventListener(object : ValueEventListener {
+        databaseRef?.child(id)?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                if (null == snapshot.value || snapshot.hasChild("users")) return
+                if (null == snapshot.value) return
                 val str = snapshot.value.toString().split(" ")
-                val type = str[0].substring(22)
+                val type = str[0].substring(str[0].indexOf("=") + 1)
                 val lat = str[1].toDouble()
                 val lon = str[2].substring(0, str[2].length - 1).toDouble()
 
@@ -36,8 +38,9 @@ class RemoteDatabaseHandlerImpl: RemoteDatabaseHandler {
                     TechnicTypes.valueOf(type),
                     Coordinates(x = lat, y = lon)
                 )
-            }
 
+                databaseRef?.child(id)?.removeValue()
+            }
             override fun onCancelled(error: DatabaseError) {}
         })
     }
@@ -54,8 +57,7 @@ class RemoteDatabaseHandlerImpl: RemoteDatabaseHandler {
         sb.append(" ")
         sb.append(technic.coords.y)
         dataMap["info"] = sb.toString()
-        databaseRef?.child("messages")
-            ?.child("8cf2994a13bcc54d")?.updateChildren(dataMap)
+        databaseRef?.child(destinationId)?.updateChildren(dataMap)
     }
 
     private fun anonymousAuth() {
@@ -67,17 +69,15 @@ class RemoteDatabaseHandlerImpl: RemoteDatabaseHandler {
                     dataMap["id"] = uid
                     dataMap["login"] = Device.id
 
-                    databaseRef?.child("users")?.child(uid)?.updateChildren(dataMap)
+                    database.reference.child("users").child(uid).updateChildren(dataMap)
                 }
 
             }
     }
 
     private fun checkNull(){
-        if (databaseRef == null) {
-            val database =
-                Firebase.database("https://drone-6c66c-default-rtdb.asia-southeast1.firebasedatabase.app")
-            databaseRef = database.reference
-        }
+        if (databaseRef == null)
+            databaseRef = database.getReference("messages")
+
     }
 }
