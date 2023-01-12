@@ -8,4 +8,5 @@ interface LocationDialogHandler {
 
 interface LocationDialogCallback{
     fun focusCamera()
+    fun findMyLocation()
 }

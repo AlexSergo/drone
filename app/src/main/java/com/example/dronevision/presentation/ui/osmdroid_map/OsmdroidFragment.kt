@@ -1,23 +1,32 @@
 package com.example.dronevision.presentation.ui.osmdroid_map
 
+import android.content.Context.LOCATION_SERVICE
+import android.content.IntentSender
 import android.graphics.Color
+import android.location.LocationManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.util.Pair
+import androidx.preference.PreferenceManager
 import com.example.dronevision.databinding.FragmentOsmdroidBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.delegates.LocationDialogCallback
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.model.bluetooth.Entity
+import com.example.dronevision.presentation.ui.MainActivity
 import com.example.dronevision.presentation.ui.MyMapFragment
 import com.example.dronevision.presentation.ui.targ.TargetFragment
 import com.example.dronevision.utils.ImageTypes
 import com.example.dronevision.utils.MapTools
 import com.example.dronevision.utils.MapType
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
+import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
@@ -29,6 +38,8 @@ import org.osmdroid.views.overlay.Overlay
 import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import kotlin.math.abs
 
 
@@ -43,6 +54,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
     private lateinit var polylineToCenter: Polyline
     private var polylineToAim: Polyline = Polyline()
     private val listOfTechnic = mutableListOf<Overlay>()
+    private var locationOverlay: MyLocationNewOverlay? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -150,24 +162,31 @@ class OsmdroidFragment : MyMapFragment(), IMap {
                 showGeoInformation(binding, cameraTarget, droneMarker.position)
 
                 setPolyline(polylineToCenter, listOf(droneMarker.position, cameraTarget))
-
+    
                 binding.distance.text = "${getDistance(droneMarker.position, cameraTarget)} km"
                 return true
             }
-
+    
             override fun onZoom(event: ZoomEvent?): Boolean {
                 return true
             }
         })
-        
+    
         setupManipulators(binding, rotationGestureOverlay)
+    
+        checkLocationPermissions((activity as MainActivity))
+        initMyLocation()
     }
-
+    
     override fun initDroneMarker() {
         droneMarker = Marker(binding.mapView)
-        drawMarker(droneMarker,
-            Technic( coords = Coordinates(x = 0.0, y = 0.0),
-                type = TechnicTypes.DRONE))
+        drawMarker(
+            droneMarker,
+            Technic(
+                coords = Coordinates(x = 0.0, y = 0.0),
+                type = TechnicTypes.DRONE
+            )
+        )
         droneMarker.isFlat = true
         polylineToCenter = Polyline()
         polylineToAim.isVisible = false
@@ -304,7 +323,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
         setPolyline(polylineToCenter, listOf(droneMarker.position, cameraTarget))
 
         showAim(GeoPoint(entities[1].lat, entities[1].lon))
-
+    
         if (entities[0].calc_target) {
             osmdroidViewModel.getTargetCoordinates(entities)
             osmdroidViewModel.targetLiveData.observe(this) { findTarget ->
@@ -315,14 +334,15 @@ class OsmdroidFragment : MyMapFragment(), IMap {
             }
         }
     }
-
-    private fun showAim(aim: GeoPoint){
+    
+    private fun showAim(aim: GeoPoint) {
         if (aimMarker != null)
             removeAim()
-
-        aimMarker = drawMarker(aimMarker,
-            Technic(coords = Coordinates(x = aim.latitude, y = aim.longitude),
-                    type = TechnicTypes.AIM
+        
+        aimMarker = drawMarker(
+            aimMarker,
+            Technic(
+                coords = Coordinates(x = aim.latitude, y = aim.longitude), type = TechnicTypes.AIM
             )
         )
         setPolyline(polylineToAim, listOf(droneMarker.position, aimMarker!!.position), Color.GREEN)
@@ -341,7 +361,76 @@ class OsmdroidFragment : MyMapFragment(), IMap {
                 else
                     focusCamera(droneMarker.position)
             }
+    
+            override fun findMyLocation() {
+                if (checkLocationPermissions((activity as MainActivity)))
+                    if (checkGPS())
+                        locationOverlay?.let {
+                            if (it.myLocation != null) focusCamera(it.myLocation)
+                        }
+            }
         })
+    }
+    
+    private fun checkGPS(): Boolean {
+        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 100)
+            .setWaitForAccurateLocation(false)
+            .setMinUpdateIntervalMillis(50)
+            .setMaxUpdateDelayMillis(100)
+            .build()
+        
+        val builder = LocationSettingsRequest.Builder()
+            .addLocationRequest(locationRequest)
+            .setAlwaysShow(true)
+            .build()
+        val res = LocationServices.getSettingsClient(requireContext())
+            .checkLocationSettings(builder)
+        
+        res.addOnCompleteListener { task ->
+            try {
+                // when the GPS is on
+                task.getResult(ApiException::class.java)
+            } catch (e: ApiException) {
+                // when the GPS is OFF
+                e.printStackTrace()
+                when (e.statusCode) {
+                    LocationSettingsStatusCodes.RESOLUTION_REQUIRED -> try {
+                        // here we send the request for enable the GPS
+                        val resolveApiException = e as ResolvableApiException
+                        resolveApiException.startResolutionForResult(requireActivity(), 200)
+                    } catch (sendIntentException: IntentSender.SendIntentException) {
+                        sendIntentException.printStackTrace()
+                    }
+                    LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> {
+                        // when the setting is unavailable
+                    }
+                }
+            }
+        }
+        res.addOnFailureListener { e ->
+            if (e is ResolvableApiException) {
+                try {
+                    // Handle result in onActivityResult()
+                    e.startResolutionForResult(requireActivity(), 999)
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    e.printStackTrace()
+                }
+            }
+            e.printStackTrace()
+        }
+        
+        val locationManager = activity?.getSystemService(LOCATION_SERVICE) as LocationManager
+        val isGPS = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        
+        return isGPS
+    }
+    
+    private fun initMyLocation() {
+        val provider = GpsMyLocationProvider(requireContext())
+        provider.addLocationSource(LocationManager.GPS_PROVIDER)
+        locationOverlay = MyLocationNewOverlay(provider, binding.mapView)
+        locationOverlay?.enableMyLocation()
+        binding.mapView.overlayManager.add(locationOverlay)
     }
     
     override fun deleteAll() = binding.run {
@@ -370,11 +459,19 @@ class OsmdroidFragment : MyMapFragment(), IMap {
     override fun onResume() {
         super.onResume()
         binding.mapView.onResume()
+        val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
+        Configuration.getInstance().save(requireContext(), prefs)
+        Configuration.getInstance().load(
+            requireContext(),
+            PreferenceManager.getDefaultSharedPreferences(requireContext())
+        )
+        locationOverlay?.enableMyLocation()
     }
     
     override fun onPause() {
         super.onPause()
         binding.mapView.onPause()
+        locationOverlay?.disableMyLocation()
     }
     
     override fun onDetach() {
