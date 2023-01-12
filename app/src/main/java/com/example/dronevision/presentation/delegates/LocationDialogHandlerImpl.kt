@@ -10,7 +10,8 @@ class LocationDialogHandlerImpl: LocationDialogHandler {
             "Запросить у Р-187-П1",
             "Запросить у Android",
             "Снять с карты",
-            "Найти на карте",
+            "Найти Дрон",
+            "Моё местоположение",
             "Передать Р-187-П1"
         )
 
@@ -21,10 +22,9 @@ class LocationDialogHandlerImpl: LocationDialogHandler {
                     0 -> {}
                     1 -> {}
                     2 -> {}
-                    3 -> {
-                       callback.focusCamera()
-                    }
-                    4 -> {}
+                    3 -> { callback.focusCamera() }
+                    4 -> { callback.findMyLocation() }
+                    5 -> {}
                 }
             }
             .show()

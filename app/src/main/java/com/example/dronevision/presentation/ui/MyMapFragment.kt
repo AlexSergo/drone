@@ -12,7 +12,7 @@ import javax.inject.Inject
 open class MyMapFragment: Fragment(),
     RemoteDatabaseHandler by RemoteDatabaseHandlerImpl(),
     OfflineMapHandler by OfflineMapHandlerImpl(),
-    StoragePermissionHandler by StoragePermissionHandlerImpl(),
+    PermissionHandler by PermissionHandlerImpl(),
     GeoInformationHandler by GeoInformationHandlerImpl(),
     LocationDialogHandler by LocationDialogHandlerImpl(),
     ManipulatorSetuper by ManipulatorSetuperImpl() {
