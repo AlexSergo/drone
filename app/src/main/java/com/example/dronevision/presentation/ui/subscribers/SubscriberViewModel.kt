@@ -1,4 +1,4 @@
-package com.example.dronevision.presentation.ui
+package com.example.dronevision.presentation.ui.subscribers
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

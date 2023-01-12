@@ -35,6 +35,8 @@ import com.example.dronevision.presentation.ui.bluetooth.BluetoothReceiver
 import com.example.dronevision.presentation.ui.bluetooth.SelectBluetoothFragment
 import com.example.dronevision.presentation.ui.osmdroid_map.IMap
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment
+import com.example.dronevision.presentation.ui.subscribers.SubscriberDialogFragment
+import com.example.dronevision.presentation.ui.subscribers.SubscriberListDialog
 import com.example.dronevision.utils.*
 import com.example.dronevision.utils.FileTools.createAppFolder
 import com.google.android.material.navigation.NavigationView
@@ -258,9 +260,14 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         map.showLocationDialog()
                         true
                     }
-                    R.id.abonentAddItem -> {
-                        val abonentDialogFragment = SubscriberDialogFragment()
-                        abonentDialogFragment.show(supportFragmentManager, "myDialog")
+                    R.id.subscriberAddItem -> {
+                        val subscriberDialogFragment = SubscriberDialogFragment()
+                        subscriberDialogFragment.show(supportFragmentManager, "myDialog")
+                        true
+                    }
+                    R.id.subscriberListItem -> {
+                        val subscriberListDialogFragment = SubscriberListDialog()
+                        subscriberListDialogFragment.show(supportFragmentManager, "listDialog")
                         true
                     }
                     R.id.removeAll -> {

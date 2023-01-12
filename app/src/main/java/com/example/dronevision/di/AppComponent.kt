@@ -1,7 +1,8 @@
 package com.example.dronevision.di
 
 import com.example.dronevision.presentation.ui.MainActivity
-import com.example.dronevision.presentation.ui.SubscriberDialogFragment
+import com.example.dronevision.presentation.ui.subscribers.SubscriberDialogFragment
+import com.example.dronevision.presentation.ui.subscribers.SubscriberListDialog
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment
 import dagger.Component
 
@@ -10,4 +11,5 @@ interface AppComponent {
     fun inject(mainActivity: MainActivity)
     fun inject(osmdroidFragment: OsmdroidFragment)
     fun inject(subscriberDialogFragment: SubscriberDialogFragment)
+    fun inject(subscriberListDialog: SubscriberListDialog)
 }

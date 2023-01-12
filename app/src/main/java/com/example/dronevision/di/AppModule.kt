@@ -1,10 +1,9 @@
 package com.example.dronevision.di
 
 import android.content.Context
-import androidx.lifecycle.ViewModelProvider
 import com.example.dronevision.domain.use_cases.*
 import com.example.dronevision.presentation.ui.MainViewModelFactory
-import com.example.dronevision.presentation.ui.SubscriberViewModelFactory
+import com.example.dronevision.presentation.ui.subscribers.SubscriberViewModelFactory
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidViewModelFactory
 import dagger.Module
 import dagger.Provides

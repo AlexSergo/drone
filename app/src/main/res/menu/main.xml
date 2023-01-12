@@ -35,16 +35,16 @@
         </menu>
     </item>
     <item
-        android:id="@+id/abonents"
+        android:id="@+id/subscribers"
         android:orderInCategory="102"
         android:title="Абоненты"
         app:showAsAction="never">
         <menu>
             <item
-                android:id="@+id/abonentListItem"
+                android:id="@+id/subscriberListItem"
                 android:title="Список" />
             <item
-                android:id="@+id/abonentAddItem"
+                android:id="@+id/subscriberAddItem"
                 android:title="Добавить" />
         </menu>
     </item>

@@ -1,4 +1,4 @@
-package com.example.dronevision.presentation.ui
+package com.example.dronevision.presentation.ui.subscribers
 
 import android.os.Bundle
 import android.view.LayoutInflater
