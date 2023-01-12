@@ -7,9 +7,6 @@ import com.example.dronevision.presentation.model.bluetooth.Entity
 import com.example.dronevision.presentation.model.bluetooth.Message
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -33,14 +30,19 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
 
     override fun run() {
         val buffer = ByteArray(BUFFER_SIZE)
+        var message = ""
         while (true){
             try {
                 val size = inputStream?.read(buffer)
-                val message = String(buffer, 0, size!!)
+                message += String(buffer, 0, size!!)
                 val gson = GsonBuilder()
                     .setLenient()
                     .create()
-                    val entities = gson.fromJson(message, Entities::class.java)
+                val start = message.indexOf("{\"Entities\"")
+                val end = message.indexOf("]}") + 2
+                val obj = message.substring(start, end)
+                message = message.removePrefix(obj)
+                    val entities = gson.fromJson(obj, Entities::class.java)
                     listener.onReceive(
                         Message("Данные получены!", false),
                         entities.entities.toMutableList()
