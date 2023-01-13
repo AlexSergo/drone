@@ -2,6 +2,9 @@ package com.example.dronevision.presentation.ui
 
 
 import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothServerSocket
+import android.bluetooth.BluetoothSocket
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.preference.PreferenceManager
@@ -18,6 +21,7 @@ import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -34,6 +38,7 @@ import com.example.dronevision.presentation.model.bluetooth.BluetoothListItem
 import com.example.dronevision.presentation.model.bluetooth.Entity
 import com.example.dronevision.presentation.model.bluetooth.Message
 import com.example.dronevision.presentation.ui.bluetooth.BluetoothCallback
+import com.example.dronevision.presentation.ui.bluetooth.BluetoothConnection
 import com.example.dronevision.presentation.ui.bluetooth.BluetoothReceiver
 import com.example.dronevision.presentation.ui.bluetooth.SelectBluetoothFragment
 import com.example.dronevision.presentation.ui.osmdroid_map.IMap
@@ -45,6 +50,8 @@ import com.example.dronevision.utils.FileTools.createAppFolder
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.components.BuildConfig
 import org.osmdroid.config.Configuration
+import java.io.IOException
+import java.util.*
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerImpl(),
@@ -149,6 +156,10 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                             Toast.makeText(applicationContext, message.message, Toast.LENGTH_LONG).show()
                         if (entities != null)
                             map.showDataFromDrone(entities)
+                        if (message.message.contains("[ID]")) {
+                            val subscriberDialogFragment = SubscriberDialogFragment(message.message)
+                            subscriberDialogFragment.show(supportFragmentManager, "")
+                        }
                     }
                 }
             })
@@ -327,7 +338,8 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         true
                     }
                     R.id.Id ->{
-                        val androidIdDialog = AndroidIdFragment()
+                        val androidIdDialog = AndroidIdFragment(dialog)
+
                         androidIdDialog.show(supportFragmentManager, "id_dialog")
                         true
                     }

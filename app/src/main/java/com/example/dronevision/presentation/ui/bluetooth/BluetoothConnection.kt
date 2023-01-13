@@ -26,6 +26,7 @@ class BluetoothConnection(
     }
 
     fun sendMessage(message: String){
+
         connectionThread.receiveThread.sendMessage(message.toByteArray())
     }
 }

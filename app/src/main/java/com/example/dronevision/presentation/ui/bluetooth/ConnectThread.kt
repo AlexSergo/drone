@@ -1,12 +1,10 @@
 package com.example.dronevision.presentation.ui.bluetooth
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.Context
-import android.content.pm.PackageManager
-import androidx.core.app.ActivityCompat
+import androidx.lifecycle.MutableLiveData
 import com.example.dronevision.presentation.model.bluetooth.Message
 import java.io.IOException
 import java.util.*
@@ -19,6 +17,11 @@ class ConnectThread(private val device: BluetoothDevice,
     val uuid = "00001101-0000-1000-8000-00805F9B34FB"
     var socket: BluetoothSocket? = null
     lateinit var receiveThread: BluetoothReceiver
+
+    companion object {
+        private var _successConnectionLiveData = MutableLiveData<Boolean>()
+        val successConnectionLiveData get() = _successConnectionLiveData
+    }
 
     init {
         try {
@@ -37,6 +40,7 @@ class ConnectThread(private val device: BluetoothDevice,
                 socket?.connect()
                 receiveThread = BluetoothReceiver(socket!!, listener)
                 receiveThread.start()
+                _successConnectionLiveData.postValue(true)
                 listener.onReceive(Message("Подключено!", true))
         }catch (e: IOException){
             listener.onReceive(Message("Невозможно подключиться!", true))

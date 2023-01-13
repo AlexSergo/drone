@@ -12,7 +12,7 @@ import com.example.dronevision.presentation.model.Subscriber
 import javax.inject.Inject
 
 
-class SubscriberDialogFragment() : DialogFragment() {
+class SubscriberDialogFragment(private val id: String? = null) : DialogFragment() {
 
     lateinit var binding: FragmentSubscriberDialogBinding
     private lateinit var viewModel: SubscriberViewModel
@@ -35,7 +35,13 @@ class SubscriberDialogFragment() : DialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentSubscriberDialogBinding.inflate(layoutInflater)
+
+        if (id != null)
+            binding.editTextID.setText(id.substring(id.indexOf("]") + 1))
+
         binding.saveButton.setOnClickListener {
+            if ( binding.editTextName.text.toString() != ""
+                && binding.editTextID.text.toString() != "")
             viewModel.saveSubscriber(
                 Subscriber(id = binding.editTextID.text.toString(),
                     name = binding.editTextName.text.toString()))

@@ -35,24 +35,32 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
             try {
                 val size = inputStream?.read(buffer)
                 message += String(buffer, 0, size!!)
-                val gson = GsonBuilder()
-                    .setLenient()
-                    .create()
-                val start = message.indexOf("{\"Entities\"")
-                val end = message.indexOf("]}") + 2
-                val obj = message.substring(start, end)
-                message = message.removePrefix(obj)
-                    val entities = gson.fromJson(obj, Entities::class.java)
-                    listener.onReceive(
-                        Message("Данные получены!", false),
-                        entities.entities.toMutableList()
-                    )
+                if (message.contains("[ID]"))
+                    listener.onReceive(Message(message.substring(4), isSystem = false))
+                else
+                    message = parseGson(message)
 
             }catch (e: IOException){
                 listener.onReceive(Message("Ошибка, сбой соединения!", true))
                 return
             }
         }
+    }
+
+    private fun parseGson(message: String): String {
+        val gson = GsonBuilder()
+            .setLenient()
+            .create()
+        val start = message.indexOf("{\"Entities\"")
+        val end = message.indexOf("]}") + 2
+        val obj = message.substring(start, end)
+        val resultMessage = message.removePrefix(obj)
+        val entities = gson.fromJson(obj, Entities::class.java)
+        listener.onReceive(
+            Message("Данные получены!", false),
+            entities.entities.toMutableList()
+        )
+        return resultMessage
     }
 
     fun sendMessage(byteArray: ByteArray){

@@ -7,4 +7,5 @@ import com.example.dronevision.presentation.ui.bluetooth.BluetoothReceiver
 interface BluetoothHandler {
      fun setupBluetooth(context: Context, systemService: Any,
                                 messageListener: BluetoothReceiver.MessageListener): BluetoothConnection
+     fun sendMessage(message: String)
 }
