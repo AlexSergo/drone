@@ -1,5 +1,6 @@
 package com.example.dronevision.presentation.ui.osmdroid_map
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -119,12 +120,13 @@ class OsmdroidViewModel(
         azimuth: String,
         plane: String,
         mapView: MapView
-    ) {
+    ) = viewModelScope.launch(Dispatchers.IO) {
         val latitude = mapView.mapCenter.latitude
         val longitude = mapView.mapCenter.longitude
         val mapOrientation = mapView.mapOrientation
         val cameraZoomLevel = mapView.zoomLevelDouble
-        sessionStateLiveData.value?.let { oldSessionState ->
+        getSessionStateUseCase.execute()?.let { oldSessionStateDto ->
+            val oldSessionState = SessionStateMapperUi.mapSessionStateDtoToUi(oldSessionStateDto)
             val newSessionState = SessionStateMapperUi.mapSessionStateOnSaveInstance(
                 azimuth = azimuth,
                 plane = plane,
