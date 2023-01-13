@@ -3,6 +3,7 @@ package com.example.dronevision.presentation.ui
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.dronevision.App
+import com.example.dronevision.data.source.local.prefs.OfflineOpenFileManager
 import com.example.dronevision.presentation.delegates.*
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidViewModel
@@ -21,6 +22,9 @@ open class MyMapFragment: Fragment(),
     
     @Inject
     lateinit var osmdroidViewModelFactory: OsmdroidViewModelFactory
+    
+    @Inject
+    lateinit var offlineOpenFileManager: OfflineOpenFileManager
 
     protected fun inject(fragment: OsmdroidFragment) {
         (requireContext().applicationContext as App).appComponent.inject(fragment)
