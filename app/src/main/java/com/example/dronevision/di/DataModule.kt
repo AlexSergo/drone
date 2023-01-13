@@ -1,5 +1,6 @@
 package com.example.dronevision.di
 
+import android.content.Context
 import com.example.dronevision.data.repository.DroneVisionServiceRepositoryImpl
 import com.example.dronevision.data.repository.SessionStateRepositoryImpl
 import com.example.dronevision.data.repository.SubscribersRepositoryImpl
@@ -9,6 +10,7 @@ import com.example.dronevision.data.source.RemoteDataSource
 import com.example.dronevision.data.source.local.dao.SessionStateDao
 import com.example.dronevision.data.source.local.dao.SubscribersDao
 import com.example.dronevision.data.source.local.dao.TechnicDao
+import com.example.dronevision.data.source.local.prefs.OfflineOpenFileManager
 import com.example.dronevision.data.source.remote.DroneVisionService
 import com.example.dronevision.domain.repository.DroneVisionServiceRepository
 import com.example.dronevision.domain.repository.SessionStateRepository
@@ -47,4 +49,8 @@ class DataModule {
     @Provides
     fun provideSubscribersRepository(localDataSource: LocalDataSource): SubscribersRepository =
         SubscribersRepositoryImpl(localDataSource = localDataSource)
+    
+    @Provides
+    fun provideOfflineOpenFileManager(context: Context): OfflineOpenFileManager =
+        OfflineOpenFileManager(context)
 }

@@ -5,7 +5,6 @@ import android.content.IntentSender
 import android.graphics.Color
 import android.location.LocationManager
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -71,7 +70,6 @@ class OsmdroidFragment : MyMapFragment(), IMap {
         checkStoragePermissions(requireActivity())
     
         setupOsmdroidMap()
-//        restoreMapInstanceState(savedInstanceState)
         initDroneMarker()
         initTechnic()
         setupLastSessionState()
@@ -112,15 +110,18 @@ class OsmdroidFragment : MyMapFragment(), IMap {
                     )
                 )
                 osmdroidViewModel.saveCurrentMapState(mapType)
+                offlineOpenFileManager.deleteFileName()
             }
-            MapType.YANDEX_MAP.value -> {
+            MapType.SCHEME_MAP.value -> {
                 binding.mapView.setTileSource(
-                    MapTools.getYandexMapTile(
+                    MapTools.getGoogleMapTile(
                         requireContext(),
-                        binding.mapView
+                        binding.mapView,
+                        Pair("Google maps", "m")
                     )
                 )
                 osmdroidViewModel.saveCurrentMapState(mapType)
+                offlineOpenFileManager.deleteFileName()
             }
             MapType.GOOGLE_HYB.value -> {
                 binding.mapView.setTileSource(
@@ -131,6 +132,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
                     )
                 )
                 osmdroidViewModel.saveCurrentMapState(mapType)
+                offlineOpenFileManager.deleteFileName()
             }
             MapType.GOOGLE_SAT.value -> {
                 binding.mapView.setTileSource(
@@ -141,9 +143,14 @@ class OsmdroidFragment : MyMapFragment(), IMap {
                     )
                 )
                 osmdroidViewModel.saveCurrentMapState(mapType)
+                offlineOpenFileManager.deleteFileName()
             }
             MapType.OFFLINE.value -> {
-                offlineMode(binding.mapView, requireContext())
+                val offlineMapFileName = offlineOpenFileManager.getFileName()
+                if (offlineMapFileName != null)
+                    openFile(offlineMapFileName, binding.mapView, requireContext())
+                else offlineMode(binding.mapView, requireContext())
+                osmdroidViewModel.saveCurrentMapState(mapType)
             }
         }
     }

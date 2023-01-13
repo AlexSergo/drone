@@ -314,8 +314,8 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         map.setMapType(MapType.OSM.value)
                         true
                     }
-                    R.id.mapYandexItem -> {
-                        map.setMapType(MapType.YANDEX_MAP.value)
+                    R.id.mapSchemeItem -> {
+                        map.setMapType(MapType.SCHEME_MAP.value)
                         true
                     }
                     R.id.mapHybridItem -> {
