@@ -2,9 +2,6 @@ package com.example.dronevision.presentation.ui
 
 
 import android.Manifest
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothServerSocket
-import android.bluetooth.BluetoothSocket
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.preference.PreferenceManager
@@ -21,7 +18,6 @@ import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -31,15 +27,14 @@ import androidx.navigation.ui.navigateUp
 import com.example.dronevision.App
 import com.example.dronevision.R
 import com.example.dronevision.databinding.ActivityMainBinding
+import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.delegates.BluetoothHandler
 import com.example.dronevision.presentation.delegates.BluetoothHandlerImpl
+import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.model.bluetooth.BluetoothListItem
 import com.example.dronevision.presentation.model.bluetooth.Entity
-import com.example.dronevision.presentation.model.bluetooth.Message
 import com.example.dronevision.presentation.ui.bluetooth.BluetoothCallback
-import com.example.dronevision.presentation.ui.bluetooth.BluetoothConnection
-import com.example.dronevision.presentation.ui.bluetooth.BluetoothReceiver
 import com.example.dronevision.presentation.ui.bluetooth.SelectBluetoothFragment
 import com.example.dronevision.presentation.ui.osmdroid_map.IMap
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment
@@ -50,12 +45,10 @@ import com.example.dronevision.utils.FileTools.createAppFolder
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.components.BuildConfig
 import org.osmdroid.config.Configuration
-import java.io.IOException
-import java.util.*
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerImpl(),
-    NavigationView.OnNavigationItemSelectedListener {
+    NavigationView.OnNavigationItemSelectedListener, MapActivityListener {
     
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
@@ -63,7 +56,6 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
     private lateinit var map: IMap
     private var dialog: SelectBluetoothFragment? = null
     private lateinit var mainViewModel: MainViewModel
-    private lateinit var sharedPreferences: SharedPreferences
     
     @Inject
     lateinit var mainViewModelFactory: MainViewModelFactory
@@ -72,7 +64,6 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        sharedPreferences = SharedPreferences(applicationContext)
 
         checkPermissions()
         createAppFolder()
@@ -113,6 +104,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
     }
 
     private fun checkRegistration(){
+        var sharedPreferences = SharedPreferences(applicationContext)
         val id = Device.getDeviceId(applicationContext)
         if (id != null) {
             val hash = sharedPreferences.getValue("AUTH_TOKEN")
@@ -142,27 +134,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         val connection = setupBluetooth(
             context = this,
             systemService = getSystemService(BLUETOOTH_SERVICE),
-            messageListener = object : BluetoothReceiver.MessageListener {
-                
-                override fun onReceive(message: Message, entities: MutableList<Entity>?) {
-                    entities?.let {
-                        if (it[0].lat.isNaN() || it[0].lon.isNaN()) {
-                            it[0] = Entity(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false)
-                            it[1] = Entity(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false)
-                        }
-                    }
-                    runOnUiThread {
-                        if (message.isSystem)
-                            Toast.makeText(applicationContext, message.message, Toast.LENGTH_LONG).show()
-                        if (entities != null)
-                            map.showDataFromDrone(entities)
-                        if (message.message.contains("[ID]")) {
-                            val subscriberDialogFragment = SubscriberDialogFragment(message.message)
-                            subscriberDialogFragment.show(supportFragmentManager, "")
-                        }
-                    }
-                }
-            })
+            listener = this)
 
         dialog = SelectBluetoothFragment(connection.getAdapter(), object : BluetoothCallback {
             override fun onClick(item: BluetoothListItem) {
@@ -170,6 +142,35 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                 dialog?.dismiss()
             }
         })
+    }
+
+    override fun showMessage(message: String){
+        runOnUiThread {
+            Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    override fun showDroneData(entities: MutableList<Entity>){
+        runOnUiThread {
+            if (entities[0].lat.isNaN() || entities[0].lon.isNaN()) {
+                entities[0] = Entity(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false)
+                entities[1] = Entity(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false)
+            }
+            map.showDataFromDrone(entities)
+        }
+    }
+
+    override fun receiveDeviceId(id: String){
+        runOnUiThread {
+            val subscriberDialogFragment = SubscriberDialogFragment(id)
+            subscriberDialogFragment.show(supportFragmentManager, "")
+        }
+    }
+
+    override fun receiveTarget(technic: Technic){
+        runOnUiThread {
+            map.spawnTechnic(technic.type, Coordinates(x = technic.coords.x, y = technic.coords.y))
+        }
     }
 
     private fun setupOsmdroidConfiguration() {

@@ -5,17 +5,17 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.Context
 import androidx.lifecycle.MutableLiveData
-import com.example.dronevision.presentation.model.bluetooth.Message
+import com.example.dronevision.presentation.ui.MapActivityListener
 import java.io.IOException
 import java.util.*
 
 @SuppressLint("MissingPermission")
 class ConnectThread(private val device: BluetoothDevice,
                     private val context: Context,
-                    private val listener: BluetoothReceiver.MessageListener): Thread() {
+                    private val listener: MapActivityListener): Thread() {
 
-    val uuid = "00001101-0000-1000-8000-00805F9B34FB"
-    var socket: BluetoothSocket? = null
+    private val uuid = "00001101-0000-1000-8000-00805F9B34FB"
+    private var socket: BluetoothSocket? = null
     lateinit var receiveThread: BluetoothReceiver
 
     companion object {
@@ -25,7 +25,6 @@ class ConnectThread(private val device: BluetoothDevice,
 
     init {
         try {
-
                 socket = device.createRfcommSocketToServiceRecord(UUID.fromString(uuid))
 
         }catch (_: IOException){
@@ -36,14 +35,14 @@ class ConnectThread(private val device: BluetoothDevice,
     @SuppressLint("MissingPermission")
     override fun run() {
         try {
-            listener.onReceive(Message("Подключение...", true))
+            listener.showMessage("Подключение...")
                 socket?.connect()
                 receiveThread = BluetoothReceiver(socket!!, listener)
                 receiveThread.start()
                 _successConnectionLiveData.postValue(true)
-                listener.onReceive(Message("Подключено!", true))
+            listener.showMessage("Подключено!")
         }catch (e: IOException){
-            listener.onReceive(Message("Невозможно подключиться!", true))
+            listener.showMessage("Невозможно подключиться!")
             closeConnection()
         }
     }

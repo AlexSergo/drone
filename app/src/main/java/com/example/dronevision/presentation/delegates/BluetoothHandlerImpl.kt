@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothServerSocket
 import android.bluetooth.BluetoothSocket
 import android.content.Context
+import com.example.dronevision.presentation.ui.MapActivityListener
 import com.example.dronevision.presentation.ui.bluetooth.BluetoothConnection
 import com.example.dronevision.presentation.ui.bluetooth.BluetoothReceiver
 import java.io.IOException
@@ -15,22 +16,19 @@ class BluetoothHandlerImpl: BluetoothHandler {
 
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var bluetoothConnection: BluetoothConnection
-    private lateinit var  messageListener: BluetoothReceiver.MessageListener
     private lateinit var receiver: BluetoothReceiver
+    private lateinit var listener: MapActivityListener
     private var socket: BluetoothSocket? = null
     val uuid = "00001101-0000-1000-8000-00805F9B34FB"
 
-    override fun setupBluetooth(context: Context, systemService: Any,
-                                messageListener: BluetoothReceiver.MessageListener): BluetoothConnection {
+    override fun setupBluetooth(
+        context: Context, systemService: Any, listener: MapActivityListener
+    ): BluetoothConnection {
         val bluetoothManager = systemService as BluetoothManager
         bluetoothAdapter = bluetoothManager.adapter
 
-        bluetoothConnection = BluetoothConnection(
-            bluetoothAdapter,
-            context = context, listener = messageListener
-        )
-        this.messageListener = messageListener
-
+        bluetoothConnection = BluetoothConnection(bluetoothAdapter, context, listener)
+        this.listener = listener
         AcceptThread().start()
         return bluetoothConnection
     }
@@ -58,7 +56,7 @@ class BluetoothHandlerImpl: BluetoothHandler {
                     null
                 }
                 socket?.also {
-                    receiver = BluetoothReceiver(it, messageListener)
+                    receiver = BluetoothReceiver(it, listener)
                     receiver.start()
                     mmServerSocket?.close()
                     shouldLoop = false

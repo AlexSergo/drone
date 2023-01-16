@@ -2,11 +2,12 @@ package com.example.dronevision.presentation.ui.bluetooth
 
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
+import com.example.dronevision.presentation.ui.MapActivityListener
 
 class BluetoothConnection(
     private val adapter: BluetoothAdapter,
     private val context: Context,
-    private val listener: BluetoothReceiver.MessageListener
+    private val listener: MapActivityListener
 ) {
 
     lateinit var connectionThread: ConnectThread
