@@ -38,10 +38,10 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
                     message = ""
                     continue
                 }
-                if (message.contains(MessageType.Target.name))
-                    parseTargetGson(message)
+                if (message.contains(MessageType.Entities.name))
+                    message = parseDroneGson(message)
                 else
-                    parseDroneGson(message)
+                    message = parseTargetGson(message)
 
             }catch (e: IOException){
                 listener.showMessage("Ошибка, сбой соединения!")
@@ -52,17 +52,11 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
 
     private fun parseTargetGson(message: String): String {
         val gson = GsonBuilder()
-            .setLenient()
+            .setPrettyPrinting()
             .create()
-        var resultMessage = ""
-        resultMessage = message.removePrefix(MessageType.Target.name)
-        val start = message.indexOf("{\"Target\"")
-        val end = message.indexOf("]}") + 2
-        val obj = message.substring(start, end)
-        val target = gson.fromJson(obj, Technic::class.java)
-        resultMessage = message.removePrefix(obj)
-        listener.receiveTarget(target)
-        return resultMessage
+        val target = gson.fromJson(message, Technic::class.java)
+        listener.receiveTechnic(target)
+        return ""
     }
 
     private fun parseDroneGson(message: String): String {
@@ -87,7 +81,7 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
 
     enum class MessageType{
         ID,
-        Target,
+        Technic,
         Entities
     }
 }

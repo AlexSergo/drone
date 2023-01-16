@@ -6,9 +6,11 @@ import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothServerSocket
 import android.bluetooth.BluetoothSocket
 import android.content.Context
+import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.MapActivityListener
 import com.example.dronevision.presentation.ui.bluetooth.BluetoothConnection
 import com.example.dronevision.presentation.ui.bluetooth.BluetoothReceiver
+import com.google.gson.Gson
 import java.io.IOException
 import java.util.*
 
@@ -29,7 +31,6 @@ class BluetoothHandlerImpl: BluetoothHandler {
 
         bluetoothConnection = BluetoothConnection(bluetoothAdapter, context, listener)
         this.listener = listener
-        AcceptThread().start()
         return bluetoothConnection
     }
 
@@ -37,6 +38,16 @@ class BluetoothHandlerImpl: BluetoothHandler {
         socket?.let {
             receiver.sendMessage(message.toByteArray())
         }
+    }
+
+    override fun sendMessage(technic: Technic) {
+        socket?.let {
+            receiver.sendMessage((Gson().toJson(technic)).toByteArray())
+        }
+    }
+
+    override fun acceptBluetoothConnection(){
+        AcceptThread().start()
     }
 
     @SuppressLint("MissingPermission")
@@ -57,12 +68,11 @@ class BluetoothHandlerImpl: BluetoothHandler {
                 }
                 socket?.also {
                     receiver = BluetoothReceiver(it, listener)
-                    receiver.start()
                     mmServerSocket?.close()
                     shouldLoop = false
                 }
             }
-            // Keep listening until exception occurs or a socket is returned
+            cancel()
         }
 
         fun cancel() {

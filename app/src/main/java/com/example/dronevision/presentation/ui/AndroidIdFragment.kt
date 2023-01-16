@@ -20,7 +20,7 @@ import com.example.dronevision.presentation.ui.bluetooth.ConnectThread
 import com.example.dronevision.presentation.ui.bluetooth.SelectBluetoothFragment
 import com.example.dronevision.utils.Device
 
-class AndroidIdFragment(private val selectBluetoothFragment: SelectBluetoothFragment?) : DialogFragment() {
+class AndroidIdFragment : DialogFragment() {
 
     private lateinit var binding: FragmentAndroidIdBinding
 
@@ -35,13 +35,11 @@ class AndroidIdFragment(private val selectBluetoothFragment: SelectBluetoothFrag
             Toast.makeText(requireContext(), "Скопировано в буфер обмена!", Toast.LENGTH_SHORT)
                 .show()
         }
+        val bluetoothHandler = requireActivity() as BluetoothHandler
+        bluetoothHandler.acceptBluetoothConnection()
         binding.sendButton.setOnClickListener {
             val callback = requireActivity() as BluetoothHandler
             callback.sendMessage("[ID]" + Device.id)
-/*            ConnectThread.successConnectionLiveData.observe(this, Observer {
-                val callback = requireActivity() as BluetoothHandler
-                callback.sendMessage(Device.id)
-            })*/
         }
         return binding.root
     }

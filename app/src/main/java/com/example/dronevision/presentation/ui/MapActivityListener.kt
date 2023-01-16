@@ -7,5 +7,5 @@ interface MapActivityListener {
     fun showMessage(message: String)
     fun showDroneData(entities: MutableList<Entity>)
     fun receiveDeviceId(id: String)
-    fun receiveTarget(technic: Technic)
+    fun receiveTechnic(technic: Technic)
 }

@@ -1,6 +1,7 @@
 package com.example.dronevision.presentation.delegates
 
 import android.content.Context
+import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.MapActivityListener
 import com.example.dronevision.presentation.ui.bluetooth.BluetoothConnection
 
@@ -9,4 +10,6 @@ interface BluetoothHandler {
          context: Context, systemService: Any,
      listener: MapActivityListener): BluetoothConnection
      fun sendMessage(message: String)
+    fun sendMessage(technic: Technic)
+    fun acceptBluetoothConnection()
 }

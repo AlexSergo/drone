@@ -4,6 +4,6 @@ import com.example.dronevision.data.source.remote.model.RequestId
 
 object IdMapper {
     fun mapStringIdToRequestObject(androidId: String): RequestId{
-        return RequestId(id = androidId)
+        return RequestId(deviceId = androidId)
     }
 }

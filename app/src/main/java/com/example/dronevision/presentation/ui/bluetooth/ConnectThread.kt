@@ -18,11 +18,6 @@ class ConnectThread(private val device: BluetoothDevice,
     private var socket: BluetoothSocket? = null
     lateinit var receiveThread: BluetoothReceiver
 
-    companion object {
-        private var _successConnectionLiveData = MutableLiveData<Boolean>()
-        val successConnectionLiveData get() = _successConnectionLiveData
-    }
-
     init {
         try {
                 socket = device.createRfcommSocketToServiceRecord(UUID.fromString(uuid))
@@ -39,7 +34,6 @@ class ConnectThread(private val device: BluetoothDevice,
                 socket?.connect()
                 receiveThread = BluetoothReceiver(socket!!, listener)
                 receiveThread.start()
-                _successConnectionLiveData.postValue(true)
             listener.showMessage("Подключено!")
         }catch (e: IOException){
             listener.showMessage("Невозможно подключиться!")

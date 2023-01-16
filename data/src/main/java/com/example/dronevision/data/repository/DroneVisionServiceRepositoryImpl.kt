@@ -7,7 +7,7 @@ import com.example.dronevision.domain.repository.DroneVisionServiceRepository
 class DroneVisionServiceRepositoryImpl(private val remoteDataSource: RemoteDataSource): DroneVisionServiceRepository {
     override suspend fun getId(androidId: String): String {
         val requestId = IdMapper.mapStringIdToRequestObject(androidId)
-        return remoteDataSource.getId(requestId).hash
+        return remoteDataSource.getId(requestId).data
     }
 
 }

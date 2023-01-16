@@ -1,8 +1,5 @@
 package com.example.dronevision.presentation.delegates
 
-import android.content.ContentValues.TAG
-import android.provider.Settings
-import android.util.Log
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.model.Technic
@@ -15,7 +12,6 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
-import kotlin.reflect.typeOf
 
 class RemoteDatabaseHandlerImpl: RemoteDatabaseHandler {
 
@@ -51,11 +47,11 @@ class RemoteDatabaseHandlerImpl: RemoteDatabaseHandler {
             anonymousAuth()
         val dataMap = mutableMapOf<String, Any>()
         val sb = StringBuilder()
-        sb.append(technic.type.name)
+        sb.append(technic.technicTypes.name)
         sb.append(" ")
-        sb.append(technic.coords.x)
+        sb.append(technic.coordinates.x)
         sb.append(" ")
-        sb.append(technic.coords.y)
+        sb.append(technic.coordinates.y)
         dataMap["info"] = sb.toString()
         databaseRef?.child(destinationId)?.updateChildren(dataMap)
     }

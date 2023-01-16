@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         initViewModel()
         val id = Device.getDeviceId(applicationContext)
         println(id)
-        //checkRegistration() TODO: Раскоментить когда будет серверная часть
+      //  checkRegistration() //TODO: Раскоментить когда будет серверная часть
         setupOptionsMenu()
         setupDrawer()
         setupBluetoothDialog()
@@ -167,9 +167,9 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         }
     }
 
-    override fun receiveTarget(technic: Technic){
+    override fun receiveTechnic(technic: Technic){
         runOnUiThread {
-            map.spawnTechnic(technic.type, Coordinates(x = technic.coords.x, y = technic.coords.y))
+            map.spawnTechnic(technic.technicTypes, Coordinates(x = technic.coordinates.x, y = technic.coordinates.y))
         }
     }
 
@@ -339,7 +339,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         true
                     }
                     R.id.Id ->{
-                        val androidIdDialog = AndroidIdFragment(dialog)
+                        val androidIdDialog = AndroidIdFragment()
 
                         androidIdDialog.show(supportFragmentManager, "id_dialog")
                         true
