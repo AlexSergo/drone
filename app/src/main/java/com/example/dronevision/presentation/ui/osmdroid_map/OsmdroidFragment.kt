@@ -55,7 +55,8 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
     OfflineMapHandler by OfflineMapHandlerImpl(), PermissionHandler by PermissionHandlerImpl(),
     GeoInformationHandler by GeoInformationHandlerImpl(),
     LocationDialogHandler by LocationDialogHandlerImpl(),
-    ManipulatorSetuper by ManipulatorSetuperImpl() {
+    ManipulatorSetuper by ManipulatorSetuperImpl(),
+    GpsHandler by GpsHandlerImpl() {
     
     
     private lateinit var binding: FragmentOsmdroidBinding
@@ -127,61 +128,6 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             val mapController = binding.mapView.controller
             mapController.setZoom(sessionState.cameraZoomLevel)
             mapController.setCenter(GeoPoint(sessionState.latitude, sessionState.longitude))
-        }
-    }
-    
-    override fun setMapType(mapType: Int) {
-        when (mapType) {
-            MapType.OSM.value -> {
-                binding.mapView.setTileSource(
-                    MapTools.getOSMMapTile(
-                        requireContext(),
-                        binding.mapView
-                    )
-                )
-                osmdroidViewModel.saveCurrentMapState(mapType)
-                offlineOpenFileManager.deleteFileName()
-            }
-            MapType.SCHEME_MAP.value -> {
-                binding.mapView.setTileSource(
-                    MapTools.getGoogleMapTile(
-                        requireContext(),
-                        binding.mapView,
-                        Pair("Google maps", "m")
-                    )
-                )
-                osmdroidViewModel.saveCurrentMapState(mapType)
-                offlineOpenFileManager.deleteFileName()
-            }
-            MapType.GOOGLE_HYB.value -> {
-                binding.mapView.setTileSource(
-                    MapTools.getGoogleMapTile(
-                        requireContext(),
-                        binding.mapView,
-                        Pair("Google hybrid", "y")
-                    )
-                )
-                osmdroidViewModel.saveCurrentMapState(mapType)
-                offlineOpenFileManager.deleteFileName()
-            }
-            MapType.GOOGLE_SAT.value -> {
-                binding.mapView.setTileSource(
-                    MapTools.getGoogleMapTile(
-                        requireContext(),
-                        binding.mapView,
-                        Pair("Google satellite", "s")
-                    )
-                )
-                osmdroidViewModel.saveCurrentMapState(mapType)
-                offlineOpenFileManager.deleteFileName()
-            }
-            MapType.OFFLINE.value -> {
-                val offlineMapFileName = offlineOpenFileManager.getFileName()
-                if (offlineMapFileName != null)
-                    openFile(offlineMapFileName, binding.mapView, requireContext())
-                else offlineMode(binding.mapView, requireContext())
-                osmdroidViewModel.saveCurrentMapState(mapType)
-            }
         }
     }
     
@@ -419,63 +365,12 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             
             override fun findMyLocation() {
                 if (checkLocationPermissions((activity as MainActivity)))
-                    if (checkGPS())
+                    if (checkGPS(requireActivity()))
                         locationOverlay?.let {
                             if (it.myLocation != null) focusCamera(it.myLocation)
                         }
             }
         })
-    }
-    
-    private fun checkGPS(): Boolean {
-        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 100)
-            .setWaitForAccurateLocation(false)
-            .setMinUpdateIntervalMillis(600)
-            .setMaxUpdateDelayMillis(1000)
-            .build()
-        
-        val builder = LocationSettingsRequest.Builder()
-            .addLocationRequest(locationRequest)
-            .setAlwaysShow(true)
-            .build()
-        val res = LocationServices.getSettingsClient(requireContext())
-            .checkLocationSettings(builder)
-        
-        res.addOnCompleteListener { task ->
-            try {
-                // when the GPS is on
-                task.getResult(ApiException::class.java)
-            } catch (e: ApiException) {
-                // when the GPS is OFF
-                e.printStackTrace()
-                when (e.statusCode) {
-                    LocationSettingsStatusCodes.RESOLUTION_REQUIRED -> try {
-                        // here we send the request for enable the GPS
-                        val resolveApiException = e as ResolvableApiException
-                        resolveApiException.startResolutionForResult(requireActivity(), 200)
-                    } catch (sendIntentException: IntentSender.SendIntentException) {
-                        sendIntentException.printStackTrace()
-                    }
-                    LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> {
-                        // when the setting is unavailable
-                    }
-                }
-            }
-        }
-        res.addOnFailureListener { e ->
-            if (e is ResolvableApiException) {
-                try {
-                    // Handle result in onActivityResult()
-                    e.startResolutionForResult(requireActivity(), 999)
-                } catch (sendEx: IntentSender.SendIntentException) {
-                    e.printStackTrace()
-                }
-            }
-            e.printStackTrace()
-        }
-        
-        val locationManager = activity?.getSystemService(LOCATION_SERVICE) as LocationManager
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
     }
     
     private fun initMyLocation() {
@@ -490,7 +385,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         mapView.overlays.removeAll(listOfTechnic)
         osmdroidViewModel.deleteAll()
         listOfTechnic.clear()
-        binding.mapView.invalidate()
+        mapView.invalidate()
         return@run
     }
     
@@ -507,6 +402,61 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             osmdroidViewModel.saveGridState(isGrid)
         }
         binding.mapView.invalidate()
+    }
+    
+    override fun setMapType(mapType: Int) {
+        when (mapType) {
+            MapType.OSM.value -> {
+                binding.mapView.setTileSource(
+                    MapTools.getOSMMapTile(
+                        requireContext(),
+                        binding.mapView
+                    )
+                )
+                osmdroidViewModel.saveCurrentMapState(mapType)
+                offlineOpenFileManager.deleteFileName()
+            }
+            MapType.SCHEME_MAP.value -> {
+                binding.mapView.setTileSource(
+                    MapTools.getGoogleMapTile(
+                        requireContext(),
+                        binding.mapView,
+                        Pair("Google maps", "m")
+                    )
+                )
+                osmdroidViewModel.saveCurrentMapState(mapType)
+                offlineOpenFileManager.deleteFileName()
+            }
+            MapType.GOOGLE_HYB.value -> {
+                binding.mapView.setTileSource(
+                    MapTools.getGoogleMapTile(
+                        requireContext(),
+                        binding.mapView,
+                        Pair("Google hybrid", "y")
+                    )
+                )
+                osmdroidViewModel.saveCurrentMapState(mapType)
+                offlineOpenFileManager.deleteFileName()
+            }
+            MapType.GOOGLE_SAT.value -> {
+                binding.mapView.setTileSource(
+                    MapTools.getGoogleMapTile(
+                        requireContext(),
+                        binding.mapView,
+                        Pair("Google satellite", "s")
+                    )
+                )
+                osmdroidViewModel.saveCurrentMapState(mapType)
+                offlineOpenFileManager.deleteFileName()
+            }
+            MapType.OFFLINE.value -> {
+                val offlineMapFileName = offlineOpenFileManager.getFileName()
+                if (offlineMapFileName != null)
+                    openFile(offlineMapFileName, binding.mapView, requireContext())
+                else offlineMode(binding.mapView, requireContext())
+                osmdroidViewModel.saveCurrentMapState(mapType)
+            }
+        }
     }
     
     override fun onResume() {

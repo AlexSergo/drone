@@ -39,12 +39,11 @@ class OfflineMapHandlerImpl: OfflineMapHandler {
                 val mapOfflineBuilder = AlertDialog.Builder(context)
                 mapOfflineBuilder.setTitle("Файлы БД оффлайн карт" as CharSequence)
                 mapOfflineBuilder.create()
-                mapOfflineBuilder.setItems(items as Array<CharSequence>) { _, which ->
+                mapOfflineBuilder.setItems(items) { _, which ->
                     val fileName = items[which]
                     OfflineOpenFileManager(context).addFileName(fileName)
                     openFile(fileName, mapView, context)
                 }.show()
-                
             } else Toast.makeText(
                     context,
                     "Файлы mbtiles не найдены в $dirName",
