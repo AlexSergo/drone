@@ -12,6 +12,8 @@ import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.util.Pair
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import com.example.dronevision.App
 import com.example.dronevision.data.source.local.prefs.OfflineOpenFileManager
@@ -22,7 +24,6 @@ import com.example.dronevision.presentation.delegates.*
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.model.bluetooth.Entity
 import com.example.dronevision.presentation.ui.MainActivity
-import com.example.dronevision.presentation.ui.MyMapFragment
 import com.example.dronevision.presentation.ui.targ.TargetFragment
 import com.example.dronevision.presentation.ui.targ.TargetFragmentCallback
 import com.example.dronevision.utils.Device
@@ -183,13 +184,17 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         drawMarker(
             droneMarker,
             Technic(
-                coords = Coordinates(x = 0.0, y = 0.0),
-                type = TechnicTypes.DRONE
+                coordinates = Coordinates(x = 0.0, y = 0.0),
+                technicTypes = TechnicTypes.DRONE
             )
         )
         droneMarker.isFlat = true
         polylineToCenter = Polyline()
         polylineToAim.isVisible = false
+    }
+
+    override fun setMapType(mapType: Int) {
+
     }
 
     private fun setPolyline(polyline: Polyline, points: List<GeoPoint>, color: Int = Color.BLUE){
@@ -209,7 +214,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                     drawMarker(mark, technic)
     
                     listOfTechnic.add(mark)
-                    addClickListenerToMark(mark, technic.type)
+                    addClickListenerToMark(mark, technic.technicTypes)
                 }
             }
         }
@@ -236,8 +241,8 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             osmdroidViewModel.saveTechnic(
                 Technic(
                     id = count,
-                    type = type,
-                    Coordinates(x = mark.position.latitude, y = mark.position.longitude)
+                    technicTypes = type,
+                    coordinates = Coordinates(x = mark.position.latitude, y = mark.position.longitude)
                 )
             )
         }
@@ -293,10 +298,10 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         var marker = mark
         if (marker == null)
             marker = Marker(binding.mapView)
-        marker.position = GeoPoint(technic.coords.x, technic.coords.y)
+        marker.position = GeoPoint(technic.coordinates.x, technic.coordinates.y)
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
         binding.mapView.overlays.add(marker)
-        marker.icon = getDrawable(requireContext(), ImageTypes.imageMap[technic.type]!!)
+        marker.icon = getDrawable(requireContext(), ImageTypes.imageMap[technic.technicTypes]!!)
         binding.mapView.invalidate()
 
         return marker
@@ -340,7 +345,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         aimMarker = drawMarker(
             aimMarker,
             Technic(
-                coords = Coordinates(x = aim.latitude, y = aim.longitude), type = TechnicTypes.AIM
+                coordinates = Coordinates(x = aim.latitude, y = aim.longitude), technicTypes = TechnicTypes.AIM
             )
         )
         setPolyline(polylineToAim, listOf(droneMarker.position, aimMarker!!.position), Color.GREEN)
