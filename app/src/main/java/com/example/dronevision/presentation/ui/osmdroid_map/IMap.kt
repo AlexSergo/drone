@@ -15,4 +15,5 @@ interface IMap {
     fun removeAim()
     fun initDroneMarker()
     fun setMapType(mapType: Int)
+    fun cacheMap()
 }

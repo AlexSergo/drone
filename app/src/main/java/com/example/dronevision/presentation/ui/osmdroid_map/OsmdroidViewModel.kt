@@ -1,5 +1,6 @@
 package com.example.dronevision.presentation.ui.osmdroid_map
 
+import android.location.LocationManager
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -16,6 +17,8 @@ import com.example.dronevision.utils.MapType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 class OsmdroidViewModel(
     private val getTechnicsUseCase: GetTechnicsUseCase,

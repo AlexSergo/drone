@@ -13,8 +13,10 @@ import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.subscribers.SubscriberListCallback
 import com.example.dronevision.presentation.ui.subscribers.SubscriberListDialog
 
-class TargetFragment(private val technic: Technic,
-                     private val targetFragmentCallback: TargetFragmentCallback) : DialogFragment() {
+class TargetFragment(
+    private val technic: Technic,
+    private val targetFragmentCallback: TargetFragmentCallback
+) : DialogFragment() {
     
     private lateinit var binding: FragmentTargBinding
     
@@ -33,11 +35,11 @@ class TargetFragment(private val technic: Technic,
             dialog?.dismiss()
         }
         binding.broadcastBtn.setOnClickListener {
-            val subscriberListDialog = SubscriberListDialog(object : SubscriberListCallback{
+            val subscriberListDialog = SubscriberListDialog(object : SubscriberListCallback {
                 override fun select(subscriber: Subscriber) {
                     targetFragmentCallback.onBroadcastButtonClick(subscriber.id, technic)
                 }
-
+                
             })
             subscriberListDialog.show(parentFragmentManager, "listDialog")
             dialog?.dismiss()
@@ -47,10 +49,5 @@ class TargetFragment(private val technic: Technic,
             targetFragmentCallback.deleteTarget()
         }
         return binding.root
-    }
-
-    interface TargetFragmentCallback{
-        fun onBroadcastButtonClick(destinationId: String, technic: Technic)
-        fun deleteTarget()
     }
 }

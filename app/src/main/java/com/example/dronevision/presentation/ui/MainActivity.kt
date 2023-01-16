@@ -167,9 +167,9 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         }
     }
 
-    override fun receiveTechnic(technic: Technic){
+    override fun receiveTarget(technic: Technic){
         runOnUiThread {
-            map.spawnTechnic(technic.technicTypes, Coordinates(x = technic.coordinates.x, y = technic.coordinates.y))
+            map.spawnTechnic(technic.type, Coordinates(x = technic.coords.x, y = technic.coords.y))
         }
     }
 
@@ -339,7 +339,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         true
                     }
                     R.id.Id ->{
-                        val androidIdDialog = AndroidIdFragment()
+                        val androidIdDialog = AndroidIdFragment(dialog)
 
                         androidIdDialog.show(supportFragmentManager, "id_dialog")
                         true
