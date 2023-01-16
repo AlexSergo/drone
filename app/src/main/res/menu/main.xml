@@ -74,7 +74,7 @@
         android:title="Удалить все"
         app:showAsAction="never" />
     <item
-        android:id="@+id/Id"
+        android:id="@+id/deviceId"
         android:orderInCategory="107"
         android:title="Мой ID"
         app:showAsAction="never" />

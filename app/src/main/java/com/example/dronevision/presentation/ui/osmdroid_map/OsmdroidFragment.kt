@@ -1,5 +1,6 @@
 package com.example.dronevision.presentation.ui.osmdroid_map
 
+import android.content.Context
 import android.content.Context.LOCATION_SERVICE
 import android.content.IntentSender
 import android.graphics.Color
@@ -8,6 +9,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.util.Pair
 import androidx.preference.PreferenceManager
@@ -31,6 +33,7 @@ import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
+import org.osmdroid.tileprovider.cachemanager.CacheManager
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
@@ -48,7 +51,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
     
     private lateinit var binding: FragmentOsmdroidBinding
     private lateinit var rotationGestureOverlay: RotationGestureOverlay
-
+    
     private val overlayGrid = LatLonGridlineOverlay2()
     private lateinit var droneMarker: Marker
     private var aimMarker: Marker? = null
@@ -61,14 +64,14 @@ class OsmdroidFragment : MyMapFragment(), IMap {
         super.onCreate(savedInstanceState)
         inject(this)
     }
-
+    
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentOsmdroidBinding.inflate(inflater, container, false)
         checkStoragePermissions(requireActivity())
-    
+        
         setupOsmdroidMap()
         initDroneMarker()
         initTechnic()
@@ -80,14 +83,14 @@ class OsmdroidFragment : MyMapFragment(), IMap {
                 GeoPoint(binding.mapView.mapCenter.latitude, binding.mapView.mapCenter.longitude)
             )
         )
-    
-        onDatabaseChangeListener(Device.getDeviceId(requireContext()),this)
+        
+        onDatabaseChangeListener(Device.getDeviceId(requireContext()), this)
         return binding.root
     }
     
     private fun setupLastSessionState() {
         osmdroidViewModel.getSessionState()
-    
+        
         osmdroidViewModel.sessionStateLiveData.observe(viewLifecycleOwner) { sessionState ->
             changeGridState(sessionState.isGrid)
             setMapType(sessionState.currentMap)
@@ -139,7 +142,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
                     MapTools.getGoogleMapTile(
                         requireContext(),
                         binding.mapView,
-                        Pair("Google sattelite", "s")
+                        Pair("Google satellite", "s")
                     )
                 )
                 osmdroidViewModel.saveCurrentMapState(mapType)
@@ -155,6 +158,20 @@ class OsmdroidFragment : MyMapFragment(), IMap {
         }
     }
     
+    override fun cacheMap() {
+        if (binding.mapView.useDataConnection()) {
+            val cacheManager = CacheManager(binding.mapView)
+            cacheManager.verifyCancel = true
+            cacheManager.downloadAreaAsync(requireContext(), binding.mapView.boundingBox, 1, 18)
+        } else {
+            Toast.makeText(
+                requireContext(),
+                "Скачивание невозможно в оффлайн-режиме",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+    
     private fun setupOsmdroidMap() = binding.run {
         mapView.setTileSource(TileSourceFactory.MAPNIK)
         mapView.controller.setZoom(3.0)
@@ -165,25 +182,25 @@ class OsmdroidFragment : MyMapFragment(), IMap {
         
         rotationGestureOverlay = RotationGestureOverlay(mapView)
         mapView.overlays.add(rotationGestureOverlay)
-
-        mapView.addMapListener(object : MapListener{
+        
+        mapView.addMapListener(object : MapListener {
             override fun onScroll(event: ScrollEvent?): Boolean {
                 val cameraTarget = binding.mapView.mapCenter as GeoPoint
                 showGeoInformation(binding, cameraTarget, droneMarker.position)
-
+                
                 setPolyline(polylineToCenter, listOf(droneMarker.position, cameraTarget))
-    
+                
                 binding.distance.text = "${getDistance(droneMarker.position, cameraTarget)} km"
                 return true
             }
-    
+            
             override fun onZoom(event: ZoomEvent?): Boolean {
                 return true
             }
         })
-    
+        
         setupManipulators(binding, rotationGestureOverlay)
-    
+        
         checkLocationPermissions((activity as MainActivity))
         initMyLocation()
     }
@@ -201,15 +218,15 @@ class OsmdroidFragment : MyMapFragment(), IMap {
         polylineToCenter = Polyline()
         polylineToAim.isVisible = false
     }
-
-    private fun setPolyline(polyline: Polyline, points: List<GeoPoint>, color: Int = Color.BLUE){
+    
+    private fun setPolyline(polyline: Polyline, points: List<GeoPoint>, color: Int = Color.BLUE) {
         polyline.setPoints(points)
         polyline.color = color
         polyline.width = 0.2f
         binding.mapView.overlays.add(polyline)
         polylineToAim.isVisible = true
     }
-
+    
     override fun initTechnic() {
         osmdroidViewModel.getTechnics()
         osmdroidViewModel.technicListLiveData.observe(viewLifecycleOwner) {
@@ -217,7 +234,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
                 list.forEach { technic ->
                     val mark = Marker(binding.mapView)
                     drawMarker(mark, technic)
-    
+                    
                     listOfTechnic.add(mark)
                     addClickListenerToMark(mark, technic.type)
                 }
@@ -254,55 +271,60 @@ class OsmdroidFragment : MyMapFragment(), IMap {
             )
         }
     }
-
+    
     private fun addClickListenerToMark(mark: Marker, type: TechnicTypes) {
-        val technic = Technic(coords = Coordinates(
+        val technic = Technic(
+            coords = Coordinates(
                 x = mark.position.latitude,
                 y = mark.position.longitude
-            ), type = type)
-
+            ), type = type
+        )
+        
         mark.setOnMarkerClickListener { marker, mapView ->
-            val targetFragment = TargetFragment( technic = technic,
-                object : TargetFragment.TargetFragmentCallback{
+            val targetFragment = TargetFragment(technic = technic,
+                object : TargetFragment.TargetFragmentCallback {
                     override fun onBroadcastButtonClick(destinationId: String, technic: Technic) {
-                       sendMessage(destinationId, technic)
+                        sendMessage(destinationId, technic)
                     }
-
+                    
                     override fun deleteTarget() {
                         binding.mapView.overlays.remove(mark)
                         listOfTechnic.remove(mark)
                         osmdroidViewModel.deleteTechnic(technic)
                     }
-
+                    
                 }
             )
             targetFragment.show(parentFragmentManager, "targFragment")
             true
         }
-
+        
     }
-
+    
     private fun setMark(
         latitude: Double,
         longitude: Double,
         type: TechnicTypes
     ): Marker {
         aimMarker?.let {
-            if ( abs(latitude - it.position.latitude) < 0.0001
-                && abs(longitude - it.position.longitude) < 0.0001)
+            if (abs(latitude - it.position.latitude) < 0.0001
+                && abs(longitude - it.position.longitude) < 0.0001
+            )
                 removeAim()
         }
         var mark = Marker(binding.mapView)
-        mark = drawMarker(mark, Technic(
-            coords = Coordinates(x= latitude, y = longitude),
-            type = type)
+        mark = drawMarker(
+            mark, Technic(
+                coords = Coordinates(x = latitude, y = longitude),
+                type = type
+            )
         )
         listOfTechnic.add(mark)
         return mark
     }
-
-    private fun drawMarker(mark: Marker?,technic: Technic): Marker{
-        var  marker = mark
+    
+    private fun drawMarker(mark: Marker?, technic: Technic): Marker {
+        var marker = mark
         if (marker == null)
             marker = Marker(binding.mapView)
         marker.position = GeoPoint(technic.coords.x, technic.coords.y)
@@ -310,11 +332,11 @@ class OsmdroidFragment : MyMapFragment(), IMap {
         binding.mapView.overlays.add(marker)
         marker.icon = getDrawable(requireContext(), ImageTypes.imageMap[technic.type]!!)
         binding.mapView.invalidate()
-
+        
         return marker
     }
-
-    override fun removeAim(){
+    
+    override fun removeAim() {
         aimMarker?.remove(binding.mapView)
         aimMarker = null
         polylineToAim.isVisible = false
@@ -327,13 +349,14 @@ class OsmdroidFragment : MyMapFragment(), IMap {
         } else {
             droneMarker.position = GeoPoint(entities[0].lat, entities[0].lon)
         }
-        val cameraTarget = GeoPoint(binding.mapView.mapCenter.latitude, binding.mapView.mapCenter.longitude)
+        val cameraTarget =
+            GeoPoint(binding.mapView.mapCenter.latitude, binding.mapView.mapCenter.longitude)
         droneMarker.setVisible(true)
         showGeoInformation(binding, cameraTarget, droneMarker.position)
         setPolyline(polylineToCenter, listOf(droneMarker.position, cameraTarget))
-
+        
         showAim(GeoPoint(entities[1].lat, entities[1].lon))
-    
+        
         if (entities[0].calc_target) {
             osmdroidViewModel.getTargetCoordinates(entities)
             osmdroidViewModel.targetLiveData.observe(this) { findTarget ->
@@ -357,8 +380,8 @@ class OsmdroidFragment : MyMapFragment(), IMap {
         )
         setPolyline(polylineToAim, listOf(droneMarker.position, aimMarker!!.position), Color.GREEN)
     }
-
-    private fun focusCamera(point: GeoPoint){
+    
+    private fun focusCamera(point: GeoPoint) {
         binding.mapView.controller.animateTo(point)
         binding.mapView.controller.zoomIn()
     }
@@ -371,7 +394,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
                 else
                     focusCamera(droneMarker.position)
             }
-    
+            
             override fun findMyLocation() {
                 if (checkLocationPermissions((activity as MainActivity)))
                     if (checkGPS())
@@ -385,8 +408,8 @@ class OsmdroidFragment : MyMapFragment(), IMap {
     private fun checkGPS(): Boolean {
         val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 100)
             .setWaitForAccurateLocation(false)
-            .setMinUpdateIntervalMillis(50)
-            .setMaxUpdateDelayMillis(100)
+            .setMinUpdateIntervalMillis(600)
+            .setMaxUpdateDelayMillis(1000)
             .build()
         
         val builder = LocationSettingsRequest.Builder()
@@ -437,7 +460,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
     
     private fun initMyLocation() {
         val provider = GpsMyLocationProvider(requireContext())
-        provider.addLocationSource(LocationManager.GPS_PROVIDER)
+        provider.addLocationSource(LocationManager.NETWORK_PROVIDER)
         locationOverlay = MyLocationNewOverlay(provider, binding.mapView)
         locationOverlay?.enableMyLocation()
         binding.mapView.overlayManager.add(locationOverlay)
@@ -452,7 +475,7 @@ class OsmdroidFragment : MyMapFragment(), IMap {
     }
     
     override fun offlineMode() {
-       offlineMode(binding.mapView, requireContext())
+        offlineMode(binding.mapView, requireContext())
     }
     
     override fun changeGridState(isGrid: Boolean) {

@@ -338,7 +338,11 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         map.setMapType(MapType.GOOGLE_SAT.value)
                         true
                     }
-                    R.id.Id ->{
+                    R.id.mapCacheDownloadItem -> {
+                        map.cacheMap()
+                        true
+                    }
+                    R.id.deviceId ->{
                         val androidIdDialog = AndroidIdFragment(dialog)
 
                         androidIdDialog.show(supportFragmentManager, "id_dialog")
