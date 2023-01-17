@@ -217,6 +217,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                     addClickListenerToMark(mark, technic.technicTypes)
                 }
             }
+            osmdroidViewModel.technicListLiveData.removeObservers(viewLifecycleOwner)
         }
     }
     
@@ -230,9 +231,12 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             }
         
         val cameraPosition = binding.mapView.mapCenter
-        osmdroidViewModel.getTechnics()
+        osmdroidViewModel.technicListLiveData.removeObservers(viewLifecycleOwner)
+        if(!osmdroidViewModel.technicListLiveData.hasObservers())
+            osmdroidViewModel.getTechnics()
         var count = 0
         osmdroidViewModel.technicListLiveData.observe(this) { technicList ->
+            osmdroidViewModel.technicListLiveData.removeObservers(this)
             count = technicList.size + 1
             val mark: Marker = if (coords != null) setMark(coords.x, coords.y, type)
             else setMark(cameraPosition.latitude, cameraPosition.longitude, type)
