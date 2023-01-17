@@ -1,13 +1,21 @@
 package com.example.dronevision.presentation.ui.bluetooth
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothProfile.GATT
 import android.bluetooth.BluetoothSocket
+import android.content.ContentValues.TAG
 import android.content.Context
-import androidx.lifecycle.MutableLiveData
+import android.content.Context.BLUETOOTH_SERVICE
+import android.util.Log
 import com.example.dronevision.presentation.ui.MapActivityListener
 import java.io.IOException
+import java.lang.reflect.InvocationTargetException
+import java.lang.reflect.Method
 import java.util.*
+
 
 @SuppressLint("MissingPermission")
 class ConnectThread(private val device: BluetoothDevice,
@@ -20,8 +28,9 @@ class ConnectThread(private val device: BluetoothDevice,
 
     init {
         try {
-                socket = device.createRfcommSocketToServiceRecord(UUID.fromString(uuid))
-
+              //  socket = device.createRfcommSocketToServiceRecord(UUID.fromString(uuid))
+            socket = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString(uuid))
+            //    socket = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString(uuid))
         }catch (_: IOException){
 
         }
@@ -31,13 +40,24 @@ class ConnectThread(private val device: BluetoothDevice,
     override fun run() {
         try {
             listener.showMessage("Подключение...")
+            if (!isConnected(device)) {
                 socket?.connect()
+            }
                 receiveThread = BluetoothReceiver(socket!!, listener)
                 receiveThread.start()
             listener.showMessage("Подключено!")
         }catch (e: IOException){
             listener.showMessage("Невозможно подключиться!")
             closeConnection()
+        }
+    }
+
+    fun isConnected(device: BluetoothDevice): Boolean {
+        return try {
+            val m: Method = device.javaClass.getMethod("isConnected")
+            m.invoke(device) as Boolean
+        } catch (e: Exception) {
+            throw IllegalStateException(e)
         }
     }
 

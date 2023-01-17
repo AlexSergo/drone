@@ -1,15 +1,20 @@
 package com.example.dronevision.presentation.delegates
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothProfile.GATT
 import android.bluetooth.BluetoothServerSocket
 import android.bluetooth.BluetoothSocket
 import android.content.Context
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.MapActivityListener
 import com.example.dronevision.presentation.ui.bluetooth.BluetoothConnection
 import com.example.dronevision.presentation.ui.bluetooth.BluetoothReceiver
+import com.example.dronevision.utils.PermissionTools
 import com.google.gson.Gson
 import java.io.IOException
 import java.util.*
@@ -35,15 +40,17 @@ class BluetoothHandlerImpl: BluetoothHandler {
     }
 
     override fun sendMessage(message: String){
-        socket?.let {
+        bluetoothConnection.sendMessage(message)
+/*        socket?.let {
             receiver.sendMessage(message.toByteArray())
-        }
+        }*/
     }
 
     override fun sendMessage(technic: Technic) {
-        socket?.let {
+        bluetoothConnection.sendMessage(technic)
+/*        socket?.let {
             receiver.sendMessage((Gson().toJson(technic)).toByteArray())
-        }
+        }*/
     }
 
     override fun acceptBluetoothConnection(){
@@ -68,6 +75,7 @@ class BluetoothHandlerImpl: BluetoothHandler {
                 }
                 socket?.also {
                     receiver = BluetoothReceiver(it, listener)
+                    receiver.start()
                     mmServerSocket?.close()
                     shouldLoop = false
                 }

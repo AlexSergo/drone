@@ -80,6 +80,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
     private fun checkPermissions() {
             val permission1 = ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.WRITE_EXTERNAL_STORAGE);
             val permission2 = ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.BLUETOOTH_SCAN);
+            val permission3 = ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.BLUETOOTH_CONNECT);
             if (permission1 != PackageManager.PERMISSION_GRANTED) {
                 // We do not have permission so immediate the consumer
                 ActivityCompat.requestPermissions(
@@ -87,12 +88,20 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                     Constants.PERMISSIONS_STORAGE,
                     1
                 );
-            } else if (permission2 != PackageManager.PERMISSION_GRANTED){
+            }
+            if (permission2 != PackageManager.PERMISSION_GRANTED){
                 ActivityCompat.requestPermissions(
                     this,
                     Constants.PERMISSIONS_LOCATION,
                     1
                 );
+            }
+            if (permission3 != PackageManager.PERMISSION_GRANTED){
+                ActivityCompat.requestPermissions(
+                    this,
+                    Constants.PERMISSIONS_LOCATION,
+                    1
+                )
             }
     }
 
@@ -131,6 +140,8 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
     }
     
     private fun setupBluetoothDialog() {
+        PermissionTools.checkAndRequestPermissions(appCompatActivity = this)
+
         val connection = setupBluetooth(
             context = this,
             systemService = getSystemService(BLUETOOTH_SERVICE),

@@ -18,6 +18,7 @@ object PermissionTools {
         Manifest.permission.CHANGE_WIFI_STATE,  // Changing between WIFI and USB connection
         Manifest.permission.WRITE_EXTERNAL_STORAGE,  // Log files
         Manifest.permission.BLUETOOTH,  // Bluetooth connected products
+        Manifest.permission.BLUETOOTH_CONNECT,
         Manifest.permission.BLUETOOTH_ADMIN,  // Bluetooth connected products
         Manifest.permission.READ_EXTERNAL_STORAGE,  // Log files
     )
