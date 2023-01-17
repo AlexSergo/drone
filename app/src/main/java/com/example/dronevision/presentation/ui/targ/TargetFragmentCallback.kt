@@ -4,5 +4,5 @@ import com.example.dronevision.presentation.model.Technic
 
 interface TargetFragmentCallback{
     fun onBroadcastButtonClick(destinationId: String, technic: Technic)
-    fun deleteTarget()
+    fun deleteTechnic()
 }

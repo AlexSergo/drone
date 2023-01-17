@@ -1,5 +1,6 @@
 package com.example.dronevision.presentation.ui.subscribers
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,6 +41,7 @@ class SubscriberRecyclerViewAdapter(private val callback: SubscriberListCallback
             binding.subscriberName.text = subscriber.name
             binding.subscriberAddress.text = subscriber.id
             binding.item.setOnClickListener {
+                it.setBackgroundColor(Color.GRAY)
                 callback?.select(subscriber)
             }
         }

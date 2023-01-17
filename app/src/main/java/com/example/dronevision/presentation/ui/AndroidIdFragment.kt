@@ -38,8 +38,7 @@ class AndroidIdFragment : DialogFragment() {
         val bluetoothHandler = requireActivity() as BluetoothHandler
         bluetoothHandler.acceptBluetoothConnection()
         binding.sendButton.setOnClickListener {
-            val callback = requireActivity() as BluetoothHandler
-            callback.sendMessage("[ID]" + Device.id)
+            bluetoothHandler.sendMessage("[ID]" + Device.id)
         }
         return binding.root
     }

@@ -261,10 +261,11 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                         sendMessage(destinationId, technic)
                     }
 
-                    override fun deleteTarget() {
+                    override fun deleteTechnic() {
                         binding.mapView.overlays.remove(mark)
                         listOfTechnic.remove(mark)
                         osmdroidViewModel.deleteTechnic(technic)
+                        binding.mapView.invalidate()
                     }
 
                 }

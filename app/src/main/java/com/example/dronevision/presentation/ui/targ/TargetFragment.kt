@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.example.dronevision.databinding.FragmentTargBinding
 import com.example.dronevision.presentation.delegates.BluetoothHandler
@@ -45,8 +44,8 @@ class TargetFragment(
             dialog?.dismiss()
         }
         binding.deleteBtn.setOnClickListener {
-            Toast.makeText(requireContext(), "Кнопки пока не работают", Toast.LENGTH_SHORT).show()
-            targetFragmentCallback.deleteTarget()
+            targetFragmentCallback.deleteTechnic()
+            dialog?.dismiss()
         }
         return binding.root
     }

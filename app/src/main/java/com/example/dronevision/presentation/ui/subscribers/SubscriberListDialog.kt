@@ -9,6 +9,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.dronevision.App
 import com.example.dronevision.databinding.FragmentSubscriberListDialogBinding
+import com.example.dronevision.presentation.model.Subscriber
 import javax.inject.Inject
 
 
@@ -29,7 +30,13 @@ class SubscriberListDialog(private val subscriberCallback: SubscriberListCallbac
 
         initModelView()
         binding = FragmentSubscriberListDialogBinding.inflate(layoutInflater)
-        adapter = SubscriberRecyclerViewAdapter(subscriberCallback)
+        adapter = SubscriberRecyclerViewAdapter(object : SubscriberListCallback{
+            override fun select(subscriber: Subscriber) {
+                subscriberCallback?.select(subscriber)
+                dialog?.dismiss()
+            }
+
+        })
         binding.recyclerView.adapter = adapter
 
         viewModel.getSubscribers()
