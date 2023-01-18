@@ -192,7 +192,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         polylineToCenter = Polyline()
         polylineToAim.isVisible = false
     }
-
+    
     override fun setMapType(mapType: Int) {
         when (mapType) {
             MapType.OSM.value -> {
@@ -203,6 +203,18 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                     )
                 )
                 osmdroidViewModel.saveCurrentMapState(mapType)
+                offlineOpenFileManager.deleteFileName()
+            }
+            MapType.SCHEME_MAP.value -> {
+                binding.mapView.setTileSource(
+                    MapTools.getGoogleMapTile(
+                        requireContext(),
+                        binding.mapView,
+                        Pair("Google maps", "m")
+                    )
+                )
+                osmdroidViewModel.saveCurrentMapState(mapType)
+                offlineOpenFileManager.deleteFileName()
             }
             MapType.GOOGLE_HYB.value -> {
                 binding.mapView.setTileSource(
@@ -213,23 +225,29 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                     )
                 )
                 osmdroidViewModel.saveCurrentMapState(mapType)
+                offlineOpenFileManager.deleteFileName()
             }
             MapType.GOOGLE_SAT.value -> {
                 binding.mapView.setTileSource(
                     MapTools.getGoogleMapTile(
                         requireContext(),
                         binding.mapView,
-                        Pair("Google sattelite", "s")
+                        Pair("Google satellite", "s")
                     )
                 )
                 osmdroidViewModel.saveCurrentMapState(mapType)
+                offlineOpenFileManager.deleteFileName()
             }
             MapType.OFFLINE.value -> {
-
+                val offlineMapFileName = offlineOpenFileManager.getFileName()
+                if (offlineMapFileName != null)
+                    openFile(offlineMapFileName, binding.mapView, requireContext())
+                else offlineMode(binding.mapView, requireContext())
+                osmdroidViewModel.saveCurrentMapState(mapType)
             }
         }
-
     }
+
 
     private fun setPolyline(polyline: Polyline, points: List<GeoPoint>, color: Int = Color.BLUE){
         polyline.setPoints(points)
