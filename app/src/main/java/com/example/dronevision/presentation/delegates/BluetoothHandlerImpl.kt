@@ -1,23 +1,23 @@
 package com.example.dronevision.presentation.delegates
 
-import android.Manifest
+import android.R
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
-import android.bluetooth.BluetoothProfile.GATT
 import android.bluetooth.BluetoothServerSocket
 import android.bluetooth.BluetoothSocket
+import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.pm.PackageManager
-import androidx.core.app.ActivityCompat
+import android.content.Intent
+import androidx.core.app.ActivityCompat.invalidateOptionsMenu
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.MapActivityListener
 import com.example.dronevision.presentation.ui.bluetooth.BluetoothConnection
+import com.example.dronevision.presentation.ui.bluetooth.BluetoothLeService
 import com.example.dronevision.presentation.ui.bluetooth.BluetoothReceiver
-import com.example.dronevision.utils.PermissionTools
-import com.google.gson.Gson
 import java.io.IOException
 import java.util.*
+
 
 class BluetoothHandlerImpl: BluetoothHandler {
 
@@ -26,7 +26,7 @@ class BluetoothHandlerImpl: BluetoothHandler {
     private lateinit var receiver: BluetoothReceiver
     private lateinit var listener: MapActivityListener
     private var socket: BluetoothSocket? = null
-    val uuid = "00001101-0000-1000-8000-00805F9B34FB"
+    val uuid = "00001112-0000-1000-8000-00805F9B34FB"
 
     override fun setupBluetooth(
         context: Context, systemService: Any, listener: MapActivityListener
@@ -80,13 +80,32 @@ class BluetoothHandlerImpl: BluetoothHandler {
                     shouldLoop = false
                 }
             }
-            cancel()
         }
 
         fun cancel() {
             try {
                 mmServerSocket?.close()
             } catch (e: IOException) {
+            }
+        }
+    }
+
+    private val mGattUpdateReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        var mConnected: Boolean = false
+        override fun onReceive(context: Context, intent: Intent) {
+            val action = intent.action
+            if (BluetoothLeService.ACTION_GATT_CONNECTED == action) {
+                mConnected = true
+
+            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED == action) {
+                mConnected = false
+
+              //  clearUI()
+            } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED == action) {
+                // Показать в UI все поддерживаемые услуги и характеристики
+             //   displayGattServices(mBluetoothLeService.getSupportedGattServices())
+            } else if (BluetoothLeService.ACTION_DATA_AVAILABLE == action) {
+             //   displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA))
             }
         }
     }

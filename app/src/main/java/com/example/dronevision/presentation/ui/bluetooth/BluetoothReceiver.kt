@@ -21,6 +21,8 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
         try {
             inputStream = bluetoothSocket.inputStream
             outputStream = bluetoothSocket.outputStream
+            if (bluetoothSocket.isConnected)
+                sendMessage(byteArrayOf(1,2,3))
         }catch (_: IOException){
 
         }
@@ -76,6 +78,7 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
         try {
             outputStream?.write(byteArray)
         }catch (_: IOException){
+            listener.showMessage("Не удалось отправить!")
         }
     }
 

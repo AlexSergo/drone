@@ -1,6 +1,8 @@
 package com.example.dronevision.presentation.ui.bluetooth
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothGatt
 import android.content.Context
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.MapActivityListener
@@ -19,10 +21,13 @@ class BluetoothConnection(
         return adapter
     }
 
+    @SuppressLint("MissingPermission")
     fun connect(mac: String){
         if (!adapter.isEnabled || mac.isEmpty())
             return
         val device = adapter.getRemoteDevice(mac)
+      //  val service = BluetoothLeService()
+       // service.connect(device, context)
         device.let {
             connectionThread = ConnectThread(it, context, listener)
             connectionThread.start()

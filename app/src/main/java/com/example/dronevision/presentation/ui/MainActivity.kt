@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         initViewModel()
         val id = Device.getDeviceId(applicationContext)
         println(id)
-      //  checkRegistration() //TODO: Раскоментить когда будет серверная часть
+        //checkRegistration() //TODO: Раскоментить когда будет серверная часть
         setupOptionsMenu()
         setupDrawer()
         setupBluetoothDialog()
@@ -115,7 +115,6 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
     private fun checkRegistration(){
         var sharedPreferences = SharedPreferences(applicationContext)
         val id = Device.getDeviceId(applicationContext)
-        if (id != null) {
             val hash = sharedPreferences.getValue("AUTH_TOKEN")
             if (hash == null) {
                 mainViewModel.getId(id)
@@ -132,11 +131,11 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
             }
             else
                 if (hash == Hash.md5(id)) {
+                    // приложение работает
                     setupOptionsMenu()
                     setupDrawer()
                     setupBluetoothDialog()
                 }
-        }
     }
     
     private fun setupBluetoothDialog() {

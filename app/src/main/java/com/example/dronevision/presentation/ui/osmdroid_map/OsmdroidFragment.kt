@@ -194,6 +194,40 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
     }
 
     override fun setMapType(mapType: Int) {
+        when (mapType) {
+            MapType.OSM.value -> {
+                binding.mapView.setTileSource(
+                    MapTools.getOSMMapTile(
+                        requireContext(),
+                        binding.mapView
+                    )
+                )
+                osmdroidViewModel.saveCurrentMapState(mapType)
+            }
+            MapType.GOOGLE_HYB.value -> {
+                binding.mapView.setTileSource(
+                    MapTools.getGoogleMapTile(
+                        requireContext(),
+                        binding.mapView,
+                        Pair("Google hybrid", "y")
+                    )
+                )
+                osmdroidViewModel.saveCurrentMapState(mapType)
+            }
+            MapType.GOOGLE_SAT.value -> {
+                binding.mapView.setTileSource(
+                    MapTools.getGoogleMapTile(
+                        requireContext(),
+                        binding.mapView,
+                        Pair("Google sattelite", "s")
+                    )
+                )
+                osmdroidViewModel.saveCurrentMapState(mapType)
+            }
+            MapType.OFFLINE.value -> {
+
+            }
+        }
 
     }
 
