@@ -57,7 +57,8 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
     GeoInformationHandler by GeoInformationHandlerImpl(),
     LocationDialogHandler by LocationDialogHandlerImpl(),
     ManipulatorSetuper by ManipulatorSetuperImpl(),
-    GpsHandler by GpsHandlerImpl() {
+    GpsHandler by GpsHandlerImpl(),
+    MapCachingHandler by MapCachingHandlerImpl() {
 
     
     private lateinit var binding: FragmentOsmdroidBinding
@@ -133,17 +134,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
     }
     
     override fun cacheMap() {
-        if (binding.mapView.useDataConnection()) {
-            val cacheManager = CacheManager(binding.mapView)
-            cacheManager.verifyCancel = true
-            cacheManager.downloadAreaAsync(requireContext(), binding.mapView.boundingBox, 1, 18)
-        } else {
-            Toast.makeText(
-                requireContext(),
-                "Скачивание невозможно в оффлайн-режиме",
-                Toast.LENGTH_LONG
-            ).show()
-        }
+        cacheMap(binding.mapView, requireContext())
     }
     
     private fun setupOsmdroidMap() = binding.run {
