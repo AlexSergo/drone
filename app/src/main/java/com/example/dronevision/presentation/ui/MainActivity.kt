@@ -353,6 +353,10 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         map.cacheMap()
                         true
                     }
+                    R.id.mapSearchItem -> {
+                        map.findGeoPoint()
+                        true
+                    }
                     R.id.deviceId ->{
                         val androidIdDialog = AndroidIdFragment()
 

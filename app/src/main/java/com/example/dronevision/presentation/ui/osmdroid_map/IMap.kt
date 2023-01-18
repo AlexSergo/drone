@@ -16,4 +16,5 @@ interface IMap {
     fun initDroneMarker()
     fun setMapType(mapType: Int)
     fun cacheMap()
+    fun findGeoPoint()
 }

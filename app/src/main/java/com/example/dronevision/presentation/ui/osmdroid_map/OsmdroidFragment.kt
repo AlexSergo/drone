@@ -1,16 +1,12 @@
 package com.example.dronevision.presentation.ui.osmdroid_map
 
-import android.content.Context.LOCATION_SERVICE
-import android.content.IntentSender
 import android.graphics.Color
 import android.location.LocationManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -24,20 +20,19 @@ import com.example.dronevision.presentation.delegates.*
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.model.bluetooth.Entity
 import com.example.dronevision.presentation.ui.MainActivity
+import com.example.dronevision.presentation.ui.find_location.FindGeoPointCallback
+import com.example.dronevision.presentation.ui.find_location.FindGeoPointFragment
 import com.example.dronevision.presentation.ui.targ.TargetFragment
 import com.example.dronevision.presentation.ui.targ.TargetFragmentCallback
 import com.example.dronevision.utils.Device
 import com.example.dronevision.utils.ImageTypes
 import com.example.dronevision.utils.MapTools
 import com.example.dronevision.utils.MapType
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
-import org.osmdroid.tileprovider.cachemanager.CacheManager
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
@@ -133,9 +128,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         }
     }
     
-    override fun cacheMap() {
-        cacheMap(binding.mapView, requireContext())
-    }
+    override fun cacheMap() { cacheMap(binding.mapView, requireContext()) }
     
     private fun setupOsmdroidMap() = binding.run {
         mapView.setTileSource(TileSourceFactory.MAPNIK)
@@ -314,13 +307,22 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                         osmdroidViewModel.deleteTechnic(technic)
                         binding.mapView.invalidate()
                     }
-
                 }
             )
             targetFragment.show(parentFragmentManager, "targFragment")
             true
         }
-
+    }
+    
+    override fun findGeoPoint() {
+        val findGeoPointFragment = FindGeoPointFragment(
+            object : FindGeoPointCallback {
+                override fun findGeoPoint(geoPoint: GeoPoint) {
+                    focusCamera(geoPoint)
+                }
+            }
+        )
+        findGeoPointFragment.show(parentFragmentManager, "findGeoPointFragment")
     }
 
     private fun setMark(
@@ -419,59 +421,6 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                         }
             }
         })
-    }
-    
-    private fun checkGPS(): Boolean {
-        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 100)
-            .setWaitForAccurateLocation(false)
-            .setMinUpdateIntervalMillis(50)
-            .setMaxUpdateDelayMillis(100)
-            .build()
-        
-        val builder = LocationSettingsRequest.Builder()
-            .addLocationRequest(locationRequest)
-            .setAlwaysShow(true)
-            .build()
-        val res = LocationServices.getSettingsClient(requireContext())
-            .checkLocationSettings(builder)
-        
-        res.addOnCompleteListener { task ->
-            try {
-                // when the GPS is on
-                task.getResult(ApiException::class.java)
-            } catch (e: ApiException) {
-                // when the GPS is OFF
-                e.printStackTrace()
-                when (e.statusCode) {
-                    LocationSettingsStatusCodes.RESOLUTION_REQUIRED -> try {
-                        // here we send the request for enable the GPS
-                        val resolveApiException = e as ResolvableApiException
-                        resolveApiException.startResolutionForResult(requireActivity(), 200)
-                    } catch (sendIntentException: IntentSender.SendIntentException) {
-                        sendIntentException.printStackTrace()
-                    }
-                    LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> {
-                        // when the setting is unavailable
-                    }
-                }
-            }
-        }
-        res.addOnFailureListener { e ->
-            if (e is ResolvableApiException) {
-                try {
-                    // Handle result in onActivityResult()
-                    e.startResolutionForResult(requireActivity(), 999)
-                } catch (sendEx: IntentSender.SendIntentException) {
-                    e.printStackTrace()
-                }
-            }
-            e.printStackTrace()
-        }
-        
-        val locationManager = activity?.getSystemService(LOCATION_SERVICE) as LocationManager
-        val isGPS = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-        
-        return isGPS
     }
     
     private fun initMyLocation() {
