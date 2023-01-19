@@ -26,7 +26,7 @@ class BluetoothHandlerImpl: BluetoothHandler {
     private lateinit var receiver: BluetoothReceiver
     private lateinit var listener: MapActivityListener
     private var socket: BluetoothSocket? = null
-    val uuid = "00001112-0000-1000-8000-00805F9B34FB"
+    val uuid = "00002902-0000-1000-8000-00805F9B34FB"
 
     override fun setupBluetooth(
         context: Context, systemService: Any, listener: MapActivityListener
@@ -89,25 +89,4 @@ class BluetoothHandlerImpl: BluetoothHandler {
             }
         }
     }
-
-    private val mGattUpdateReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        var mConnected: Boolean = false
-        override fun onReceive(context: Context, intent: Intent) {
-            val action = intent.action
-            if (BluetoothLeService.ACTION_GATT_CONNECTED == action) {
-                mConnected = true
-
-            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED == action) {
-                mConnected = false
-
-              //  clearUI()
-            } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED == action) {
-                // Показать в UI все поддерживаемые услуги и характеристики
-             //   displayGattServices(mBluetoothLeService.getSupportedGattServices())
-            } else if (BluetoothLeService.ACTION_DATA_AVAILABLE == action) {
-             //   displayData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA))
-            }
-        }
-    }
-
 }

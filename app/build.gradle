@@ -83,6 +83,8 @@ dependencies {
     implementation "com.google.dagger:dagger:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
 
+    implementation 'no.nordicsemi.android:ble:2.6.0'
+
     implementation platform('com.google.firebase:firebase-bom:31.1.1')
 
     implementation 'androidx.preference:preference-ktx:1.2.0'

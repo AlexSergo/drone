@@ -16,15 +16,15 @@ class ConnectThread(private val device: BluetoothDevice,
                     private val context: Context,
                     private val listener: MapActivityListener): Thread() {
 
-    private val uuid = "00001112-0000-1000-8000-00805F9B34FB"
+    private val uuid = "00001101-0000-1000-8000-00805F9B34FB"
     private var socket: BluetoothSocket? = null
     lateinit var receiveThread: BluetoothReceiver
 
     init {
         try {
-              //  socket = device.createRfcommSocketToServiceRecord(UUID.fromString(uuid))
+                socket = device.createRfcommSocketToServiceRecord(UUID.fromString(uuid))
             val z =  device.uuids
-            socket = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString(uuid))
+          // socket = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString(uuid))
             //    socket = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString(uuid))
         }catch (_: IOException){
 
@@ -36,13 +36,13 @@ class ConnectThread(private val device: BluetoothDevice,
         val pm: PackageManager = context.packageManager
         val hasBLE = pm.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)
         try {
-            val ble = BluetoothLeService()
-            ble.connect(device, context)
+          //  val ble = BluetoothLeService()
+           // ble.connect(device, context)
             val z = device.uuids
             listener.showMessage("Подключение...")
-               // socket?.connect()
+                socket?.connect()
                 receiveThread = BluetoothReceiver(socket!!, listener)
-              //  receiveThread.start()
+                receiveThread.start()
             listener.showMessage("Подключено!")
         }catch (e: IOException){
             listener.showMessage("Невозможно подключиться!")
