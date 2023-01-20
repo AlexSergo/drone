@@ -2,9 +2,11 @@ package com.example.dronevision.presentation.ui
 
 
 import android.Manifest
+import android.content.ActivityNotFoundException
+import android.content.ClipboardManager
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.preference.PreferenceManager
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -24,6 +26,7 @@ import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
+import androidx.preference.PreferenceManager
 import com.example.dronevision.App
 import com.example.dronevision.R
 import com.example.dronevision.databinding.ActivityMainBinding
@@ -44,8 +47,10 @@ import com.example.dronevision.utils.*
 import com.example.dronevision.utils.FileTools.createAppFolder
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.components.BuildConfig
+import com.google.gson.GsonBuilder
 import org.osmdroid.config.Configuration
 import javax.inject.Inject
+
 
 class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerImpl(),
     NavigationView.OnNavigationItemSelectedListener, MapActivityListener {
@@ -362,6 +367,15 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
 
                         androidIdDialog.show(supportFragmentManager, "id_dialog")
                         true
+                    }
+                    R.id.pasteBuffer ->{
+                        val myClipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager?
+                        val abc = myClipboard?.primaryClip
+                        val item = abc?.getItemAt(0)
+                        val gson = GsonBuilder().create()
+                        val target = gson.fromJson(item?.text.toString(), Technic::class.java)
+                        map.spawnTechnic(target.technicTypes, target.coordinates)
+                        return true
                     }
                     else -> false
                 }

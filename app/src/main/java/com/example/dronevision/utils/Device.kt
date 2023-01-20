@@ -4,6 +4,9 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.Context
 import android.provider.Settings
+import com.example.dronevision.presentation.model.Technic
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 
 object Device {
     private lateinit var _id: String
@@ -23,5 +26,12 @@ object Device {
             context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
         val clip = ClipData.newPlainText("Copied Text", text)
         clipboard.setPrimaryClip(clip)
+    }
+
+    fun Technic.toJson(): String{
+        val gson = GsonBuilder()
+            .setPrettyPrinting()
+            .create()
+        return gson.toJson(this)
     }
 }

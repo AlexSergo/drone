@@ -81,11 +81,21 @@
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <Button
+        android:id="@+id/telegram_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Передать через Telegram"
+        android:textSize="13sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/broadcast_btn" />
+
+    <Button
         android:id="@+id/delete_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Удалить"
-        app:layout_constraintTop_toBottomOf="@id/broadcast_btn"
+        app:layout_constraintTop_toBottomOf="@id/telegram_btn"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
