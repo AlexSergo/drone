@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         initViewModel()
         val id = Device.getDeviceId(applicationContext)
         println(id)
-        //checkRegistration() //TODO: Раскоментить когда будет серверная часть
+       // checkRegistration() //TODO: Раскоментить когда будет серверная часть
         setupOptionsMenu()
         setupDrawer()
         setupBluetoothDialog()

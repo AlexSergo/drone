@@ -5,10 +5,10 @@ import android.content.SharedPreferences
 
 class SharedPreferences(context: Context) {
     private val PREFS_NAME = "my_prefs"
-    val sharedPref: SharedPreferences? = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    val sharedPref: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     fun save(KEY_NAME: String, value: String) {
-        sharedPref?.let {
+        sharedPref.let {
             val editor: SharedPreferences.Editor = sharedPref.edit()
 
             editor.putString(KEY_NAME, value)
@@ -18,7 +18,7 @@ class SharedPreferences(context: Context) {
     }
 
     fun getValue(KEY_NAME: String): String?{
-        sharedPref?.let {
+        sharedPref.let {
             return sharedPref.getString(KEY_NAME, null)
         }
         return null

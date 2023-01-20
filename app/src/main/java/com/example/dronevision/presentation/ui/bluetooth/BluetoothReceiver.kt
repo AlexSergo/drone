@@ -1,6 +1,7 @@
 package com.example.dronevision.presentation.ui.bluetooth
 
 import android.bluetooth.BluetoothSocket
+import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.model.bluetooth.Entities
 import com.example.dronevision.presentation.ui.MapActivityListener
@@ -21,8 +22,6 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
         try {
             inputStream = bluetoothSocket.inputStream
             outputStream = bluetoothSocket.outputStream
-            if (bluetoothSocket.isConnected)
-                sendMessage(byteArrayOf(1,2,3))
         }catch (_: IOException){
 
         }
@@ -42,7 +41,7 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
                 }
                 if (message.contains(MessageType.Entities.name))
                     message = parseDroneGson(message)
-                else
+                if (message.contains("coordinates"))
                     message = parseTargetGson(message)
 
             }catch (e: IOException){
@@ -84,7 +83,7 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
 
     enum class MessageType{
         ID,
-        Technic,
+        TechnicTypes,
         Entities
     }
 }

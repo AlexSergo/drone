@@ -2,14 +2,13 @@ package com.example.dronevision.presentation.ui.bluetooth
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothGatt
-import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanResult
 import android.content.Context
-import android.util.Log
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.MapActivityListener
 import com.google.gson.Gson
+
 
 class BluetoothConnection(
     private val adapter: BluetoothAdapter,
@@ -18,49 +17,38 @@ class BluetoothConnection(
 ) {
 
     lateinit var connectionThread: ConnectThread
-    private var isConnected: Boolean = false
+    private var _isConnected: Boolean = false
+    val isConnected: Boolean get() = _isConnected
 
     fun getAdapter(): BluetoothAdapter {
         return adapter
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("MissingPermission")
     fun connect(mac: String){
         if (!adapter.isEnabled || mac.isEmpty())
             return
         val device = adapter.getRemoteDevice(mac)
-       // adapter.bluetoothLeScanner.startScan(leScanCallback)
-     //   val service = BluetoothLeService(context)
-       /* service.connect(device)
-            .done{
-                Log.e("ZZZ", "CONNECTED!")
-            }
-            .fail { device, status ->
-                Log.e("ZZZ", "FAIL!, $status")
-            }
-            .enqueue()*/
-       // service.connect(device, context)
         device.let {
             connectionThread = ConnectThread(it, context, listener)
             connectionThread.start()
         }
-        isConnected = true
+        _isConnected = true
     }
 
-    private val leScanCallback: ScanCallback = object : ScanCallback() {
-        override fun onScanResult(callbackType: Int, result: ScanResult) {
-            super.onScanResult(callbackType, result)
-            result.device
-        }
-    }
 
     fun sendMessage(message: String){
-        if (isConnected)
+        if (_isConnected)
             connectionThread.receiveThread.sendMessage(message.toByteArray())
+        else
+            listener.showMessage("Невозможно отправить!")
     }
 
     fun sendMessage(technic: Technic){
-        if (isConnected)
+        if (_isConnected)
             connectionThread.receiveThread.sendMessage((Gson().toJson(technic)).toByteArray())
+        else
+            listener.showMessage("Невозможно отправить!")
     }
 }
