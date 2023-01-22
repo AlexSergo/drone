@@ -17,4 +17,5 @@ interface IMap {
     fun setMapType(mapType: Int)
     fun cacheMap()
     fun findGeoPoint()
+    fun showAllTargets()
 }

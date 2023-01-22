@@ -3,6 +3,7 @@ package com.example.dronevision.presentation.ui.osmdroid_map
 import android.graphics.Color
 import android.location.LocationManager
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -134,6 +135,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         mapView.setTileSource(TileSourceFactory.MAPNIK)
         mapView.controller.setZoom(3.0)
         binding.mapView.minZoomLevel = 3.0
+        binding.mapView.maxZoomLevel = 20.0
         
         mapView.setMultiTouchControls(true)
         mapView.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
@@ -147,7 +149,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                 showGeoInformation(binding, cameraTarget, droneMarker.position)
 
                 setPolyline(polylineToCenter, listOf(droneMarker.position, cameraTarget))
-    
+//                Log.d("zoom_lvl", binding.mapView.zoomLevelDouble.toString())
                 binding.distance.text = "${getDistance(droneMarker.position, cameraTarget)} km"
                 return true
             }
@@ -323,6 +325,10 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             }
         )
         findGeoPointFragment.show(parentFragmentManager, "findGeoPointFragment")
+    }
+    
+    override fun showAllTargets() {
+    
     }
 
     private fun setMark(
