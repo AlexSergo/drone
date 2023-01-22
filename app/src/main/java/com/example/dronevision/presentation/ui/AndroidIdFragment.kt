@@ -27,7 +27,7 @@ class AndroidIdFragment : DialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentAndroidIdBinding.inflate(layoutInflater)
         binding.androidId.text = Device.id
         binding.copyButton.setOnClickListener {
