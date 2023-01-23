@@ -71,12 +71,22 @@
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <Button
+        android:id="@+id/radio_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Передать через Motorola"
+        android:textSize="13sp"
+        app:layout_constraintTop_toBottomOf="@id/bluetooth_btn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
         android:id="@+id/broadcast_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Передать через Интернет"
         android:textSize="13sp"
-        app:layout_constraintTop_toBottomOf="@id/bluetooth_btn"
+        app:layout_constraintTop_toBottomOf="@id/radio_btn"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 

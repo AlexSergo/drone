@@ -63,16 +63,4 @@ class MainViewModel(
 
          }
     }
-
-    fun getMessageFromFM() = viewModelScope.launch(Dispatchers.IO) {
-        socketUseCase.getMessage { _socketLiveData.postValue(it)  }
-    }
-
-    fun sendMessageFromFM(message: String) = viewModelScope.launch(Dispatchers.IO) {
-        socketUseCase.sendMessage(message)
-    }
-
-    fun connectSocket() = viewModelScope.launch(Dispatchers.IO) {
-        socketUseCase.connect()
-    }
 }

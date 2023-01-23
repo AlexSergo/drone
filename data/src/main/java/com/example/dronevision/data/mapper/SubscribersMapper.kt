@@ -6,13 +6,13 @@ import com.example.dronevision.domain.model.SubscriberDTO
 object SubscribersMapper {
 
     fun mapSubscriberDTOToEntity(subscriberDTO: SubscriberDTO): SubscriberEntity{
-        return SubscriberEntity(id = subscriberDTO.id, name = subscriberDTO.name)
+        return SubscriberEntity(deviceId = subscriberDTO.id, name = subscriberDTO.name, IP = subscriberDTO.IP)
     }
 
     fun mapSubscriberEntityToDTO(subscriberEntities: List<SubscriberEntity>): List<SubscriberDTO>{
         val result = mutableListOf<SubscriberDTO>()
         subscriberEntities.forEach {
-            result.add(SubscriberDTO(id = it.id, name = it.name))
+            result.add(SubscriberDTO(id = it.deviceId, name = it.name, IP = it.IP))
         }
         return result
     }

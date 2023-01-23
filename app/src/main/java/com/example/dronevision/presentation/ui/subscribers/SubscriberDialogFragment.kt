@@ -40,11 +40,13 @@ class SubscriberDialogFragment(private val id: String? = null) : DialogFragment(
             binding.editTextID.setText(id.substring(id.indexOf("]") + 1))
 
         binding.saveButton.setOnClickListener {
-            if ( binding.editTextName.text.toString() != ""
-                && binding.editTextID.text.toString() != "")
+            if (binding.editTextName.text.toString() != ""
+                && (binding.editTextID.text.toString() != ""
+                        || binding.editTextIP.text.toString() != ""))
             viewModel.saveSubscriber(
                 Subscriber(id = binding.editTextID.text.toString(),
-                    name = binding.editTextName.text.toString()))
+                    name = binding.editTextName.text.toString(),
+                    IP = binding.editTextIP.text.toString()))
         }
         return binding.root
     }

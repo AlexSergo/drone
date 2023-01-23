@@ -55,6 +55,6 @@ class DataModule {
 
     @Provides
     fun provideSocketDataSource(): SocketDataSource {
-       return SocketDataSourceImpl("172.20.10.4", 80)
+       return SocketDataSourceImpl()
     }
 }

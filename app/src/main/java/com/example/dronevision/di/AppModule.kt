@@ -5,6 +5,7 @@ import com.example.dronevision.domain.use_cases.*
 import com.example.dronevision.presentation.ui.MainViewModelFactory
 import com.example.dronevision.presentation.ui.subscribers.SubscriberViewModelFactory
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidViewModelFactory
+import com.example.dronevision.presentation.ui.targ.TargetViewModelFactory
 import dagger.Module
 import dagger.Provides
 
@@ -52,4 +53,9 @@ class AppModule(val context: Context) {
         saveSubscriberUseCase = saveSubscriberUseCase,
         getSubscribersUseCase = getSubscribersUseCase
     )
+
+    @Provides
+    fun provideTargetViewModelFactory(
+        socketUseCase: SocketUseCase
+    ): TargetViewModelFactory = TargetViewModelFactory(socketUseCase = socketUseCase)
 }

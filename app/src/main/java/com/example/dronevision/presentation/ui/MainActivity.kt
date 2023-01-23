@@ -43,6 +43,7 @@ import com.example.dronevision.presentation.ui.osmdroid_map.IMap
 import com.example.dronevision.presentation.ui.osmdroid_map.OsmdroidFragment
 import com.example.dronevision.presentation.ui.subscribers.SubscriberDialogFragment
 import com.example.dronevision.presentation.ui.subscribers.SubscriberListDialog
+import com.example.dronevision.presentation.ui.subscribers.SubscribersType
 import com.example.dronevision.utils.*
 import com.example.dronevision.utils.FileTools.createAppFolder
 import com.google.android.material.navigation.NavigationView
@@ -80,13 +81,6 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         setupDrawer()
         setupBluetoothDialog()
         setupOsmdroidConfiguration()
-
-/*        mainViewModel.connectSocket()
-        mainViewModel.sendMessageFromFM("zzz")
-        mainViewModel.getMessageFromFM()
-        mainViewModel.socketLiveData.observe(this, Observer {
-            map.spawnTechnic(TechnicTypes.DRONE, Coordinates(20.0,20.0))
-        })*/
     }
 
     private fun checkPermissions() {
@@ -323,7 +317,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         true
                     }
                     R.id.subscriberListItem -> {
-                        val subscriberListDialogFragment = SubscriberListDialog()
+                        val subscriberListDialogFragment = SubscriberListDialog(subscribersType = SubscribersType.All)
                         subscriberListDialogFragment.show(supportFragmentManager, "listDialog")
                         true
                     }

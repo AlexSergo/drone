@@ -4,8 +4,8 @@ import com.example.dronevision.domain.repository.SocketDataSource
 
 class SocketUseCase(private val dataSource: SocketDataSource) {
 
-    suspend fun connect() {
-        dataSource.connect()
+    suspend fun connect(address: String, port: Int = 8080) {
+        dataSource.connect(address, port)
     }
 
     suspend fun disconnect() {

@@ -13,7 +13,8 @@ import com.example.dronevision.presentation.model.Subscriber
 import javax.inject.Inject
 
 
-class SubscriberListDialog(private val subscriberCallback: SubscriberListCallback? = null) : DialogFragment() {
+class SubscriberListDialog(private val subscriberCallback: SubscriberListCallback? = null,
+                           private val subscribersType: SubscribersType) : DialogFragment() {
 
     private lateinit var binding: FragmentSubscriberListDialogBinding
     private lateinit var viewModel: SubscriberViewModel
@@ -41,8 +42,24 @@ class SubscriberListDialog(private val subscriberCallback: SubscriberListCallbac
 
         viewModel.getSubscribers()
         viewModel.subscribersLiveData.observe(this, Observer {
-            it?.let {
-                adapter.setData(it)
+            it?.let {subs ->
+                val result = mutableListOf<Subscriber>()
+                subs.forEach { sub ->
+                    when(subscribersType){
+                        SubscribersType.Internet -> {
+                            if (sub.id != "")
+                                result.add(sub)
+                        }
+                        SubscribersType.Radio ->{
+                            if (sub.IP != "")
+                                result.add(sub)
+                        }
+                        else -> {
+                            result.add(sub)
+                        }
+                    }
+                }
+                adapter.setData(result)
             }
         })
         return binding.root

@@ -10,7 +10,7 @@ import com.example.dronevision.data.source.local.model.SessionStateEntity
 import com.example.dronevision.data.source.local.model.SubscriberEntity
 import com.example.dronevision.data.source.local.model.TechnicEntity
 
-@androidx.room.Database(entities = [TechnicEntity::class, SessionStateEntity::class, SubscriberEntity::class], version = 5, exportSchema = false)
+@androidx.room.Database(entities = [TechnicEntity::class, SessionStateEntity::class, SubscriberEntity::class], version = 6, exportSchema = false)
 abstract class DroneVisionDatabase : RoomDatabase() {
     
     abstract fun technicsDao(): TechnicDao
