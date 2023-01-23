@@ -4,7 +4,7 @@ import android.Manifest
 import android.os.Environment
 
 object Constants {
-    const val BASE_URL = "http://178.214.63.210/"
+    const val BASE_URL = "http://192.168.35.235"
 
     val PERMISSIONS_STORAGE = arrayOf(
         Manifest.permission.READ_EXTERNAL_STORAGE,
