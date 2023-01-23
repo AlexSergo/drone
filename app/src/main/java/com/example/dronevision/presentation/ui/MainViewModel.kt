@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.dronevision.domain.use_cases.GetIdUseCase
 import com.example.dronevision.domain.use_cases.GetSessionStateUseCase
 import com.example.dronevision.domain.use_cases.SaveSessionStateUseCase
+import com.example.dronevision.domain.use_cases.SocketUseCase
 import com.example.dronevision.presentation.mapper.SessionStateMapperUi
 import com.example.dronevision.presentation.model.SessionState
 import com.example.dronevision.utils.MapType
@@ -16,10 +17,14 @@ import kotlinx.coroutines.launch
 class MainViewModel(
     private val saveSessionStateUseCase: SaveSessionStateUseCase,
     private val getSessionStateUseCase: GetSessionStateUseCase,
-    private val getIdUseCase: GetIdUseCase
+    private val getIdUseCase: GetIdUseCase,
+    private val socketUseCase: SocketUseCase
 ) : ViewModel() {
     private val _sessionStateLiveData = MutableLiveData<SessionState>()
     val sessionStateLiveData: LiveData<SessionState> get() = _sessionStateLiveData
+
+    private val _socketLiveData = MutableLiveData<String>()
+    val socketLiveData: LiveData<String> get() = _socketLiveData
 
     private val _idLiveData = MutableLiveData<String>()
     val idLiveData: LiveData<String> get() = _idLiveData
@@ -57,5 +62,17 @@ class MainViewModel(
          }catch (_: IllegalArgumentException){
 
          }
+    }
+
+    fun getMessageFromFM() = viewModelScope.launch(Dispatchers.IO) {
+        socketUseCase.getMessage { _socketLiveData.postValue(it)  }
+    }
+
+    fun sendMessageFromFM(message: String) = viewModelScope.launch(Dispatchers.IO) {
+        socketUseCase.sendMessage(message)
+    }
+
+    fun connectSocket() = viewModelScope.launch(Dispatchers.IO) {
+        socketUseCase.connect()
     }
 }

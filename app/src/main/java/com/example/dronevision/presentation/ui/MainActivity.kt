@@ -80,6 +80,13 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         setupDrawer()
         setupBluetoothDialog()
         setupOsmdroidConfiguration()
+
+        mainViewModel.connectSocket()
+        mainViewModel.sendMessageFromFM("zzz")
+        mainViewModel.getMessageFromFM()
+        mainViewModel.socketLiveData.observe(this, Observer {
+            map.spawnTechnic(TechnicTypes.DRONE, Coordinates(20.0,20.0))
+        })
     }
 
     private fun checkPermissions() {

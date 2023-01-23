@@ -7,17 +7,16 @@ import com.example.dronevision.data.repository.SubscribersRepositoryImpl
 import com.example.dronevision.data.repository.TechnicRepositoryImpl
 import com.example.dronevision.data.source.LocalDataSource
 import com.example.dronevision.data.source.RemoteDataSource
+import com.example.dronevision.data.source.SocketDataSourceImpl
 import com.example.dronevision.data.source.local.dao.SessionStateDao
 import com.example.dronevision.data.source.local.dao.SubscribersDao
 import com.example.dronevision.data.source.local.dao.TechnicDao
 import com.example.dronevision.data.source.local.prefs.OfflineOpenFileManager
 import com.example.dronevision.data.source.remote.DroneVisionService
-import com.example.dronevision.domain.repository.DroneVisionServiceRepository
-import com.example.dronevision.domain.repository.SessionStateRepository
-import com.example.dronevision.domain.repository.SubscribersRepository
-import com.example.dronevision.domain.repository.TechnicRepository
+import com.example.dronevision.domain.repository.*
 import dagger.Module
 import dagger.Provides
+import java.net.Socket
 
 @Module(includes = [DatabaseModule::class, NetworkModule::class])
 class DataModule {
@@ -53,4 +52,9 @@ class DataModule {
     @Provides
     fun provideOfflineOpenFileManager(context: Context): OfflineOpenFileManager =
         OfflineOpenFileManager(context)
+
+    @Provides
+    fun provideSocketDataSource(): SocketDataSource {
+       return SocketDataSourceImpl("172.20.10.4", 80)
+    }
 }

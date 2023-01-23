@@ -1,12 +1,11 @@
 package com.example.dronevision.di
 
-import com.example.dronevision.domain.repository.DroneVisionServiceRepository
-import com.example.dronevision.domain.repository.SessionStateRepository
-import com.example.dronevision.domain.repository.SubscribersRepository
-import com.example.dronevision.domain.repository.TechnicRepository
+import com.example.dronevision.data.source.SocketDataSourceImpl
+import com.example.dronevision.domain.repository.*
 import com.example.dronevision.domain.use_cases.*
 import dagger.Module
 import dagger.Provides
+import java.net.Socket
 
 @Module
 class DomainModule {
@@ -46,4 +45,9 @@ class DomainModule {
     @Provides
     fun provideSaveSubscriberUseCase(subscribersRepository: SubscribersRepository): SaveSubscriberUseCase =
         SaveSubscriberUseCase(repository = subscribersRepository)
+
+    @Provides
+    fun provideSocketUseCase(dataSource: SocketDataSource): SocketUseCase {
+        return SocketUseCase(dataSource)
+    }
 }

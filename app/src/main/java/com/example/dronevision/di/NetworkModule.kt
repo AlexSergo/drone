@@ -1,6 +1,7 @@
 package com.example.dronevision.di
 
 import com.example.dronevision.data.source.remote.DroneVisionService
+import com.example.dronevision.domain.repository.SocketDataSource
 import com.example.dronevision.utils.Constants.BASE_URL
 import dagger.Module
 import dagger.Provides
@@ -8,6 +9,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.net.Socket
 
 @Module
 class NetworkModule {
@@ -28,5 +30,4 @@ class NetworkModule {
     @Provides
     fun provideRetrofitService(retrofit: Retrofit): DroneVisionService =
         retrofit.create(DroneVisionService::class.java)
-    
 }

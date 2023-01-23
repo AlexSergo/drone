@@ -7,7 +7,8 @@ import com.example.dronevision.domain.use_cases.*
 class MainViewModelFactory(
     private val saveSessionStateUseCase: SaveSessionStateUseCase,
     private val getSessionStateUseCase: GetSessionStateUseCase,
-    private val getIdUseCase: GetIdUseCase
+    private val getIdUseCase: GetIdUseCase,
+    private val socketUseCase: SocketUseCase
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -15,7 +16,8 @@ class MainViewModelFactory(
             return MainViewModel(
                 saveSessionStateUseCase = saveSessionStateUseCase,
                 getSessionStateUseCase = getSessionStateUseCase,
-                getIdUseCase = getIdUseCase
+                getIdUseCase = getIdUseCase,
+                socketUseCase = socketUseCase
             ) as T
         throw IllegalAccessException("ViewModel not found!")
     }
