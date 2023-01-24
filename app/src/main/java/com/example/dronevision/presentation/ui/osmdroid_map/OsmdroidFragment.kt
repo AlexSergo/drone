@@ -1,5 +1,8 @@
 package com.example.dronevision.presentation.ui.osmdroid_map
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.graphics.Color
 import android.location.LocationManager
 import android.os.Bundle
@@ -7,6 +10,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.util.Pair
 import androidx.core.view.isGone
@@ -104,7 +108,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         setupPolylines()
         setupDisruptionButtons()
 
-//        onDatabaseChangeListener(Device.getDeviceId(requireContext()),this)
+        onDatabaseChangeListener(Device.getDeviceId(requireContext()),this)
         return binding.root
     }
     
@@ -167,6 +171,22 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             }
             showDisruptionInf(isAimVisible, isDisruptionVisible)
         }
+        
+        binding.sightingCard.setOnClickListener {
+            val clipboard: ClipboardManager =
+                requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val horizontalSighting = binding.sightingHorizontal.text.toString()
+            val verticalSighting = binding.sightingVertical.text.toString()
+            val copiedText = "$horizontalSighting, $verticalSighting"
+            val clip = ClipData.newPlainText("sighting", copiedText)
+            clipboard.setPrimaryClip(clip)
+            
+            Toast.makeText(
+                requireContext(),
+                "Скопировано ${clipboard.primaryClip?.getItemAt(0)?.text.toString()}",
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
     
     private fun showDisruptionInf(isAimVisible: Boolean, isDisruptionVisible: Boolean) {
@@ -182,7 +202,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                 NGeoCalc.degreesToRadians(aimMarker.position.longitude),
                 0.0
             )
-    
+            
             NGeoCalc().wgs84ToPlane(
                 xOfDisruption, yOfDisruption, doubleArrayOf(0.0),
                 NGeoCalc.degreesToRadians(disruptionMarker.position.latitude),
@@ -192,18 +212,18 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             
             val xOfAimResult = Integer.valueOf(xOfAim[0].toInt())
             val yOfAimResult = Integer.valueOf(yOfAim[0].toInt())
-    
+            
             val xOfDisruptionResult = Integer.valueOf(xOfDisruption[0].toInt())
             val yOfDisruptionResult = Integer.valueOf(yOfDisruption[0].toInt())
             
             val horizontal = abs(xOfAimResult) - abs(xOfDisruptionResult)
             val vertical = abs(yOfAimResult) - abs(yOfDisruptionResult)
             
-            if (horizontal > 0) binding.sightingHorizontal.text = "Юг ${abs(horizontal)}"
-            else binding.sightingHorizontal.text = "Север ${abs(horizontal)}"
-    
-            if (vertical > 0) binding.sightingVertical.text = "Запад ${abs(vertical)}"
-            else binding.sightingVertical.text = "Восток ${abs(vertical)}"
+            if (horizontal > 0) binding.sightingHorizontal.text = "Юг ${abs(horizontal)}m"
+            else binding.sightingHorizontal.text = "Север ${abs(horizontal)}m"
+            
+            if (vertical > 0) binding.sightingVertical.text = "Запад ${abs(vertical)}m"
+            else binding.sightingVertical.text = "Восток ${abs(vertical)}m"
             
             binding.sightingCard.isVisible = true
         } else binding.sightingCard.isGone = true
