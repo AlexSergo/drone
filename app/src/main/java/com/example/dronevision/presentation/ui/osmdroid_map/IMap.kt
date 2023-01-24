@@ -12,7 +12,7 @@ interface IMap {
     fun changeGridState(isGrid: Boolean)
     fun initTechnic()
     fun spawnTechnic(type: TechnicTypes, coords: Coordinates? = null)
-    fun removeAim()
+    fun removeFrontSight()
     fun initDroneMarker()
     fun setMapType(mapType: Int)
     fun cacheMap()

@@ -26,6 +26,6 @@ object ImageTypes {
         Pair(TechnicTypes.ANOTHER, R.drawable.ic_99),
         Pair(TechnicTypes.GAP, R.drawable.ic_breach),
         Pair(TechnicTypes.DRONE, R.drawable.gps_tacker2),
-        Pair(TechnicTypes.AIM, R.drawable.ic_cross_center)
+        Pair(TechnicTypes.FRONT_SIGHT, R.drawable.ic_cross_center)
     )
 }

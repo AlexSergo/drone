@@ -57,9 +57,9 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
     
     private val overlayGrid = LatLonGridlineOverlay2()
     private lateinit var droneMarker: Marker
-    private var aimMarker: Marker? = null
+    private var frontSightMarker: Marker? = null
     private var polylineToCenter: Polyline = Polyline()
-    private var polylineToAim: Polyline = Polyline()
+    private var polylineToFrontSight: Polyline = Polyline()
     private val listOfTechnic = mutableListOf<Overlay>()
     private var locationOverlay: MyLocationNewOverlay? = null
     
@@ -165,7 +165,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             )
         )
         droneMarker.isFlat = true
-        polylineToAim.isVisible = false
+        polylineToFrontSight.isVisible = false
     }
     
     override fun setMapType(mapType: Int) {
@@ -226,7 +226,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
     private fun setupPolylines() {
         val zeroPoint = GeoPoint(0.0, 0.0)
         val zeroPoints = listOf(zeroPoint, zeroPoint)
-        setPolyline(polylineToAim, zeroPoints, Color.GREEN)
+        setPolyline(polylineToFrontSight, zeroPoints, Color.GREEN)
         setPolyline(polylineToCenter, zeroPoints)
     }
     
@@ -236,7 +236,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         polyline.width = 4.0f
         polyline.isGeodesic = true
         binding.mapView.overlays.add(polyline)
-        polylineToAim.isVisible = true
+        polylineToFrontSight.isVisible = true
     }
     
     private fun updatePolyline(polyline: Polyline, points: List<GeoPoint>) {
@@ -341,11 +341,11 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         longitude: Double,
         type: TechnicTypes
     ): Marker {
-        aimMarker?.let {
+        frontSightMarker?.let {
             if (abs(latitude - it.position.latitude) < 0.0001
                 && abs(longitude - it.position.longitude) < 0.0001
             )
-                removeAim()
+                removeFrontSight()
         }
         var mark = Marker(binding.mapView)
         mark = drawMarker(
@@ -371,10 +371,10 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         return marker
     }
     
-    override fun removeAim() {
-        aimMarker?.remove(binding.mapView)
-        aimMarker = null
-        polylineToAim.isVisible = false
+    override fun removeFrontSight() {
+        frontSightMarker?.remove(binding.mapView)
+        frontSightMarker = null
+        polylineToFrontSight.isVisible = false
     }
     
     override fun showDataFromDrone(entities: List<Entity>) {
@@ -390,7 +390,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         showGeoInformation(binding, cameraTarget, droneMarker.position)
         updatePolyline(polylineToCenter, listOf(droneMarker.position, cameraTarget))
         
-        showAim(GeoPoint(entities[1].lat, entities[1].lon))
+        showFrontSight(GeoPoint(entities[1].lat, entities[1].lon))
         
         if (entities[0].calc_target) {
             osmdroidViewModel.getTargetCoordinates(entities)
@@ -403,17 +403,17 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         }
     }
     
-    private fun showAim(aim: GeoPoint) {
-        if (aimMarker != null) removeAim()
+    private fun showFrontSight(frontSightGeoPoint: GeoPoint) {
+        if (frontSightMarker != null) removeFrontSight()
         
-        aimMarker = drawMarker(
-            aimMarker,
+        frontSightMarker = drawMarker(
+            frontSightMarker,
             Technic(
-                coordinates = Coordinates(x = aim.latitude, y = aim.longitude),
-                technicTypes = TechnicTypes.AIM
+                coordinates = Coordinates(x = frontSightGeoPoint.latitude, y = frontSightGeoPoint.longitude),
+                technicTypes = TechnicTypes.FRONT_SIGHT
             )
         )
-        updatePolyline(polylineToAim, listOf(droneMarker.position, aimMarker!!.position))
+        updatePolyline(polylineToFrontSight, listOf(droneMarker.position, frontSightMarker!!.position))
     }
     
     private fun focusCamera(point: GeoPoint) {
@@ -424,7 +424,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
     override fun showLocationDialog() {
         showLocationDialog(requireContext(), object : LocationDialogCallback {
             override fun focusCamera() {
-                if (aimMarker != null) focusCamera(aimMarker!!.position)
+                if (frontSightMarker != null) focusCamera(frontSightMarker!!.position)
                 else focusCamera(droneMarker.position)
             }
             
