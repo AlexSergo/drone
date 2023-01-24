@@ -22,5 +22,5 @@ enum class TechnicTypes {
     GAP,
     ANOTHER,
     DRONE,
-    AIM
+    FRONT_SIGHT
 }
