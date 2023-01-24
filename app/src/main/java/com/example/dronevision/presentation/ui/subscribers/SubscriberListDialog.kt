@@ -1,5 +1,6 @@
 package com.example.dronevision.presentation.ui.subscribers
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -33,8 +34,25 @@ class SubscriberListDialog(private val subscriberCallback: SubscriberListCallbac
         binding = FragmentSubscriberListDialogBinding.inflate(layoutInflater)
         adapter = SubscriberRecyclerViewAdapter(object : SubscriberListCallback{
             override fun select(subscriber: Subscriber) {
-                subscriberCallback?.select(subscriber)
-                dialog?.dismiss()
+                if (subscriberCallback == null) {
+                    val builder = AlertDialog.Builder(requireContext())
+                    builder.setTitle("Удаление абонента")
+                        .setMessage("Вы точно хотите удалить абонента?")
+                        .setPositiveButton("Удалить") { dialog, id ->
+                            viewModel.removeSubscriber(subscriber)
+                            dialog.cancel()
+                            dismiss()
+                        }
+                        .setNegativeButton("Отмена"){ dialog, id ->
+                            dialog.cancel()
+                        }
+                    builder.create()
+                    builder.show()
+                }
+                else {
+                    subscriberCallback.select(subscriber)
+                    dialog?.dismiss()
+                }
             }
 
         })

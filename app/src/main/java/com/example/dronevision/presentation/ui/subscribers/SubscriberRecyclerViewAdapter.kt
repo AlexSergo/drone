@@ -41,7 +41,6 @@ class SubscriberRecyclerViewAdapter(private val callback: SubscriberListCallback
             binding.subscriberName.text = subscriber.name
             binding.subscriberAddress.text = subscriber.id
             binding.item.setOnClickListener {
-                it.setBackgroundColor(Color.GRAY)
                 callback?.select(subscriber)
             }
         }

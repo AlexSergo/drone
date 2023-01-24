@@ -48,10 +48,12 @@ class AppModule(val context: Context) {
     @Provides
     fun provideSubscriberViewModelFactory(
         saveSubscriberUseCase: SaveSubscriberUseCase,
-        getSubscribersUseCase: GetSubscribersUseCase
+        getSubscribersUseCase: GetSubscribersUseCase,
+        removeSubscriberUseCase: RemoveSubscriberUseCase
     ): SubscriberViewModelFactory = SubscriberViewModelFactory(
         saveSubscriberUseCase = saveSubscriberUseCase,
-        getSubscribersUseCase = getSubscribersUseCase
+        getSubscribersUseCase = getSubscribersUseCase,
+        removeSubscriberUseCase = removeSubscriberUseCase
     )
 
     @Provides

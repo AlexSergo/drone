@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.dronevision.App
 import com.example.dronevision.databinding.FragmentSubscriberDialogBinding
@@ -42,11 +43,19 @@ class SubscriberDialogFragment(private val id: String? = null) : DialogFragment(
         binding.saveButton.setOnClickListener {
             if (binding.editTextName.text.toString() != ""
                 && (binding.editTextID.text.toString() != ""
-                        || binding.editTextIP.text.toString() != ""))
-            viewModel.saveSubscriber(
-                Subscriber(id = binding.editTextID.text.toString(),
-                    name = binding.editTextName.text.toString(),
-                    IP = binding.editTextIP.text.toString()))
+                        || binding.editTextIP.text.toString() != "")) {
+                viewModel.saveSubscriber(
+                    Subscriber(
+                        id = binding.editTextID.text.toString(),
+                        name = binding.editTextName.text.toString(),
+                        IP = binding.editTextIP.text.toString()
+                    )
+                )
+                dismiss()
+            }
+        }
+        binding.closeButton.setOnClickListener {
+            dismiss()
         }
         return binding.root
     }

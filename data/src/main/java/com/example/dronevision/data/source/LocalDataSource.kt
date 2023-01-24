@@ -39,5 +39,9 @@ class LocalDataSource(
     suspend fun saveSubscriber(subscriberEntity: SubscriberEntity){
         subscribersDao.saveSubscriber(subscriberEntity)
     }
-    
+
+    fun removeSubscriber(subscriber: SubscriberEntity) {
+        subscribersDao.removeSubscriber(subscriber.name)
+    }
+
 }

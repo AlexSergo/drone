@@ -47,6 +47,10 @@ class DomainModule {
         SaveSubscriberUseCase(repository = subscribersRepository)
 
     @Provides
+    fun provideRemoveSubscriberUseCase(subscribersRepository: SubscribersRepository): RemoveSubscriberUseCase =
+        RemoveSubscriberUseCase(repository = subscribersRepository)
+
+    @Provides
     fun provideSocketUseCase(dataSource: SocketDataSource): SocketUseCase {
         return SocketUseCase(dataSource)
     }

@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dronevision.domain.use_cases.GetSubscribersUseCase
+import com.example.dronevision.domain.use_cases.RemoveSubscriberUseCase
 import com.example.dronevision.domain.use_cases.SaveSubscriberUseCase
 import com.example.dronevision.presentation.mapper.SubscribersMapperUI
 import com.example.dronevision.presentation.model.Subscriber
@@ -13,7 +14,8 @@ import kotlinx.coroutines.launch
 
 class SubscriberViewModel(
     private val saveSubscriberUseCase: SaveSubscriberUseCase,
-    private val getSubscribersUseCase: GetSubscribersUseCase
+    private val getSubscribersUseCase: GetSubscribersUseCase,
+    private val removeSubscriberUseCase: RemoveSubscriberUseCase
 ): ViewModel() {
 
     private val _subscribersLiveData: MutableLiveData<List<Subscriber>> = MutableLiveData()
@@ -28,4 +30,9 @@ class SubscriberViewModel(
         val subs = SubscribersMapperUI.mapSubscribersDTOtoSubscribersUI(getSubscribersUseCase.execute())
         _subscribersLiveData.postValue(subs)
     }
+
+    fun removeSubscriber(subscriber: Subscriber) = viewModelScope.launch(Dispatchers.IO) {
+        removeSubscriberUseCase.execute(SubscribersMapperUI.mapSubscriberUItoDTO(subscriber))
+    }
+
 }

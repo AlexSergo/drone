@@ -16,4 +16,8 @@ class SubscribersRepositoryImpl(private val localDataSource: LocalDataSource): S
         val sub = SubscribersMapper.mapSubscriberDTOToEntity(subscriberDTO)
        localDataSource.saveSubscriber(sub)
     }
+
+    override fun removeSubscriber(subscriber: SubscriberDTO) {
+        localDataSource.removeSubscriber(SubscribersMapper.mapSubscriberDTOToEntity(subscriber))
+    }
 }

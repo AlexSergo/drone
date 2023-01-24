@@ -1,6 +1,7 @@
 package com.example.dronevision.data.source.local.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -13,4 +14,7 @@ interface SubscribersDao {
 
     @Query("SELECT * FROM subscribers")
     suspend fun getSubscribers(): List<SubscriberEntity>
+
+    @Query("DELETE FROM subscribers WHERE name = :name")
+    fun removeSubscriber(name: String)
 }
