@@ -1,5 +1,6 @@
 package com.example.dronevision.presentation.ui.targ
 
+import android.app.AlertDialog
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -74,6 +75,14 @@ class TargetFragment(
             try {
                 startActivity(sendIntent)
             } catch (ex: ActivityNotFoundException) {
+                val builder = AlertDialog.Builder(requireContext())
+                builder.setTitle("На вашем устройстве нет Telegram!")
+                    .setMessage("Для начала установите telegram")
+                    .setPositiveButton("ОК") {
+                            dialog, id ->  dialog.cancel()
+                    }
+                builder.create()
+                builder.show()
             }
         }
 
@@ -85,7 +94,7 @@ class TargetFragment(
         binding.radioBtn.setOnClickListener {
             val subscriberListDialog = SubscriberListDialog(object : SubscriberListCallback {
                 override fun select(subscriber: Subscriber) {
-                    targetViewModel.sendMessage("192.168.1.33", technic.toJson())
+                    targetViewModel.sendMessage("172.20.12.195", technic.toJson())
                 }
 
             }, SubscribersType.Radio)

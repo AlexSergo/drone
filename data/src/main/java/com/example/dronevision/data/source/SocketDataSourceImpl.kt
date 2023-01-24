@@ -13,9 +13,10 @@ class SocketDataSourceImpl() : SocketDataSource {
     private var isConnected: Boolean = false
 
     override suspend fun connect(address: String, port: Int){
+        if (!socket.isConnected) {
             socket = Socket(address, port)
-            socket.connect(socket.remoteSocketAddress)
             isConnected = true
+        }
     }
 
     override suspend fun disconnect() {
@@ -26,7 +27,7 @@ class SocketDataSourceImpl() : SocketDataSource {
     }
 
     override suspend fun sendMessage(message: String) {
-        if (!isConnected)
+        if (!isConnected || socket.isClosed)
             return
       withContext(Dispatchers.IO) {
           val writer = socket.getOutputStream()

@@ -81,6 +81,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         setupDrawer()
         setupBluetoothDialog()
         setupOsmdroidConfiguration()
+        mainViewModel.startServer()
     }
 
     private fun checkPermissions() {

@@ -13,6 +13,8 @@ import com.example.dronevision.presentation.model.SessionState
 import com.example.dronevision.utils.MapType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.net.ServerSocket
+import java.util.*
 
 class MainViewModel(
     private val saveSessionStateUseCase: SaveSessionStateUseCase,
@@ -62,5 +64,20 @@ class MainViewModel(
          }catch (_: IllegalArgumentException){
 
          }
+    }
+
+    fun startServer() = viewModelScope.launch(Dispatchers.IO) {
+        val server = ServerSocket(8080)
+        println("Server running on port ${server.localPort}")
+        val client = server.accept()
+        println("Client connected : ${client.inetAddress.hostAddress}")
+        val scanner = Scanner(client.inputStream)
+        var result = ""
+        while (scanner.hasNextLine()) {
+            println(scanner.nextLine())
+            result += scanner.nextLine()
+        }
+        val writer =  client.getOutputStream()
+        writer.write(result.toByteArray())
     }
 }
