@@ -9,35 +9,36 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="200 km"
-        android:textSize="10sp"
         android:textColor="@color/black"
+        android:textSize="10sp"
         android:translationZ="2dp"
-        app:layout_constraintStart_toEndOf="@id/form_View"
-        app:layout_constraintBottom_toBottomOf="@id/form_View"/>
+        app:layout_constraintBottom_toBottomOf="@id/form_View"
+        app:layout_constraintStart_toEndOf="@id/form_View" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/infoCard"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
+        android:backgroundTint="@color/semiTransparentColor"
         android:minWidth="35dp"
         android:minHeight="75dp"
-        android:backgroundTint="@color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:id="@+id/linearLayoutInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="5dp">
 
             <TextView
                 android:id="@+id/azimuth"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Азимут"
+                android:textColor="@color/black"
                 android:textSize="14sp" />
 
             <TextView
@@ -45,6 +46,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Широта"
+                android:textColor="@color/black"
                 android:textSize="14sp" />
 
             <TextView
@@ -52,42 +54,115 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Долгота"
-                android:textSize="14sp"
-                android:background="@color/white" />
+                android:textColor="@color/black"
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/plane"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="X= , Y="
-                android:textSize="14sp"
-                android:background="@color/white" />
+                android:textColor="@color/black"
+                android:textSize="14sp" />
         </androidx.appcompat.widget.LinearLayoutCompat>
     </androidx.cardview.widget.CardView>
 
+    <androidx.cardview.widget.CardView
+        android:id="@+id/sightingCard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="@color/semiTransparentColor"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@id/infoCard"
+        app:layout_constraintTop_toBottomOf="@id/infoCard">
 
-    <ImageButton
+        <LinearLayout
+            android:id="@+id/linearЫighting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="5dp">
+
+            <TextView
+                android:id="@+id/sightingLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Корректировка:"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/sightingHorizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Юг"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/sightingVertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Восток"
+                android:textColor="@color/black"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/aimButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/white"
+        android:gravity="center"
+        android:text="Ц"
+        android:textColor="@color/black"
+        android:translationZ="2dp"
+        app:layout_constraintBottom_toTopOf="@+id/disruptionButton"
+        app:layout_constraintEnd_toEndOf="@+id/disruptionButton"
+        app:layout_constraintStart_toStartOf="@+id/disruptionButton" />
+
+    <TextView
+        android:id="@+id/disruptionButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
+        android:background="@color/white"
+        android:gravity="center"
+        android:text="Р"
+        android:textColor="@color/black"
+        android:translationZ="2dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
         android:id="@+id/zoomInButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:src="@drawable/zoom_in"
         android:translationZ="2dp"
         app:layout_constraintBottom_toTopOf="@id/zoomOutButton"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="@id/compassButton"
+        app:layout_constraintStart_toStartOf="@id/compassButton" />
 
-    <ImageButton
+    <ImageView
         android:id="@+id/zoomOutButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:src="@drawable/zoom_out"
         android:translationZ="2dp"
         app:layout_constraintBottom_toTopOf="@id/compassButton"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="@id/compassButton"
+        app:layout_constraintStart_toStartOf="@id/compassButton" />
 
     <ImageView
         android:id="@+id/compassButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:src="@drawable/compass"
         android:translationZ="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -100,10 +175,10 @@
         android:layout_centerInParent="true"
         android:src="@drawable/locker"
         android:translationZ="3dp"
-        app:layout_constraintStart_toStartOf="@id/compassButton"
-        app:layout_constraintTop_toTopOf="@id/compassButton"
         app:layout_constraintBottom_toBottomOf="@id/compassButton"
-        app:layout_constraintEnd_toEndOf="@id/compassButton"/>
+        app:layout_constraintEnd_toEndOf="@id/compassButton"
+        app:layout_constraintStart_toStartOf="@id/compassButton"
+        app:layout_constraintTop_toTopOf="@id/compassButton" />
 
     <org.osmdroid.views.MapView
         android:id="@+id/mapView"
@@ -119,8 +194,8 @@
         android:id="@+id/form_View"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:translationZ="2dp"
         android:background="@drawable/ic_cross_center"
+        android:translationZ="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

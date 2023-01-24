@@ -3,14 +3,18 @@ package com.example.dronevision.presentation.ui.osmdroid_map
 import android.graphics.Color
 import android.location.LocationManager
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.util.Pair
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.dronevision.App
+import com.example.dronevision.R
 import com.example.dronevision.data.source.local.prefs.OfflineOpenFileManager
 import com.example.dronevision.databinding.FragmentOsmdroidBinding
 import com.example.dronevision.domain.model.Coordinates
@@ -23,9 +27,7 @@ import com.example.dronevision.presentation.ui.find_location.FindGeoPointCallbac
 import com.example.dronevision.presentation.ui.find_location.FindGeoPointFragment
 import com.example.dronevision.presentation.ui.targ.TargetFragment
 import com.example.dronevision.presentation.ui.targ.TargetFragmentCallback
-import com.example.dronevision.utils.ImageTypes
-import com.example.dronevision.utils.MapTools
-import com.example.dronevision.utils.MapType
+import com.example.dronevision.utils.*
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
@@ -58,6 +60,8 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
     private val overlayGrid = LatLonGridlineOverlay2()
     private lateinit var droneMarker: Marker
     private var frontSightMarker: Marker? = null
+    private lateinit var aimMarker: Marker
+    private lateinit var disruptionMarker: Marker
     private var polylineToCenter: Polyline = Polyline()
     private var polylineToFrontSight: Polyline = Polyline()
     private val listOfTechnic = mutableListOf<Overlay>()
@@ -98,9 +102,111 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         initTechnic()
         setupLastSessionState()
         setupPolylines()
+        setupDisruptionButtons()
 
 //        onDatabaseChangeListener(Device.getDeviceId(requireContext()),this)
         return binding.root
+    }
+    
+    private fun setupDisruptionButtons() {
+        aimMarker = Marker(binding.mapView)
+        disruptionMarker = Marker(binding.mapView)
+        
+        drawMarker(
+            aimMarker,
+            Technic(
+                coordinates = Coordinates(2.0, 2.0),
+                technicTypes = TechnicTypes.AIM
+            )
+        )
+        drawMarker(
+            disruptionMarker,
+            Technic(
+                coordinates = Coordinates(4.0, 4.0),
+                technicTypes = TechnicTypes.DISRUPTION
+            )
+        )
+        
+        var isAimVisible = false
+        var isDisruptionVisible = false
+        aimMarker.setVisible(isAimVisible)
+        disruptionMarker.setVisible(isDisruptionVisible)
+        binding.aimButton.setOnClickListener {
+            if (isAimVisible) {
+                isAimVisible = false
+                aimMarker.setVisible(isAimVisible)
+                binding.aimButton.background =
+                    getDrawable(requireContext(), R.color.white)
+                binding.mapView.invalidate()
+            } else {
+                isAimVisible = true
+                aimMarker.setVisible(isAimVisible)
+                aimMarker.position = binding.mapView.mapCenter as GeoPoint
+                binding.aimButton.background =
+                    getDrawable(requireContext(), R.color.green)
+                binding.mapView.invalidate()
+            }
+            Log.d("isAimVisible", aimMarker.isEnabled.toString())
+            showDisruptionInf(isAimVisible, isDisruptionVisible)
+        }
+        
+        binding.disruptionButton.setOnClickListener {
+            if (isDisruptionVisible) {
+                isDisruptionVisible = false
+                disruptionMarker.setVisible(isDisruptionVisible)
+                binding.disruptionButton.background =
+                    getDrawable(requireContext(), R.color.white)
+                binding.mapView.invalidate()
+            } else {
+                isDisruptionVisible = true
+                disruptionMarker.setVisible(isDisruptionVisible)
+                disruptionMarker.position = binding.mapView.mapCenter as GeoPoint
+                binding.disruptionButton.background =
+                    getDrawable(requireContext(), R.color.green)
+                binding.mapView.invalidate()
+            }
+            showDisruptionInf(isAimVisible, isDisruptionVisible)
+        }
+    }
+    
+    private fun showDisruptionInf(isAimVisible: Boolean, isDisruptionVisible: Boolean) {
+        if (isAimVisible && isDisruptionVisible) {
+            val xOfAim = doubleArrayOf(0.0)
+            val yOfAim = doubleArrayOf(0.0)
+            val xOfDisruption = doubleArrayOf(0.0)
+            val yOfDisruption = doubleArrayOf(0.0)
+            
+            NGeoCalc().wgs84ToPlane(
+                xOfAim, yOfAim, doubleArrayOf(0.0),
+                NGeoCalc.degreesToRadians(aimMarker.position.latitude),
+                NGeoCalc.degreesToRadians(aimMarker.position.longitude),
+                0.0
+            )
+    
+            NGeoCalc().wgs84ToPlane(
+                xOfDisruption, yOfDisruption, doubleArrayOf(0.0),
+                NGeoCalc.degreesToRadians(disruptionMarker.position.latitude),
+                NGeoCalc.degreesToRadians(disruptionMarker.position.longitude),
+                0.0
+            )
+            
+            val xOfAimResult = Integer.valueOf(xOfAim[0].toInt())
+            val yOfAimResult = Integer.valueOf(yOfAim[0].toInt())
+    
+            val xOfDisruptionResult = Integer.valueOf(xOfDisruption[0].toInt())
+            val yOfDisruptionResult = Integer.valueOf(yOfDisruption[0].toInt())
+            
+            val horizontal = abs(xOfAimResult) - abs(xOfDisruptionResult)
+            val vertical = abs(yOfAimResult) - abs(yOfDisruptionResult)
+            
+            if (horizontal > 0) binding.sightingHorizontal.text = "Юг ${abs(horizontal)}"
+            else binding.sightingHorizontal.text = "Север ${abs(horizontal)}"
+    
+            if (vertical > 0) binding.sightingVertical.text = "Запад ${abs(vertical)}"
+            else binding.sightingVertical.text = "Восток ${abs(vertical)}"
+            
+            binding.sightingCard.isVisible = true
+        } else binding.sightingCard.isGone = true
     }
     
     private fun setupLastSessionState() {
@@ -138,7 +244,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             override fun onScroll(event: ScrollEvent?): Boolean {
                 val cameraTarget = binding.mapView.mapCenter as GeoPoint
                 showGeoInformation(binding, cameraTarget, droneMarker.position)
-
+                
                 updatePolyline(polylineToCenter, listOf(droneMarker.position, cameraTarget))
                 binding.distance.text = "${getDistance(droneMarker.position, cameraTarget)} km"
                 return true
@@ -332,8 +438,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         findGeoPointFragment.show(parentFragmentManager, "findGeoPointFragment")
     }
     
-    override fun showAllTargets() {
-    
+    override fun showAllTargets() { // TODO:
     }
     
     private fun setMark(
@@ -409,11 +514,17 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         frontSightMarker = drawMarker(
             frontSightMarker,
             Technic(
-                coordinates = Coordinates(x = frontSightGeoPoint.latitude, y = frontSightGeoPoint.longitude),
+                coordinates = Coordinates(
+                    x = frontSightGeoPoint.latitude,
+                    y = frontSightGeoPoint.longitude
+                ),
                 technicTypes = TechnicTypes.FRONT_SIGHT
             )
         )
-        updatePolyline(polylineToFrontSight, listOf(droneMarker.position, frontSightMarker!!.position))
+        updatePolyline(
+            polylineToFrontSight,
+            listOf(droneMarker.position, frontSightMarker!!.position)
+        )
     }
     
     private fun focusCamera(point: GeoPoint) {

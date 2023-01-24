@@ -1,7 +1,5 @@
 package com.example.dronevision.presentation.ui.osmdroid_map
 
-import android.location.LocationManager
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.dronevision.domain.use_cases.*
 import com.example.dronevision.presentation.mapper.SessionStateMapperUi
 import com.example.dronevision.presentation.mapper.TechnicMapperUI
+import com.example.dronevision.presentation.model.DisruptionModel
 import com.example.dronevision.presentation.model.SessionState
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.model.bluetooth.Entity
@@ -17,8 +16,6 @@ import com.example.dronevision.utils.MapType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 class OsmdroidViewModel(
     private val getTechnicsUseCase: GetTechnicsUseCase,
