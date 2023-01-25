@@ -138,7 +138,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/zoomInButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
@@ -148,7 +148,7 @@
         app:layout_constraintEnd_toEndOf="@id/compassButton"
         app:layout_constraintStart_toStartOf="@id/compassButton" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/zoomOutButton"
         android:layout_width="48dp"
         android:layout_height="48dp"
