@@ -94,7 +94,7 @@ class TargetFragment(
         binding.radioBtn.setOnClickListener {
             val subscriberListDialog = SubscriberListDialog(object : SubscriberListCallback {
                 override fun select(subscriber: Subscriber) {
-                   // targetViewModel.sendMessage("192.168.11.1", technic.toJson())
+                    targetViewModel.sendMessage("192.168.11.1", technic.toJson())
                 }
 
             }, SubscribersType.Radio)

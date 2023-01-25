@@ -1,14 +1,12 @@
 package com.example.dronevision.presentation.delegates
 
-import android.Manifest
+
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothServerSocket
 import android.bluetooth.BluetoothSocket
 import android.content.Context
-import android.content.pm.PackageManager
-import androidx.core.app.ActivityCompat
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.MapActivityListener
 import com.example.dronevision.presentation.ui.bluetooth.BluetoothConnection
@@ -25,14 +23,13 @@ class BluetoothHandlerImpl: BluetoothHandler {
     private lateinit var bluetoothConnection: BluetoothConnection
     private lateinit var receiver: BluetoothReceiver
     private lateinit var listener: MapActivityListener
-    private lateinit var context: Context
     private var socket: BluetoothSocket? = null
     val uuid = "00001101-0000-1000-8000-00805F9B34FB"
 
     override fun setupBluetooth(
         context: Context, systemService: Any, listener: MapActivityListener
     ): BluetoothConnection {
-        this.context = context
+
         val bluetoothManager = systemService as BluetoothManager
         bluetoothAdapter = bluetoothManager.adapter
 
