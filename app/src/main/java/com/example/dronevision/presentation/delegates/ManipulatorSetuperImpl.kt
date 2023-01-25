@@ -33,19 +33,6 @@ class ManipulatorSetuperImpl: ManipulatorSetuper {
         }
     }
 
-/*    private fun setupDisplayMetrics(binding: FragmentOsmdroidBinding) = binding.run {
-        val displayMetrics = resources.displayMetrics
-        val scaleBarOverlay = ScaleBarOverlay(mapView)
-        scaleBarOverlay.unitsOfMeasure = ScaleBarOverlay.UnitsOfMeasure.metric
-        scaleBarOverlay.setCentred(true)
-        scaleBarOverlay.setTextSize(30.0f)
-        scaleBarOverlay.setScaleBarOffset(
-            displayMetrics.widthPixels / 2,
-            displayMetrics.heightPixels - (displayMetrics.density * 70.0f).toInt()
-        )
-        mapView.overlayManager.add(scaleBarOverlay)
-    }*/
-
     override fun setupManipulators(binding: FragmentOsmdroidBinding, rotationGestureOverlay: RotationGestureOverlay) {
         setupCompass(binding, rotationGestureOverlay)
         setupZoomButtons(binding)

@@ -41,6 +41,7 @@ import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Overlay
 import org.osmdroid.views.overlay.Polyline
+import org.osmdroid.views.overlay.ScaleBarOverlay
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
@@ -107,8 +108,8 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         setupLastSessionState()
         setupPolylines()
         setupDisruptionButtons()
-
-        onDatabaseChangeListener(Device.getDeviceId(requireContext()),this)
+        
+        onDatabaseChangeListener(Device.getDeviceId(requireContext()), this)
         return binding.root
     }
     
@@ -276,9 +277,22 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         })
         
         setupManipulators(binding, rotationGestureOverlay)
-        
+        setupDisplayMetrics()
         checkLocationPermissions((activity as MainActivity))
 //        initMyLocation()
+    }
+    
+    private fun setupDisplayMetrics() {
+        val displayMetrics = resources.displayMetrics
+        val scaleBarOverlay = ScaleBarOverlay(binding.mapView)
+        scaleBarOverlay.unitsOfMeasure = ScaleBarOverlay.UnitsOfMeasure.metric
+        scaleBarOverlay.setCentred(true)
+        scaleBarOverlay.setTextSize(30.0f)
+        scaleBarOverlay.setScaleBarOffset(
+            displayMetrics.widthPixels / 2,
+            displayMetrics.heightPixels - (displayMetrics.density * 110.0f).toInt()
+        )
+        binding.mapView.overlayManager.add(scaleBarOverlay)
     }
     
     override fun initDroneMarker() {
