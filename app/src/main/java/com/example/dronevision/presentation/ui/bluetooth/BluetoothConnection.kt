@@ -24,7 +24,6 @@ class BluetoothConnection(
         return adapter
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
     @SuppressLint("MissingPermission")
     fun connect(mac: String){
         if (!adapter.isEnabled || mac.isEmpty())

@@ -13,7 +13,7 @@ class SocketDataSourceImpl() : SocketDataSource {
     private var isConnected: Boolean = false
 
     override suspend fun connect(address: String, port: Int){
-        if (!socket.isConnected) {
+        if (!isConnected) {
             socket = Socket(address, port)
             isConnected = true
         }
@@ -35,6 +35,7 @@ class SocketDataSourceImpl() : SocketDataSource {
             writer.write(message.toByteArray())
           else
               writer.close()
+          disconnect()
       }
     }
 

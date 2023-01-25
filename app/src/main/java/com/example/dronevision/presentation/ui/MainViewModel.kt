@@ -10,7 +10,9 @@ import com.example.dronevision.domain.use_cases.SaveSessionStateUseCase
 import com.example.dronevision.domain.use_cases.SocketUseCase
 import com.example.dronevision.presentation.mapper.SessionStateMapperUi
 import com.example.dronevision.presentation.model.SessionState
+import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.utils.MapType
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.net.ServerSocket
@@ -67,7 +69,7 @@ class MainViewModel(
     }
 
     fun startServer() = viewModelScope.launch(Dispatchers.IO) {
-        val server = ServerSocket(8080)
+        val server = ServerSocket(8000)
         println("Server running on port ${server.localPort}")
         val client = server.accept()
         println("Client connected : ${client.inetAddress.hostAddress}")
@@ -77,6 +79,7 @@ class MainViewModel(
             println(scanner.nextLine())
             result += scanner.nextLine()
         }
+        _socketLiveData.postValue(result)
         val writer =  client.getOutputStream()
         writer.write(result.toByteArray())
     }

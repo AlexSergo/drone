@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 class TargetViewModel(private val socketUseCase: SocketUseCase): ViewModel() {
 
     fun sendMessage(address: String, message: String) = viewModelScope.launch(Dispatchers.IO){
-        socketUseCase.connect(address)
+        socketUseCase.connect(address, 33928)
         socketUseCase.sendMessage(message)
     }
 

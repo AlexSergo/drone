@@ -104,7 +104,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         setupPolylines()
         setupDisruptionButtons()
 
-//        onDatabaseChangeListener(Device.getDeviceId(requireContext()),this)
+        onDatabaseChangeListener(Device.getDeviceId(requireContext()),this)
         return binding.root
     }
     

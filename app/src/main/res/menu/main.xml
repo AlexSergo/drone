@@ -94,5 +94,6 @@
         android:icon="@drawable/no_wifi"
         android:orderInCategory="300"
         android:title="Р-187-П1"
+        android:visible="false"
         app:showAsAction="ifRoom" />
 </menu>

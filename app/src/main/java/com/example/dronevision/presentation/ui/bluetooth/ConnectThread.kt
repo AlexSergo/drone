@@ -21,9 +21,9 @@ class ConnectThread(private val device: BluetoothDevice,
 
     init {
         try {
-                socket = device.createRfcommSocketToServiceRecord(UUID.fromString(uuid))
+               // socket = device.createRfcommSocketToServiceRecord(UUID.fromString(uuid))
           // socket = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString(uuid))
-            //    socket = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString(uuid))
+                socket = device.createInsecureRfcommSocketToServiceRecord(UUID.fromString(uuid))
         }catch (_: IOException){
 
         }

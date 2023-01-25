@@ -48,6 +48,7 @@ import com.example.dronevision.utils.*
 import com.example.dronevision.utils.FileTools.createAppFolder
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.components.BuildConfig
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import org.osmdroid.config.Configuration
 import javax.inject.Inject
@@ -76,12 +77,17 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         initViewModel()
         val id = Device.getDeviceId(applicationContext)
         println(id)
-       // checkRegistration() //TODO: Раскоментить когда будет серверная часть
-        setupOptionsMenu()
+        checkRegistration() //TODO: Раскоментить когда будет серверная часть
+/*        setupOptionsMenu()
         setupDrawer()
-        setupBluetoothDialog()
+        setupBluetoothDialog()*/
         setupOsmdroidConfiguration()
-        mainViewModel.startServer()
+/*        mainViewModel.startServer()
+        mainViewModel.socketLiveData.observe(this, Observer {
+            val technic = Gson().fromJson(it, Technic::class.java)
+            map.spawnTechnic(technic.technicTypes,
+                Coordinates(x = technic.coordinates.x, y = technic.coordinates.y))
+        })*/
     }
 
     private fun checkPermissions() {
@@ -138,7 +144,6 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
             }
             else
                 if (hash == Hash.md5(id)) {
-                    // приложение работает
                     setupOptionsMenu()
                     setupDrawer()
                     setupBluetoothDialog()
