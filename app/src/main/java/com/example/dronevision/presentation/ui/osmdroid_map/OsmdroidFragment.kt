@@ -1,12 +1,12 @@
 package com.example.dronevision.presentation.ui.osmdroid_map
 
+import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Color
 import android.location.LocationManager
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -50,8 +50,9 @@ import javax.inject.Inject
 import kotlin.math.abs
 
 
-class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDatabaseHandlerImpl(),
-    OfflineMapHandler by OfflineMapHandlerImpl(), PermissionHandler by PermissionHandlerImpl(),
+class OsmdroidFragment : Fragment(), IMap,
+    RemoteDatabaseHandler by RemoteDatabaseHandlerImpl(),
+    OfflineMapHandler by OfflineMapHandlerImpl(),
     GeoInformationHandler by GeoInformationHandlerImpl(),
     LocationDialogHandler by LocationDialogHandlerImpl(),
     ManipulatorSetuper by ManipulatorSetuperImpl(),
@@ -99,8 +100,6 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentOsmdroidBinding.inflate(inflater, container, false)
-        checkStoragePermissions(requireActivity())
-        
         setupOsmdroidMap()
         initDroneMarker()
         initTechnic()
@@ -188,6 +187,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         }
     }
     
+    @SuppressLint("SetTextI18n")
     private fun showDisruptionInf(isAimVisible: Boolean, isDisruptionVisible: Boolean) {
         if (isAimVisible && isDisruptionVisible) {
             val xOfAim = doubleArrayOf(0.0)
@@ -276,8 +276,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         
         setupManipulators(binding, rotationGestureOverlay)
         setupDisplayMetrics()
-        checkLocationPermissions((activity as MainActivity))
-//        initMyLocation()
+        initMyLocation()
     }
     
     private fun setupDisplayMetrics() {
@@ -572,11 +571,10 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             }
             
             override fun findMyLocation() {
-                if (checkLocationPermissions((activity as MainActivity)))
-                    if (checkGPS(requireActivity()))
-                        locationOverlay?.let {
-                            if (it.myLocation != null) focusCamera(it.myLocation)
-                        }
+                if (checkGPS(requireActivity()))
+                    locationOverlay?.let {
+                        if (it.myLocation != null) focusCamera(it.myLocation)
+                    }
             }
         })
     }

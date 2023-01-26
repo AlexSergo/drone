@@ -2,9 +2,7 @@ package com.example.dronevision.presentation.ui
 
 
 import android.Manifest
-import android.content.ActivityNotFoundException
 import android.content.ClipboardManager
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Menu
@@ -20,7 +18,6 @@ import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -48,7 +45,6 @@ import com.example.dronevision.utils.*
 import com.example.dronevision.utils.FileTools.createAppFolder
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.components.BuildConfig
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import org.osmdroid.config.Configuration
 import javax.inject.Inject
@@ -71,14 +67,15 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        checkPermissions()
+    
+        PermissionTools.checkAndRequestPermissions(this)
         createAppFolder()
         initViewModel()
-        val id = Device.getDeviceId(applicationContext)
-        println(id)
         checkRegistration()
         setupOsmdroidConfiguration()
+    
+        val id = Device.getDeviceId(applicationContext)
+        println(id)
 /*        mainViewModel.startServer()
         mainViewModel.socketLiveData.observe(this, Observer {
             val technic = Gson().fromJson(it, Technic::class.java)
@@ -87,35 +84,6 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         })*/
     }
 
-    private fun checkPermissions() {
-            val permission1 = ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            val permission2 = ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.BLUETOOTH_SCAN);
-            val permission3 = ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.BLUETOOTH_CONNECT);
-            if (permission1 != PackageManager.PERMISSION_GRANTED) {
-                // We do not have permission so immediate the consumer
-                ActivityCompat.requestPermissions(
-                    this,
-                    Constants.PERMISSIONS_STORAGE,
-                    1
-                );
-            }
-            if (permission2 != PackageManager.PERMISSION_GRANTED){
-                ActivityCompat.requestPermissions(
-                    this,
-                    Constants.PERMISSIONS_LOCATION,
-                    1
-                );
-            }
-            if (permission3 != PackageManager.PERMISSION_GRANTED){
-                ActivityCompat.requestPermissions(
-                    this,
-                    Constants.PERMISSIONS_LOCATION,
-                    1
-                )
-            }
-    }
-
-
     private fun initViewModel() {
         (applicationContext as App).appComponent.inject(this)
         mainViewModel =
@@ -123,12 +91,12 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
     }
 
     private fun checkRegistration(){
-        var sharedPreferences = SharedPreferences(applicationContext)
+        val sharedPreferences = SharedPreferences(applicationContext)
         val id = Device.getDeviceId(applicationContext)
             val hash = sharedPreferences.getValue("AUTH_TOKEN")
             if (hash == null) {
                 mainViewModel.getId(id)
-                mainViewModel.idLiveData.observe(this, Observer {
+                mainViewModel.idLiveData.observe(this) {
                     it?.let { hash ->
                         if (hash == Hash.md5(id)) {
                             sharedPreferences.save("AUTH_TOKEN", hash)
@@ -137,7 +105,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                             setupBluetoothDialog()
                         }
                     }
-                })
+                }
             }
             else
                 if (hash == Hash.md5(id)) {
@@ -148,8 +116,6 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
     }
     
     private fun setupBluetoothDialog() {
-        PermissionTools.checkAndRequestPermissions(appCompatActivity = this)
-
         val connection = setupBluetooth(
             context = this,
             systemService = getSystemService(BLUETOOTH_SERVICE),
@@ -202,7 +168,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
 
     private fun setupDrawer(){
         setSupportActionBar(binding.appBarMain.toolbar)
-        supportActionBar?.setDisplayShowTitleEnabled(false);
+        supportActionBar?.setDisplayShowTitleEnabled(false)
 
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
@@ -329,8 +295,8 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         true
                     }
                     R.id.addHeightMaps -> {
-                        //  Загрузка высотной карты (Москвы) надо будет добавить возможность выбирать регионы
-                        val hgtLoader = HgtLoader(resources)
+                        //  TODO: Загрузка высотной карты (Москвы) надо будет добавить возможность выбирать регионы
+//                        val hgtLoader = HgtLoader(resources)
                         true
                     }
                     R.id.mapOfflineItem -> {
