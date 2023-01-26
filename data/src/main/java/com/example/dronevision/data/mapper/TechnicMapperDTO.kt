@@ -11,7 +11,8 @@ object TechnicMapperDTO {
             id = technicDTO.id,
             type = technicDTO.type.name,
             x = technicDTO.coords.x,
-            y = technicDTO.coords.y
+            y = technicDTO.coords.y,
+            division = technicDTO.division
         )
     }
 
@@ -21,7 +22,8 @@ object TechnicMapperDTO {
             result.add(TechnicDTO(
                 id = it.id,
                 type = TechnicTypes.valueOf(it.type),
-                coords = Coordinates(x = it.x, y = it.y)
+                coords = Coordinates(x = it.x, y = it.y),
+                division = it.division
             ))
         }
         return result

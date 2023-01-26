@@ -14,11 +14,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.example.dronevision.databinding.FragmentAndroidIdBinding
 import com.example.dronevision.presentation.delegates.BluetoothHandler
+import com.example.dronevision.presentation.delegates.DivisionHandler
 import com.example.dronevision.presentation.ui.bluetooth.BluetoothConnection
 import com.example.dronevision.presentation.ui.bluetooth.BluetoothReceiver
 import com.example.dronevision.presentation.ui.bluetooth.ConnectThread
 import com.example.dronevision.presentation.ui.bluetooth.SelectBluetoothFragment
+import com.example.dronevision.utils.Constants
 import com.example.dronevision.utils.Device
+import com.example.dronevision.utils.SharedPreferences
 
 class AndroidIdFragment : DialogFragment() {
 
@@ -30,7 +33,7 @@ class AndroidIdFragment : DialogFragment() {
     ): View {
         binding = FragmentAndroidIdBinding.inflate(layoutInflater)
         binding.androidId.text = Device.id
-        binding.copyButton.setOnClickListener {
+        binding.idCopyButton.setOnClickListener {
            Device.setClipboard(requireContext(), Device.id)
             Toast.makeText(requireContext(), "Скопировано в буфер обмена!", Toast.LENGTH_SHORT)
                 .show()
@@ -40,6 +43,13 @@ class AndroidIdFragment : DialogFragment() {
         binding.sendButton.setOnClickListener {
             bluetoothHandler.sendMessage("[ID]" + Device.id)
         }
+        binding.saveButton.setOnClickListener {
+            val sharedPreferences = SharedPreferences(requireContext())
+            sharedPreferences.save(Constants.DIVISION_KEY, binding.divisionEditText.text.toString())
+            dialog?.dismiss()
+        }
+        val division = (requireActivity() as DivisionHandler).getDivision(requireContext())
+        binding.divisionEditText.setText(division)
         return binding.root
     }
 }

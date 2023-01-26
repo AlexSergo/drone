@@ -22,12 +22,14 @@ import com.example.dronevision.presentation.ui.subscribers.SubscriberListCallbac
 import com.example.dronevision.presentation.ui.subscribers.SubscriberListDialog
 import com.example.dronevision.presentation.ui.subscribers.SubscribersType
 import com.example.dronevision.utils.Device.toJson
+import com.example.dronevision.utils.NGeoCalc
 import javax.inject.Inject
 
 
 class TargetFragment(
     private val technic: Technic,
-    private val targetFragmentCallback: TargetFragmentCallback
+    private val targetFragmentCallback: TargetFragmentCallback,
+    private val altitude: Double
 ) : DialogFragment() {
     
     private lateinit var binding: FragmentTargBinding
@@ -41,57 +43,22 @@ class TargetFragment(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        initViewModel()
-
-        val bluetoothHandler = requireActivity() as BluetoothHandler
-        bluetoothHandler.acceptBluetoothConnection()
         binding = FragmentTargBinding.inflate(inflater, container, false)
 
-        binding.header.text = technic.technicTypes.name
-        binding.latitudeValue.text = technic.coordinates.x.toString()
-        binding.longitudeValue.text = technic.coordinates.y.toString()
+        initViewModel()
+        initText()
+        setBluetoothOnClickListener()
+        setBroadcastClickListener()
+        setTelegramClickListener()
+        setDeleteClickListener()
+        setRadioClickListener()
 
-        binding.bluetoothBtn.setOnClickListener {
-            bluetoothHandler.sendMessage(technic)
-            dialog?.dismiss()
-        }
-        binding.broadcastBtn.setOnClickListener {
-            val subscriberListDialog = SubscriberListDialog(object : SubscriberListCallback {
-                override fun select(subscriber: Subscriber) {
-                    targetFragmentCallback.onBroadcastButtonClick(subscriber.id, technic)
-                }
-                
-            }, SubscribersType.Internet)
-            subscriberListDialog.show(parentFragmentManager, "listDialog")
-            dialog?.dismiss()
-        }
+        return binding.root
+    }
 
-        binding.telegramBtn.setOnClickListener {
-            val sendIntent = Intent()
-            sendIntent.action = Intent.ACTION_SEND
-            sendIntent.putExtra(Intent.EXTRA_TEXT, technic.toJson())
-            sendIntent.type = "text/plain"
-            sendIntent.setPackage("org.telegram.messenger")
-            try {
-                startActivity(sendIntent)
-            } catch (ex: ActivityNotFoundException) {
-                val builder = AlertDialog.Builder(requireContext())
-                builder.setTitle("На вашем устройстве нет Telegram!")
-                    .setMessage("Для начала установите telegram")
-                    .setPositiveButton("ОК") {
-                            dialog, id ->  dialog.cancel()
-                    }
-                builder.create()
-                builder.show()
-            }
-        }
-
-        binding.deleteBtn.setOnClickListener {
-            targetFragmentCallback.deleteTechnic()
-            dialog?.dismiss()
-        }
-
-        binding.radioBtn.setOnClickListener {
+    private fun setRadioClickListener() {
+        // TODO: в разработке
+/*        binding.radioBtn.setOnClickListener {
             val subscriberListDialog = SubscriberListDialog(object : SubscriberListCallback {
                 override fun select(subscriber: Subscriber) {
                     targetViewModel.sendMessage("192.168.11.1", technic.toJson())
@@ -99,8 +66,100 @@ class TargetFragment(
 
             }, SubscribersType.Radio)
             subscriberListDialog.show(parentFragmentManager, "listDialog")
+        }*/
+    }
+
+    private fun setDeleteClickListener() {
+        binding.deleteBtn.setOnClickListener {
+            targetFragmentCallback.deleteTechnic()
+            dialog?.dismiss()
         }
-        return binding.root
+    }
+
+    private fun setTelegramClickListener() {
+        binding.telegramBtn.setOnClickListener {
+            if (checkDivision()) {
+                val sendIntent = Intent()
+                sendIntent.action = Intent.ACTION_SEND
+                sendIntent.putExtra(Intent.EXTRA_TEXT, technic.toJson())
+                sendIntent.type = "text/plain"
+                sendIntent.setPackage("org.telegram.messenger")
+                try {
+                    startActivity(sendIntent)
+                } catch (ex: ActivityNotFoundException) {
+                    val builder = AlertDialog.Builder(requireContext())
+                    builder.setTitle("На вашем устройстве нет Telegram!")
+                        .setMessage("Для начала установите telegram")
+                        .setPositiveButton("ОК") { dialog, id ->
+                            dialog.cancel()
+                        }
+                    builder.create()
+                    builder.show()
+                }
+            }
+        }
+    }
+
+    private fun setBroadcastClickListener() {
+        binding.broadcastBtn.setOnClickListener {
+            if (checkDivision()) {
+                val subscriberListDialog = SubscriberListDialog(object : SubscriberListCallback {
+                    override fun select(subscriber: Subscriber) {
+                        targetFragmentCallback.onBroadcastButtonClick(subscriber.id, technic)
+                    }
+
+                }, SubscribersType.Internet)
+                subscriberListDialog.show(parentFragmentManager, "listDialog")
+                dialog?.dismiss()
+            }
+        }
+    }
+
+    private fun setBluetoothOnClickListener() {
+        val bluetoothHandler = requireActivity() as BluetoothHandler
+        bluetoothHandler.acceptBluetoothConnection()
+
+        binding.bluetoothBtn.setOnClickListener {
+            if (checkDivision()) {
+                bluetoothHandler.sendMessage(technic)
+                dialog?.dismiss()
+            }
+        }
+    }
+
+    private fun checkDivision(): Boolean {
+        if (technic.division == null) {
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle("Укажите свое подразделение!")
+                .setMessage("Укажите подразделение в настройках! (Пункт: Мои данные)")
+                .setPositiveButton("ОК") { dialog, id ->
+                    dialog.cancel()
+                }
+            builder.create()
+            builder.show()
+            return false
+        }
+        return true
+    }
+
+    private fun initText() {
+        val x = doubleArrayOf(0.0)
+        val y = doubleArrayOf(0.0)
+
+        NGeoCalc().wgs84ToPlane(
+            x, y,
+            doubleArrayOf(0.0),
+            NGeoCalc.degreesToRadians(technic.coordinates.x),
+            NGeoCalc.degreesToRadians(technic.coordinates.y),
+            0.0
+        )
+
+        binding.header.text = technic.technicTypes.name
+        binding.latitudeValue.text = x[0].toInt().toString()
+        binding.longitudeValue.text = y[0].toInt().toString()
+        binding.divisionValue.text = technic.division
+        binding.heightValue.text = altitude.toString()
+
     }
 
     private fun initViewModel() {

@@ -9,5 +9,6 @@ data class TechnicEntity(
     val id: Int,
     val type: String,
     val x: Double,
-    val y: Double
+    val y: Double,
+    val division: String? = null
 )

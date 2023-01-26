@@ -13,6 +13,11 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 
+interface RemoteDatabaseCallback{
+    fun returnMessage(str: List<String>)
+}
+
+
 class RemoteDatabaseHandlerImpl: RemoteDatabaseHandler {
 
     private var databaseRef: DatabaseReference? = null
@@ -20,20 +25,15 @@ class RemoteDatabaseHandlerImpl: RemoteDatabaseHandler {
     private var database =
         Firebase.database("https://drone-6c66c-default-rtdb.asia-southeast1.firebasedatabase.app")
 
-    override fun onDatabaseChangeListener(id: String, map : IMap) {
+    override fun onDatabaseChangeListener(id: String, callback: RemoteDatabaseCallback) {
         checkNull()
         databaseRef?.child(id)?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (null == snapshot.value) return
                 val str = snapshot.value.toString().split(" ")
-                val type = str[0].substring(str[0].indexOf("=") + 1)
-                val lat = str[1].toDouble()
-                val lon = str[2].substring(0, str[2].length - 1).toDouble()
 
-                map.spawnTechnic(
-                    TechnicTypes.valueOf(type),
-                    Coordinates(x = lat, y = lon)
-                )
+                callback.returnMessage(str)
+
 
                 databaseRef?.child(id)?.removeValue()
             }
@@ -47,6 +47,8 @@ class RemoteDatabaseHandlerImpl: RemoteDatabaseHandler {
             anonymousAuth()
         val dataMap = mutableMapOf<String, Any>()
         val sb = StringBuilder()
+        sb.append(technic.division)
+        sb.append(" ")
         sb.append(technic.technicTypes.name)
         sb.append(" ")
         sb.append(technic.coordinates.x)

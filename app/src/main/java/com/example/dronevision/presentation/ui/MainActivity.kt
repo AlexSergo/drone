@@ -31,6 +31,8 @@ import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.delegates.BluetoothHandler
 import com.example.dronevision.presentation.delegates.BluetoothHandlerImpl
+import com.example.dronevision.presentation.delegates.DivisionHandler
+import com.example.dronevision.presentation.delegates.DivisionHandlerImpl
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.model.bluetooth.BluetoothListItem
 import com.example.dronevision.presentation.model.bluetooth.Entity
@@ -51,6 +53,7 @@ import javax.inject.Inject
 
 
 class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerImpl(),
+    DivisionHandler by DivisionHandlerImpl(),
     NavigationView.OnNavigationItemSelectedListener, MapActivityListener {
     
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -73,9 +76,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         initViewModel()
         checkRegistration()
         setupOsmdroidConfiguration()
-    
-        val id = Device.getDeviceId(applicationContext)
-        println(id)
+
 /*        mainViewModel.startServer()
         mainViewModel.socketLiveData.observe(this, Observer {
             val technic = Gson().fromJson(it, Technic::class.java)
@@ -93,6 +94,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
     private fun checkRegistration(){
         val sharedPreferences = SharedPreferences(applicationContext)
         val id = Device.getDeviceId(applicationContext)
+        sharedPreferences.save("AUTH_TOKEN", Hash.md5(id))
             val hash = sharedPreferences.getValue("AUTH_TOKEN")
             if (hash == null) {
                 mainViewModel.getId(id)
@@ -154,8 +156,13 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
 
     override fun receiveTechnic(technic: Technic) {
         runOnUiThread {
-            map.spawnTechnic(technic.technicTypes,
-                Coordinates(x = technic.coordinates.x, y = technic.coordinates.y))
+            technic.division?.let {
+                map.spawnTechnic(
+                    technic.technicTypes,
+                    Coordinates(x = technic.coordinates.x, y = technic.coordinates.y),
+                    technic.division
+                )
+            }
         }
     }
 
@@ -195,66 +202,69 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
     }
     
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        if (!checkDivision(this))
+            return false
+        val division = getDivision(this)!!
         when (item.itemId) {
             R.id.targ01 -> {
-                map.spawnTechnic(TechnicTypes.LAUNCHER)
+                map.spawnTechnic(TechnicTypes.LAUNCHER, division = division)
             }
             R.id.targ04 -> {
-                map.spawnTechnic(TechnicTypes.OVERLAND)
+                map.spawnTechnic(TechnicTypes.OVERLAND, division = division)
             }
             R.id.targ08 -> {
-                map.spawnTechnic(TechnicTypes.ARTILLERY)
+                map.spawnTechnic(TechnicTypes.ARTILLERY, division = division)
             }
             R.id.targ10 -> {
-                map.spawnTechnic(TechnicTypes.REACT)
+                map.spawnTechnic(TechnicTypes.REACT, division = division)
             }
             R.id.targ12 -> {
-                map.spawnTechnic(TechnicTypes.MINES)
+                map.spawnTechnic(TechnicTypes.MINES, division = division)
             }
             R.id.targ14 -> {
-                map.spawnTechnic(TechnicTypes.ZUR)
+                map.spawnTechnic(TechnicTypes.ZUR, division = division)
             }
             R.id.targ17 -> {
-                map.spawnTechnic(TechnicTypes.RLS)
+                map.spawnTechnic(TechnicTypes.RLS, division = division)
             }
             R.id.targ19 -> {
-                map.spawnTechnic(TechnicTypes.INFANTRY)
+                map.spawnTechnic(TechnicTypes.INFANTRY, division = division)
             }
             R.id.targ20 -> {
-                map.spawnTechnic(TechnicTypes.O_POINT)
+                map.spawnTechnic(TechnicTypes.O_POINT, division = division)
             }
             R.id.targ21 -> {
-                map.spawnTechnic(TechnicTypes.KNP)
+                map.spawnTechnic(TechnicTypes.KNP, division = division)
             }
             R.id.targ22 -> {
-                map.spawnTechnic(TechnicTypes.TANKS)
+                map.spawnTechnic(TechnicTypes.TANKS, division = division)
             }
             R.id.targ23 -> {
-                map.spawnTechnic(TechnicTypes.BTR)
+                map.spawnTechnic(TechnicTypes.BTR, division = division)
             }
             R.id.targ24 -> {
-                map.spawnTechnic(TechnicTypes.BMP)
+                map.spawnTechnic(TechnicTypes.BMP, division = division)
             }
             R.id.targ25 -> {
-                map.spawnTechnic(TechnicTypes.HELICOPTER)
+                map.spawnTechnic(TechnicTypes.HELICOPTER, division = division)
             }
             R.id.targ27 -> {
-                map.spawnTechnic(TechnicTypes.PTRK)
+                map.spawnTechnic(TechnicTypes.PTRK, division = division)
             }
             R.id.targ29 -> {
-                map.spawnTechnic(TechnicTypes.KLN_PESH)
+                map.spawnTechnic(TechnicTypes.KLN_PESH, division = division)
             }
             R.id.targ30 -> {
-                map.spawnTechnic(TechnicTypes.KLN_BR)
+                map.spawnTechnic(TechnicTypes.KLN_BR, division = division)
             }
             R.id.targ31 -> {
-                map.spawnTechnic(TechnicTypes.TANK)
+                map.spawnTechnic(TechnicTypes.TANK, division = division)
             }
             R.id.targ99 -> {
-                map.spawnTechnic(TechnicTypes.ANOTHER)
+                map.spawnTechnic(TechnicTypes.ANOTHER, division = division)
             }
             R.id.breach -> {
-                map.spawnTechnic(TechnicTypes.GAP)
+                map.spawnTechnic(TechnicTypes.GAP, division = division)
             }
         }
         binding.drawerLayout.closeDrawer(GravityCompat.START)
@@ -348,7 +358,13 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         val item = abc?.getItemAt(0)
                         val gson = GsonBuilder().create()
                         val target = gson.fromJson(item?.text.toString(), Technic::class.java)
-                        map.spawnTechnic(target.technicTypes, target.coordinates)
+                        target.division?.let {
+                            map.spawnTechnic(
+                                target.technicTypes,
+                                target.coordinates,
+                                target.division
+                            )
+                        }
                         return true
                     }
                     else -> false

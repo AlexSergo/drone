@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:minWidth="350dp"
+    android:minWidth="400dp"
     android:minHeight="200dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".presentation.ui.AndroidIdFragment">
@@ -14,20 +14,70 @@
         android:id="@+id/header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Мой ID"
+        android:text="Мои данные"
         android:textSize="18sp"
         android:textColor="@color/black"
         android:layout_marginTop="16dp" />
 
+    <LinearLayout
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_marginEnd="8dp"
+            android:layout_gravity="center"
+            android:id="@+id/androidIdText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Мой ID: "
+            android:textColor="@color/black"
+            android:textSize="18sp" />
 
     <TextView
         android:layout_gravity="center"
         android:id="@+id/androidId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="qwertytdgfgduio"
-        android:textSize="18sp"
-        android:layout_marginTop="16dp" />
+        android:text="qwertytdg445gfgduio"
+        android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/idCopyButton"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:text="Скопировать" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_marginEnd="8dp"
+            android:layout_gravity="center"
+            android:id="@+id/divisionText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Подразделение: "
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+
+        <EditText
+            android:layout_gravity="center"
+            android:id="@+id/divisionEditText"
+            android:layout_marginEnd="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="18sp" />
+
+    </LinearLayout>
 
     <LinearLayout
         android:layout_marginTop="16dp"
@@ -38,17 +88,17 @@
         android:gravity="center">
 
         <Button
-            android:id="@+id/copyButton"
-            android:layout_marginEnd="16dp"
+            android:id="@+id/saveButton"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Скопировать" />
+            android:layout_marginEnd="16dp"
+            android:layout_height="wrap_content"
+            android:text="сохранить" />
 
         <Button
             android:id="@+id/sendButton"
             android:layout_width="wrap_content"
-            android:layout_weight="3"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="Передать" />
 

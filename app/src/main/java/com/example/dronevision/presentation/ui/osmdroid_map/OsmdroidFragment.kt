@@ -26,7 +26,6 @@ import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.delegates.*
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.model.bluetooth.Entity
-import com.example.dronevision.presentation.ui.MainActivity
 import com.example.dronevision.presentation.ui.find_location.FindGeoPointCallback
 import com.example.dronevision.presentation.ui.find_location.FindGeoPointFragment
 import com.example.dronevision.presentation.ui.targ.TargetFragment
@@ -57,7 +56,7 @@ class OsmdroidFragment : Fragment(), IMap,
     LocationDialogHandler by LocationDialogHandlerImpl(),
     ManipulatorSetuper by ManipulatorSetuperImpl(),
     GpsHandler by GpsHandlerImpl(),
-    MapCachingHandler by MapCachingHandlerImpl() {
+    MapCachingHandler by MapCachingHandlerImpl(){
     
     private lateinit var binding: FragmentOsmdroidBinding
     private lateinit var rotationGestureOverlay: RotationGestureOverlay
@@ -107,7 +106,23 @@ class OsmdroidFragment : Fragment(), IMap,
         setupPolylines()
         setupDisruptionButtons()
         
-        onDatabaseChangeListener(Device.getDeviceId(requireContext()), this)
+        onDatabaseChangeListener(Device.getDeviceId(requireContext()), object : RemoteDatabaseCallback{
+            override fun returnMessage(str: List<String>) {
+                val type = str[1]
+                val division = str[0].substring(str[0].indexOf("=") + 1)
+                val lat = str[2].toDouble()
+                val lon = str[3].substring(0, str[3].length - 1).toDouble()
+
+                spawnTechnic(
+                    TechnicTypes.valueOf(type),
+                    Coordinates(x = lat, y = lon),
+                    division
+                )
+
+
+            }
+
+        })
         return binding.root
     }
     
@@ -389,14 +404,16 @@ class OsmdroidFragment : Fragment(), IMap,
                     drawMarker(mark, technic)
                     
                     listOfTechnic.add(mark)
-                    addClickListenerToMark(mark, technic.technicTypes)
+                    technic.division?.let {
+                        addClickListenerToMark(mark, technic.technicTypes, technic.division)
+                    }
                 }
             }
             osmdroidViewModel.technicListLiveData.removeObservers(viewLifecycleOwner)
         }
     }
     
-    override fun spawnTechnic(type: TechnicTypes, coords: Coordinates?) {
+    override fun spawnTechnic(type: TechnicTypes, coords: Coordinates?, division: String) {
         if (coords != null)
             for (technic in listOfTechnic) {
                 technic as Marker
@@ -416,7 +433,7 @@ class OsmdroidFragment : Fragment(), IMap,
             val mark: Marker = if (coords != null) setMark(coords.x, coords.y, type)
             else setMark(cameraPosition.latitude, cameraPosition.longitude, type)
             
-            addClickListenerToMark(mark, type)
+            addClickListenerToMark(mark, type, division)
             osmdroidViewModel.saveTechnic(
                 Technic(
                     id = count,
@@ -424,20 +441,22 @@ class OsmdroidFragment : Fragment(), IMap,
                     coordinates = Coordinates(
                         x = mark.position.latitude,
                         y = mark.position.longitude
-                    )
+                    ),
+                    division = division
                 )
             )
         }
     }
     
-    private fun addClickListenerToMark(mark: Marker, type: TechnicTypes) {
+    private fun addClickListenerToMark(mark: Marker, type: TechnicTypes, division: String) {
         val technic = Technic(
             coordinates = Coordinates(
                 x = mark.position.latitude,
                 y = mark.position.longitude
-            ), technicTypes = type
+            ), technicTypes = type,
+            division = division
         )
-        
+        val altitude = GeoPoint(technic.coordinates.x, technic.coordinates.y).altitude
         mark.setOnMarkerClickListener { marker, mapView ->
             val targetFragment = TargetFragment(technic = technic,
                 object : TargetFragmentCallback {
@@ -451,8 +470,7 @@ class OsmdroidFragment : Fragment(), IMap,
                         osmdroidViewModel.deleteTechnic(technic)
                         binding.mapView.invalidate()
                     }
-                }
-            )
+                }, altitude = altitude)
             targetFragment.show(parentFragmentManager, "targFragment")
             true
         }
@@ -529,12 +547,17 @@ class OsmdroidFragment : Fragment(), IMap,
         showFrontSight(GeoPoint(entities[1].lat, entities[1].lon))
         
         if (entities[0].calc_target) {
-            osmdroidViewModel.getTargetCoordinates(entities)
-            osmdroidViewModel.targetLiveData.observe(this) { findTarget ->
-                spawnTechnic(
-                    TechnicTypes.ANOTHER,
-                    Coordinates(x = findTarget.lat, y = findTarget.lon)
-                )
+            val divisionHandler = requireActivity() as DivisionHandler
+            if (divisionHandler.checkDivision(requireContext())) {
+                val division = divisionHandler.getDivision(requireContext())
+                osmdroidViewModel.getTargetCoordinates(entities)
+                osmdroidViewModel.targetLiveData.observe(this) { findTarget ->
+                    spawnTechnic(
+                        TechnicTypes.ANOTHER,
+                        Coordinates(x = findTarget.lat, y = findTarget.lon),
+                        division!!
+                    )
+                }
             }
         }
     }

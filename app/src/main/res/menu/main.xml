@@ -76,7 +76,7 @@
     <item
         android:id="@+id/deviceId"
         android:orderInCategory="107"
-        android:title="Мой ID"
+        android:title="Мои данные"
         app:showAsAction="never" />
     <item
         android:id="@+id/addHeightMaps"

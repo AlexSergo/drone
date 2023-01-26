@@ -10,17 +10,25 @@ object TechnicMapperUI {
         technics.forEach {
             result.add(Technic(
                 technicTypes = it.type,
-                coordinates = it.coords
+                coordinates = it.coords,
+                division = it.division
             ))
         }
         return result
     }
 
     fun mapTechnicUIToTechnicDTO(technic: Technic): TechnicDTO{
+        if (technic.division != null)
         return TechnicDTO(
             id = technic.id,
             type = technic.technicTypes,
-            coords = technic.coordinates
+            coords = technic.coordinates,
+            division = technic.division
         )
+        else
+            return TechnicDTO(
+                id = technic.id,
+                type = technic.technicTypes,
+                coords = technic.coordinates)
     }
 }

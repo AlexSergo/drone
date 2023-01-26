@@ -10,5 +10,7 @@ data class Technic(
     @SerializedName("id")
     val id: Int = 1,
     @SerializedName("technicTypes")
-    val technicTypes: TechnicTypes
+    val technicTypes: TechnicTypes,
+    @SerializedName("division")
+    val division: String? = null
 ): java.io.Serializable
