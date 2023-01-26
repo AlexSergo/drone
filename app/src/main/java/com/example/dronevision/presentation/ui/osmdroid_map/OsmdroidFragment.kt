@@ -7,6 +7,7 @@ import android.content.Context
 import android.graphics.Color
 import android.location.LocationManager
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -48,6 +49,8 @@ import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import javax.inject.Inject
 import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.sin
 
 
 class OsmdroidFragment : Fragment(), IMap,
@@ -71,6 +74,8 @@ class OsmdroidFragment : Fragment(), IMap,
     private var polylineToFrontSight: Polyline = Polyline()
     private val listOfTechnic = mutableListOf<Overlay>()
     private var locationOverlay: MyLocationNewOverlay? = null
+    private var correctionAngRad: Double? = null
+    
     
     lateinit var osmdroidViewModel: OsmdroidViewModel
     
@@ -166,8 +171,33 @@ class OsmdroidFragment : Fragment(), IMap,
     
     private fun setupCorrectionButton() {
         binding.correctionButton.setOnClickListener {
-        
+            val polylineToCenterPoints = polylineToCenter.actualPoints
+            val polylineToFrontSightPoints = polylineToFrontSight.actualPoints
+            val polylineToCenterAzimuth =
+                MapTools.angleBetween(polylineToCenterPoints[0], polylineToCenterPoints[1])
+            val polylineToFrontSightAzimuth =
+                MapTools.angleBetween(polylineToFrontSightPoints[0], polylineToFrontSightPoints[1])
+            val correctionAngDeg = polylineToCenterAzimuth - polylineToFrontSightAzimuth
+            Math.toRadians(correctionAngDeg).let {
+                correctionAngRad = it
+                val endPoint = polylineToFrontSightPoints.last()
+                val newEndGeoPoint = correctEndPointByAngRad(endPoint, it)
+                val correctedPoints = listOf(polylineToFrontSightPoints.first(), newEndGeoPoint)
+    
+                frontSightMarker.position = newEndGeoPoint
+                updatePolyline(polylineToFrontSight, correctedPoints)
+            }
         }
+    }
+    
+    private fun correctEndPointByAngRad(endPoint: GeoPoint, correctionAngRad: Double): GeoPoint {
+        val newEndX = endPoint.latitude * cos(correctionAngRad) - endPoint.longitude * sin(
+            correctionAngRad
+        )
+        val newEndY = endPoint.latitude * sin(correctionAngRad) + endPoint.longitude * cos(
+            correctionAngRad
+        )
+        return GeoPoint(newEndX, newEndY)
     }
     
     private fun setupDisruptionButtons() {
@@ -406,6 +436,7 @@ class OsmdroidFragment : Fragment(), IMap,
     
     private fun updatePolyline(polyline: Polyline, points: List<GeoPoint>) {
         polyline.setPoints(points)
+        binding.mapView.invalidate()
     }
     
     override fun initTechnic() {
@@ -545,10 +576,20 @@ class OsmdroidFragment : Fragment(), IMap,
         // обновили позицию прицела и его полилинии
         val frontSightGeoPoint = GeoPoint(entities[1].lat, entities[1].lon)
         frontSightMarker.position = frontSightGeoPoint
-        updatePolyline(
-            polylineToFrontSight,
-            listOf(droneMarker.position, frontSightMarker.position)
-        )
+        if (correctionAngRad != null)
+            updatePolyline(
+                polylineToFrontSight,
+                listOf(droneMarker.position, frontSightMarker.position)
+            )
+        else {
+            val endPoint = frontSightMarker.position
+            val endNewPoint = correctEndPointByAngRad(endPoint, correctionAngRad!!)
+            frontSightMarker.position = endNewPoint
+            updatePolyline(
+                polylineToFrontSight,
+                listOf(droneMarker.position, endNewPoint)
+            )
+        }
         
         showGeoInformation(binding, cameraTarget, droneMarker.position)
         
