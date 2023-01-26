@@ -26,7 +26,6 @@ import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.delegates.*
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.model.bluetooth.Entity
-import com.example.dronevision.presentation.ui.MainActivity
 import com.example.dronevision.presentation.ui.find_location.FindGeoPointCallback
 import com.example.dronevision.presentation.ui.find_location.FindGeoPointFragment
 import com.example.dronevision.presentation.ui.targ.TargetFragment
@@ -64,7 +63,7 @@ class OsmdroidFragment : Fragment(), IMap,
     
     private val overlayGrid = LatLonGridlineOverlay2()
     private lateinit var droneMarker: Marker
-    private var frontSightMarker: Marker? = null
+    private lateinit var frontSightMarker: Marker
     private lateinit var aimMarker: Marker
     private lateinit var disruptionMarker: Marker
     private var polylineToCenter: Polyline = Polyline()
@@ -101,20 +100,30 @@ class OsmdroidFragment : Fragment(), IMap,
     ): View {
         binding = FragmentOsmdroidBinding.inflate(inflater, container, false)
         setupOsmdroidMap()
-        initDroneMarker()
+        setupMarkers()
+        setupPolylines()
         initTechnic()
         setupLastSessionState()
-        setupPolylines()
         setupDisruptionButtons()
+        setupCorrectionButton()
         
         onDatabaseChangeListener(Device.getDeviceId(requireContext()), this)
         return binding.root
     }
     
-    private fun setupDisruptionButtons() {
+    private fun setupMarkers() {
         aimMarker = Marker(binding.mapView)
         disruptionMarker = Marker(binding.mapView)
+        frontSightMarker = Marker(binding.mapView)
+        droneMarker = Marker(binding.mapView)
         
+        drawMarker(
+            droneMarker,
+            Technic(
+                coordinates = Coordinates(x = 0.0, y = 0.0),
+                technicTypes = TechnicTypes.DRONE
+            )
+        )
         drawMarker(
             aimMarker,
             Technic(
@@ -129,7 +138,22 @@ class OsmdroidFragment : Fragment(), IMap,
                 technicTypes = TechnicTypes.DISRUPTION
             )
         )
+        drawMarker(
+            frontSightMarker,
+            Technic(
+                coordinates = Coordinates(3.0, 3.0),
+                technicTypes = TechnicTypes.FRONT_SIGHT
+            )
+        )
+    }
+    
+    private fun setupCorrectionButton() {
+        binding.correctionButton.setOnClickListener {
         
+        }
+    }
+    
+    private fun setupDisruptionButtons() {
         var isAimVisible = false
         var isDisruptionVisible = false
         aimMarker.setVisible(isAimVisible)
@@ -263,7 +287,6 @@ class OsmdroidFragment : Fragment(), IMap,
             override fun onScroll(event: ScrollEvent?): Boolean {
                 val cameraTarget = binding.mapView.mapCenter as GeoPoint
                 showGeoInformation(binding, cameraTarget, droneMarker.position)
-                
                 updatePolyline(polylineToCenter, listOf(droneMarker.position, cameraTarget))
                 binding.distance.text = "${getDistance(droneMarker.position, cameraTarget)} km"
                 return true
@@ -290,19 +313,6 @@ class OsmdroidFragment : Fragment(), IMap,
             displayMetrics.heightPixels - (displayMetrics.density * 110.0f).toInt()
         )
         binding.mapView.overlayManager.add(scaleBarOverlay)
-    }
-    
-    override fun initDroneMarker() {
-        droneMarker = Marker(binding.mapView)
-        drawMarker(
-            droneMarker,
-            Technic(
-                coordinates = Coordinates(x = 0.0, y = 0.0),
-                technicTypes = TechnicTypes.DRONE
-            )
-        )
-        droneMarker.isFlat = true
-        polylineToFrontSight.isVisible = false
     }
     
     override fun setMapType(mapType: Int) {
@@ -362,9 +372,10 @@ class OsmdroidFragment : Fragment(), IMap,
     
     private fun setupPolylines() {
         val zeroPoint = GeoPoint(0.0, 0.0)
-        val zeroPoints = listOf(zeroPoint, zeroPoint)
-        setPolyline(polylineToFrontSight, zeroPoints, Color.GREEN)
-        setPolyline(polylineToCenter, zeroPoints)
+        val polylinePointsForToFrontSight = listOf(droneMarker.position, frontSightMarker.position)
+        val polylinePointsForCenter = listOf(droneMarker.position, zeroPoint)
+        setPolyline(polylineToFrontSight, polylinePointsForToFrontSight, Color.GREEN)
+        setPolyline(polylineToCenter, polylinePointsForCenter)
     }
     
     private fun setPolyline(polyline: Polyline, points: List<GeoPoint>, color: Int = Color.BLUE) {
@@ -477,12 +488,6 @@ class OsmdroidFragment : Fragment(), IMap,
         longitude: Double,
         type: TechnicTypes
     ): Marker {
-        frontSightMarker?.let {
-            if (abs(latitude - it.position.latitude) < 0.0001
-                && abs(longitude - it.position.longitude) < 0.0001
-            )
-                removeFrontSight()
-        }
         var mark = Marker(binding.mapView)
         mark = drawMarker(
             mark, Technic(
@@ -507,12 +512,6 @@ class OsmdroidFragment : Fragment(), IMap,
         return marker
     }
     
-    override fun removeFrontSight() {
-        frontSightMarker?.remove(binding.mapView)
-        frontSightMarker = null
-        polylineToFrontSight.isVisible = false
-    }
-    
     override fun showDataFromDrone(entities: List<Entity>) {
         droneMarker.rotation = -entities[0].asim.toFloat()
         if (entities[0].lat.isNaN() && entities[0].lon.isNaN()) {
@@ -523,10 +522,16 @@ class OsmdroidFragment : Fragment(), IMap,
         val cameraTarget =
             GeoPoint(binding.mapView.mapCenter.latitude, binding.mapView.mapCenter.longitude)
         droneMarker.setVisible(true)
-        showGeoInformation(binding, cameraTarget, droneMarker.position)
-        updatePolyline(polylineToCenter, listOf(droneMarker.position, cameraTarget))
         
-        showFrontSight(GeoPoint(entities[1].lat, entities[1].lon))
+        // обновили позицию прицела и его полилинии
+        val frontSightGeoPoint = GeoPoint(entities[1].lat, entities[1].lon)
+        frontSightMarker.position = frontSightGeoPoint
+        updatePolyline(
+            polylineToFrontSight,
+            listOf(droneMarker.position, frontSightMarker.position)
+        )
+        
+        showGeoInformation(binding, cameraTarget, droneMarker.position)
         
         if (entities[0].calc_target) {
             osmdroidViewModel.getTargetCoordinates(entities)
@@ -539,25 +544,6 @@ class OsmdroidFragment : Fragment(), IMap,
         }
     }
     
-    private fun showFrontSight(frontSightGeoPoint: GeoPoint) {
-        if (frontSightMarker != null) removeFrontSight()
-        
-        frontSightMarker = drawMarker(
-            frontSightMarker,
-            Technic(
-                coordinates = Coordinates(
-                    x = frontSightGeoPoint.latitude,
-                    y = frontSightGeoPoint.longitude
-                ),
-                technicTypes = TechnicTypes.FRONT_SIGHT
-            )
-        )
-        updatePolyline(
-            polylineToFrontSight,
-            listOf(droneMarker.position, frontSightMarker!!.position)
-        )
-    }
-    
     private fun focusCamera(point: GeoPoint) {
         binding.mapView.controller.animateTo(point)
         binding.mapView.controller.zoomIn()
@@ -566,8 +552,7 @@ class OsmdroidFragment : Fragment(), IMap,
     override fun showLocationDialog() {
         showLocationDialog(requireContext(), object : LocationDialogCallback {
             override fun focusCamera() {
-                if (frontSightMarker != null) focusCamera(frontSightMarker!!.position)
-                else focusCamera(droneMarker.position)
+                focusCamera(frontSightMarker.position)
             }
             
             override fun findMyLocation() {

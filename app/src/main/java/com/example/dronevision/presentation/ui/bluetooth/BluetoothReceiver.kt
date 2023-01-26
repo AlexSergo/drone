@@ -11,26 +11,28 @@ import java.io.InputStream
 import java.io.OutputStream
 
 
-class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
-                        private val listener: MapActivityListener): Thread() {
-
+class BluetoothReceiver(
+    private val bluetoothSocket: BluetoothSocket,
+    private val listener: MapActivityListener
+) : Thread() {
+    
     private val BUFFER_SIZE = 512
     private var inputStream: InputStream? = null
     private var outputStream: OutputStream? = null
-
+    
     init {
         try {
             inputStream = bluetoothSocket.inputStream
             outputStream = bluetoothSocket.outputStream
-        }catch (_: IOException){
-
+        } catch (_: IOException) {
+        
         }
     }
-
+    
     override fun run() {
         val buffer = ByteArray(BUFFER_SIZE)
         var message = ""
-        while (true){
+        while (true) {
             try {
                 val size = inputStream?.read(buffer)
                 message += String(buffer, 0, size!!)
@@ -43,14 +45,14 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
                     message = parseDroneGson(message)
                 if (message.contains("coordinates"))
                     message = parseTargetGson(message)
-
-            }catch (e: IOException){
+                
+            } catch (e: IOException) {
                 listener.showMessage("Ошибка, сбой соединения!")
                 return
             }
         }
     }
-
+    
     private fun parseTargetGson(message: String): String {
         val gson = GsonBuilder()
             .setPrettyPrinting()
@@ -59,7 +61,7 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
         listener.receiveTechnic(target)
         return ""
     }
-
+    
     private fun parseDroneGson(message: String): String {
         val gson = GsonBuilder()
             .setLenient()
@@ -72,16 +74,16 @@ class BluetoothReceiver(private val bluetoothSocket: BluetoothSocket,
         listener.showDroneData(entities.entities.toMutableList())
         return resultMessage
     }
-
-    fun sendMessage(byteArray: ByteArray){
+    
+    fun sendMessage(byteArray: ByteArray) {
         try {
             outputStream?.write(byteArray)
-        }catch (_: IOException){
+        } catch (_: IOException) {
             listener.showMessage("Не удалось отправить!")
         }
     }
-
-    enum class MessageType{
+    
+    enum class MessageType {
         ID,
         TechnicTypes,
         Entities
