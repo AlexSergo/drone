@@ -15,6 +15,17 @@
         app:layout_constraintBottom_toBottomOf="@id/form_View"
         app:layout_constraintStart_toEndOf="@id/form_View" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/correctionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:fabSize="mini"
+        android:layout_margin="8dp"
+        android:src="@drawable/ic_correction"
+        app:layout_constraintEnd_toEndOf="@id/aimButton"
+        app:layout_constraintBottom_toTopOf="@id/aimButton"
+        app:layout_constraintStart_toStartOf="@id/aimButton"/>
+
     <androidx.cardview.widget.CardView
         android:id="@+id/infoCard"
         android:layout_width="wrap_content"

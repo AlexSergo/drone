@@ -12,8 +12,6 @@ interface IMap {
     fun changeGridState(isGrid: Boolean)
     fun initTechnic()
     fun spawnTechnic(type: TechnicTypes, coords: Coordinates? = null, division: String)
-    fun removeFrontSight()
-    fun initDroneMarker()
     fun setMapType(mapType: Int)
     fun cacheMap()
     fun findGeoPoint()

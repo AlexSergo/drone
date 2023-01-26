@@ -1,9 +1,7 @@
 package com.example.dronevision.presentation.ui
 
 
-import android.Manifest
 import android.content.ClipboardManager
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -12,7 +10,6 @@ import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.view.GravityCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -70,7 +67,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-    
+        
         PermissionTools.checkAndRequestPermissions(this)
         createAppFolder()
         initViewModel()
@@ -84,44 +81,43 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                 Coordinates(x = technic.coordinates.x, y = technic.coordinates.y))
         })*/
     }
-
+    
     private fun initViewModel() {
         (applicationContext as App).appComponent.inject(this)
         mainViewModel =
             ViewModelProvider(this, mainViewModelFactory)[MainViewModel::class.java]
     }
-
-    private fun checkRegistration(){
+    
+    private fun checkRegistration() {
         val sharedPreferences = SharedPreferences(applicationContext)
         val id = Device.getDeviceId(applicationContext)
-        sharedPreferences.save("AUTH_TOKEN", Hash.md5(id))
-            val hash = sharedPreferences.getValue("AUTH_TOKEN")
-            if (hash == null) {
-                mainViewModel.getId(id)
-                mainViewModel.idLiveData.observe(this) {
-                    it?.let { hash ->
-                        if (hash == Hash.md5(id)) {
-                            sharedPreferences.save("AUTH_TOKEN", hash)
-                            setupOptionsMenu()
-                            setupDrawer()
-                            setupBluetoothDialog()
-                        }
+        val hash = sharedPreferences.getValue("AUTH_TOKEN")
+        if (hash == null) {
+            mainViewModel.getId(id)
+            mainViewModel.idLiveData.observe(this) {
+                it?.let { hash ->
+                    if (hash == Hash.md5(id)) {
+                        sharedPreferences.save("AUTH_TOKEN", hash)
+                        setupOptionsMenu()
+                        setupDrawer()
+                        setupBluetoothDialog()
                     }
                 }
             }
-            else
-                if (hash == Hash.md5(id)) {
-                    setupOptionsMenu()
-                    setupDrawer()
-                    setupBluetoothDialog()
-                }
+        } else
+            if (hash == Hash.md5(id)) {
+                setupOptionsMenu()
+                setupDrawer()
+                setupBluetoothDialog()
+            }
     }
     
     private fun setupBluetoothDialog() {
         val connection = setupBluetooth(
             context = this,
             systemService = getSystemService(BLUETOOTH_SERVICE),
-            listener = this)
+            listener = this
+        )
 
         dialog = SelectBluetoothFragment(connection.getAdapter(), object : BluetoothCallback {
             override fun onClick(item: BluetoothListItem) {
@@ -131,13 +127,13 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         })
     }
 
-    override fun showMessage(message: String){
+    override fun showMessage(message: String) {
         runOnUiThread {
             Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
         }
     }
 
-    override fun showDroneData(entities: MutableList<Entity>){
+    override fun showDroneData(entities: MutableList<Entity>) {
         runOnUiThread {
             if (entities[0].lat.isNaN() || entities[0].lon.isNaN()) {
                 entities[0] = Entity(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false)
@@ -147,7 +143,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         }
     }
 
-    override fun receiveDeviceId(id: String){
+    override fun receiveDeviceId(id: String) {
         runOnUiThread {
             val subscriberDialogFragment = SubscriberDialogFragment(id)
             subscriberDialogFragment.show(supportFragmentManager, "")
@@ -173,22 +169,22 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         provider.load(this, PreferenceManager.getDefaultSharedPreferences(this))
     }
 
-    private fun setupDrawer(){
+    private fun setupDrawer() {
         setSupportActionBar(binding.appBarMain.toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
-    
+
         val toggle = ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close)
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
-    
+
         val button = findViewById<ImageButton>(R.id.drawerButton)
         button.setOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
-    
+
         navView.setNavigationItemSelectedListener(this)
         navController = findNavController(R.id.nav_host_fragment_content_main)
         initMap()
@@ -279,7 +275,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                 menuInflater.inflate(R.menu.main, menu)
                 setupMenuState(menu)
             }
-    
+
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
                     R.id.bluetooth -> {
@@ -296,7 +292,8 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         true
                     }
                     R.id.subscriberListItem -> {
-                        val subscriberListDialogFragment = SubscriberListDialog(subscribersType = SubscribersType.All)
+                        val subscriberListDialogFragment =
+                            SubscriberListDialog(subscribersType = SubscribersType.All)
                         subscriberListDialogFragment.show(supportFragmentManager, "listDialog")
                         true
                     }
@@ -346,13 +343,13 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         map.showAllTargets()
                         true
                     }
-                    R.id.deviceId ->{
+                    R.id.deviceId -> {
                         val androidIdDialog = AndroidIdFragment()
 
                         androidIdDialog.show(supportFragmentManager, "id_dialog")
                         true
                     }
-                    R.id.pasteBuffer ->{
+                    R.id.pasteBuffer -> {
                         val myClipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager?
                         val abc = myClipboard?.primaryClip
                         val item = abc?.getItemAt(0)

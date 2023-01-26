@@ -10,7 +10,7 @@ class LocationDialogHandlerImpl: LocationDialogHandler {
             "Запросить у Р-187-П1",
             "Запросить у Android",
             "Снять с карты",
-            "Найти Дрон",
+            "Найти Прицел",
             "Моё местоположение",
             "Передать Р-187-П1"
         )
