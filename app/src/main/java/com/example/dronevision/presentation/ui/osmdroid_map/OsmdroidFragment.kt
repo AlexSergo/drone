@@ -31,6 +31,7 @@ import com.example.dronevision.presentation.ui.find_location.FindGeoPointFragmen
 import com.example.dronevision.presentation.ui.targ.TargetFragment
 import com.example.dronevision.presentation.ui.targ.TargetFragmentCallback
 import com.example.dronevision.utils.*
+import com.example.dronevision.utils.Device.toJson
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
@@ -468,7 +469,6 @@ class OsmdroidFragment : Fragment(), IMap,
             ), technicTypes = type,
             division = division
         )
-        val altitude = GeoPoint(technic.coordinates.x, technic.coordinates.y).altitude
         mark.setOnMarkerClickListener { marker, mapView ->
             val targetFragment = TargetFragment(technic = technic,
                 object : TargetFragmentCallback {
@@ -482,7 +482,7 @@ class OsmdroidFragment : Fragment(), IMap,
                         osmdroidViewModel.deleteTechnic(technic)
                         binding.mapView.invalidate()
                     }
-                }, altitude = altitude)
+                }, altitude = 0.0)
             targetFragment.show(parentFragmentManager, "targFragment")
             true
         }

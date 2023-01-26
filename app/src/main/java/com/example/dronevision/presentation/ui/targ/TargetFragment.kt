@@ -21,6 +21,7 @@ import com.example.dronevision.presentation.ui.MainViewModelFactory
 import com.example.dronevision.presentation.ui.subscribers.SubscriberListCallback
 import com.example.dronevision.presentation.ui.subscribers.SubscriberListDialog
 import com.example.dronevision.presentation.ui.subscribers.SubscribersType
+import com.example.dronevision.utils.Device
 import com.example.dronevision.utils.Device.toJson
 import com.example.dronevision.utils.NGeoCalc
 import javax.inject.Inject
@@ -31,14 +32,14 @@ class TargetFragment(
     private val targetFragmentCallback: TargetFragmentCallback,
     private val altitude: Double
 ) : DialogFragment() {
-    
+
     private lateinit var binding: FragmentTargBinding
 
     private lateinit var targetViewModel: TargetViewModel
 
     @Inject
     lateinit var targetViewModelFactory: TargetViewModelFactory
-    
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -52,8 +53,66 @@ class TargetFragment(
         setTelegramClickListener()
         setDeleteClickListener()
         setRadioClickListener()
+        initLongClicks()
 
         return binding.root
+    }
+
+    private fun initLongClicks() {
+        binding.heightText.setOnLongClickListener {
+            Device.setClipboard(requireContext(), binding.heightValue.text.toString())
+            Toast.makeText(
+                requireContext(),
+                "Значение " + binding.heightValue.text.toString() + "скопировано!",
+                Toast.LENGTH_SHORT
+            ).show()
+            return@setOnLongClickListener true
+        }
+        binding.heightValue.setOnLongClickListener {
+            Device.setClipboard(requireContext(), binding.heightValue.text.toString())
+            Toast.makeText(
+                requireContext(),
+                "Значение " + binding.heightValue.text.toString() + "скопировано!",
+                Toast.LENGTH_SHORT
+            ).show()
+            return@setOnLongClickListener true
+        }
+        binding.latitudeText.setOnLongClickListener {
+            Device.setClipboard(requireContext(), binding.latitudeValue.text.toString())
+            Toast.makeText(
+                requireContext(),
+                "Значение " + binding.latitudeValue.text.toString() + "скопировано!",
+                Toast.LENGTH_SHORT
+            ).show()
+            return@setOnLongClickListener true
+        }
+        binding.latitudeValue.setOnLongClickListener {
+            Device.setClipboard(requireContext(), binding.latitudeValue.text.toString())
+            Toast.makeText(
+                requireContext(),
+                "Значение " + binding.latitudeValue.text.toString() + "скопировано!",
+                Toast.LENGTH_SHORT
+            ).show()
+            return@setOnLongClickListener true
+        }
+        binding.longitudeText.setOnLongClickListener {
+            Device.setClipboard(requireContext(), binding.longitudeValue.text.toString())
+            Toast.makeText(
+                requireContext(),
+                "Значение " + binding.longitudeValue.text.toString() + "скопировано!",
+                Toast.LENGTH_SHORT
+            ).show()
+            return@setOnLongClickListener true
+        }
+        binding.longitudeValue.setOnLongClickListener {
+            Device.setClipboard(requireContext(), binding.longitudeValue.text.toString())
+            Toast.makeText(
+                requireContext(),
+                "Значение " + binding.longitudeValue.text.toString() + "скопировано!",
+                Toast.LENGTH_SHORT
+            ).show()
+            return@setOnLongClickListener true
+        }
     }
 
     private fun setRadioClickListener() {
