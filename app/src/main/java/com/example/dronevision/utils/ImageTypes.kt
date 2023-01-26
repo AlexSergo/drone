@@ -4,7 +4,7 @@ import com.example.dronevision.R
 import com.example.dronevision.domain.model.TechnicTypes
 
 object ImageTypes {
-    val imageMap = mapOf<TechnicTypes, Int>(
+    val imageMap = mapOf(
         Pair(TechnicTypes.LAUNCHER, R.drawable.ic_01),
         Pair(TechnicTypes.OVERLAND, R.drawable.ic_04),
         Pair(TechnicTypes.ARTILLERY, R.drawable.ic_08),

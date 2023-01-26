@@ -5,12 +5,11 @@ import android.content.ClipData
 import android.content.Context
 import android.provider.Settings
 import com.example.dronevision.presentation.model.Technic
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 
 object Device {
     private lateinit var _id: String
-    val id: String  get() =  _id
+    val id: String get() = _id
 
     @SuppressLint("HardwareIds")
     fun getDeviceId(context: Context): String {

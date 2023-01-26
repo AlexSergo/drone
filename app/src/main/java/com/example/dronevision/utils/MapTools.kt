@@ -8,9 +8,7 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.util.MapTileIndex
 import org.osmdroid.views.MapView
 import java.util.*
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sin
+import kotlin.math.*
 
 object MapTools {
     private const val EARTH_RADIUS = 6378140.0
@@ -22,7 +20,7 @@ object MapTools {
         val deltaLong = Math.toRadians(b.longitude) - lng1
         return (Math.toDegrees(
             atan2(
-                sin(deltaLong) * Math.cos(lat2),
+                sin(deltaLong) * cos(lat2),
                 cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(deltaLong)
             )
         ) + 360.0) % 360.0
@@ -75,44 +73,15 @@ object MapTools {
         }
     }
     
-    fun getYandexMapTile(context: Context?, mapView: MapView): OnlineTileSourceBase {
-        mapView.setUseDataConnection(true)
-        mapView.tileProvider = MapTileProviderBasic(context)
-        val str =
-            "https://core-renderer-tiles.maps.yandex.net/tiles?l=map&v=2.28.0&x={x}&y={y}&z={z}&lang=ru-RU"
-        return object : OnlineTileSourceBase(
-            "Yandex Map",
-            1,
-            19,
-            256,
-            ".png",
-            arrayOf("https://core-renderer-tiles.maps.yandex.net/tiles?l=map&v=2.28.0&x={x}&y={y}&z={z}&lang=ru-RU"),
-            "© Yandex"
-        ) {
-            override fun getTileURLString(pMapTileIndex: Long): String {
-                val x = MapTileIndex.getX(pMapTileIndex)
-                val y = MapTileIndex.getY(pMapTileIndex)
-                return str.replace("{z}", MapTileIndex.getZoom(pMapTileIndex).toString())
-                    .replace("{x}", x.toString()).replace("{y}", y.toString())
-            }
-        }
-    }
-    
     fun distanceBetween(a: GeoPoint, b: GeoPoint): Double {
         val lat1 = Math.toRadians(a.latitude)
         val lng1 = Math.toRadians(a.longitude)
         val lat2 = Math.toRadians(b.latitude)
-        val d = lat1
-        val cordlen = Math.pow(
-            Math.sin((lat2 - lat1) / 2.0),
-            2.0
-        ) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(
-            Math.sin((Math.toRadians(b.longitude) - lng1) / 2.0), 2.0
-        )
-        val d2 = lng1
-        return EARTH_RADIUS * Math.atan2(
-            Math.sqrt(cordlen),
-            Math.sqrt(1.0 - cordlen)
-        ) * 2.0
+        val cordlen = sin((lat2 - lat1) / 2.0).pow(2.0) + cos(lat1) * cos(lat2) * sin(
+            (Math.toRadians(
+                b.longitude
+            ) - lng1) / 2.0
+        ).pow(2.0)
+        return EARTH_RADIUS * atan2(sqrt(cordlen), sqrt(1.0 - cordlen)) * 2.0
     }
 }

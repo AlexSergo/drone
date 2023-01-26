@@ -1,10 +1,7 @@
 package com.example.dronevision.utils;
 
-import android.app.Activity;
 import android.content.res.Resources;
-
 import com.example.dronevision.R;
-
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,7 +15,7 @@ import java.nio.file.StandardOpenOption;
 public class HgtLoader {
 
     public HgtLoader(Resources r) {
-        writeToFile("data/data/com.example.dronevision/files/n55e037.hgt", getStringFromRawFile(r));
+        writeToFile(getStringFromRawFile(r));
     }
 
     private byte[] getStringFromRawFile(Resources r) {
@@ -48,10 +45,10 @@ public class HgtLoader {
         return baos.toByteArray();
     }
 
-    private void writeToFile(String filename, byte[] data) {
+    private void writeToFile(byte[] data) {
         Path p;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            p = Paths.get(".", filename);
+            p = Paths.get(".", "data/data/com.example.dronevision/files/n55e037.hgt");
             try (OutputStream os = new BufferedOutputStream(
                     Files.newOutputStream(p, StandardOpenOption.CREATE))) {
                 os.write(data, 0, data.length);

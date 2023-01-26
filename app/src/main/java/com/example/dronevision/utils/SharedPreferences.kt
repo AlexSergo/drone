@@ -4,8 +4,11 @@ import android.content.Context
 import android.content.SharedPreferences
 
 class SharedPreferences(context: Context) {
-    private val PREFS_NAME = "my_prefs"
-    val sharedPref: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    companion object {
+        private const val PREFS_NAME = "my_prefs"
+    }
+   
+    private val sharedPref: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     fun save(KEY_NAME: String, value: String) {
         sharedPref.let {
@@ -21,6 +24,5 @@ class SharedPreferences(context: Context) {
         sharedPref.let {
             return sharedPref.getString(KEY_NAME, null)
         }
-        return null
     }
 }

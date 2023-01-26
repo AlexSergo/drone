@@ -58,7 +58,6 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
     GpsHandler by GpsHandlerImpl(),
     MapCachingHandler by MapCachingHandlerImpl() {
     
-    
     private lateinit var binding: FragmentOsmdroidBinding
     private lateinit var rotationGestureOverlay: RotationGestureOverlay
     
@@ -151,7 +150,6 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                     getDrawable(requireContext(), R.color.green)
                 binding.mapView.invalidate()
             }
-            Log.d("isAimVisible", aimMarker.isEnabled.toString())
             showDisruptionInf(isAimVisible, isDisruptionVisible)
         }
         
