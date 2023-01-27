@@ -54,16 +54,6 @@
         android:title="Bluetooth"
         app:showAsAction="never" />
     <item
-        android:id="@+id/targets"
-        android:orderInCategory="103"
-        android:title="Цели"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/breachs"
-        android:orderInCategory="104"
-        android:title="Разрывы"
-        app:showAsAction="never" />
-    <item
         android:id="@+id/pasteBuffer"
         android:orderInCategory="105"
         android:title="Вставить из буфера"
@@ -82,6 +72,11 @@
         android:id="@+id/addHeightMaps"
         android:orderInCategory="108"
         android:title="Загрузить высоты"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/updates"
+        android:orderInCategory="109"
+        android:title="Обновление"
         app:showAsAction="never" />
     <item
         android:id="@+id/actionGeoLocation"

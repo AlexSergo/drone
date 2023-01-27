@@ -52,22 +52,22 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerImpl(),
     DivisionHandler by DivisionHandlerImpl(),
     NavigationView.OnNavigationItemSelectedListener, MapActivityListener {
-    
+
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private lateinit var map: IMap
     private var dialog: SelectBluetoothFragment? = null
     private lateinit var mainViewModel: MainViewModel
-    
+
     @Inject
     lateinit var mainViewModelFactory: MainViewModelFactory
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
+
         PermissionTools.checkAndRequestPermissions(this)
         createAppFolder()
         initViewModel()
@@ -81,28 +81,34 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                 Coordinates(x = technic.coordinates.x, y = technic.coordinates.y))
         })*/
     }
-    
+
     private fun initViewModel() {
         (applicationContext as App).appComponent.inject(this)
         mainViewModel =
             ViewModelProvider(this, mainViewModelFactory)[MainViewModel::class.java]
     }
-    
+
     private fun checkRegistration() {
         val sharedPreferences = SharedPreferences(applicationContext)
         val id = Device.getDeviceId(applicationContext)
+        sharedPreferences.save("AUTH_TOKEN", Hash.md5(id))
         val hash = sharedPreferences.getValue("AUTH_TOKEN")
         if (hash == null) {
-            mainViewModel.getId(id)
-            mainViewModel.idLiveData.observe(this) {
-                it?.let { hash ->
-                    if (hash == Hash.md5(id)) {
-                        sharedPreferences.save("AUTH_TOKEN", hash)
-                        setupOptionsMenu()
-                        setupDrawer()
-                        setupBluetoothDialog()
+            try {
+                mainViewModel.getId(id)
+                mainViewModel.idLiveData.observe(this) {
+                    it?.let { hash ->
+                        if (hash == Hash.md5(id)) {
+                            sharedPreferences.save("AUTH_TOKEN", hash)
+                            setupOptionsMenu()
+                            setupDrawer()
+                            setupBluetoothDialog()
+                        }
                     }
                 }
+            } catch (_: Exception) {
+                Toast.makeText(this, "Невозможно подключиться к серверу!", Toast.LENGTH_SHORT)
+                    .show()
             }
         } else
             if (hash == Hash.md5(id)) {
@@ -111,7 +117,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                 setupBluetoothDialog()
             }
     }
-    
+
     private fun setupBluetoothDialog() {
         val connection = setupBluetooth(
             context = this,
@@ -189,14 +195,14 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         navController = findNavController(R.id.nav_host_fragment_content_main)
         initMap()
     }
-    
+
     private fun initMap() {
         val navFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
         val fragment = navFragment?.childFragmentManager?.fragments?.get(0)
         map = fragment as IMap
     }
-    
+
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         if (!checkDivision(this))
             return false
@@ -339,10 +345,6 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         map.findGeoPoint()
                         true
                     }
-                    R.id.targets -> {
-                        map.showAllTargets()
-                        true
-                    }
                     R.id.deviceId -> {
                         val androidIdDialog = AndroidIdFragment()
 
@@ -364,12 +366,20 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         }
                         return true
                     }
+                    R.id.updates -> {
+                        try {
+                         //   mainViewModel.updateApp()
+                        } catch (_: Exception){
+                           // Toast.makeText(this, "Невозможно подключиться!", Toast.LENGTH_SHORT)
+                        }
+                        return true
+                    }
                     else -> false
                 }
             }
         }, this, Lifecycle.State.RESUMED)
     }
-    
+
     private fun setupMenuState(menu: Menu) {
         mainViewModel.getSessionState()
         val mapGridItem = menu.findItem(R.id.mapGridItem)
@@ -377,7 +387,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
             mapGridItem.isChecked = sessionState.isGrid
         }
     }
-    
+
     override fun onSupportNavigateUp(): Boolean =
         navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
 }

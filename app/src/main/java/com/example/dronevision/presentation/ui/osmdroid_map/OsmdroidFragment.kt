@@ -75,8 +75,8 @@ class OsmdroidFragment : Fragment(), IMap,
     private val listOfTechnic = mutableListOf<Overlay>()
     private var locationOverlay: MyLocationNewOverlay? = null
     private var correctionAngRad: Double? = null
-    
-    
+
+
     lateinit var osmdroidViewModel: OsmdroidViewModel
     
     @Inject
@@ -183,10 +183,11 @@ class OsmdroidFragment : Fragment(), IMap,
                 val endPoint = polylineToFrontSightPoints.last()
                 val newEndGeoPoint = correctEndPointByAngRad(endPoint, it)
                 val correctedPoints = listOf(polylineToFrontSightPoints.first(), newEndGeoPoint)
-    
+
                 frontSightMarker.position = newEndGeoPoint
                 updatePolyline(polylineToFrontSight, correctedPoints)
             }
+
         }
     }
     
@@ -576,7 +577,7 @@ class OsmdroidFragment : Fragment(), IMap,
         // обновили позицию прицела и его полилинии
         val frontSightGeoPoint = GeoPoint(entities[1].lat, entities[1].lon)
         frontSightMarker.position = frontSightGeoPoint
-        if (correctionAngRad != null)
+        if (correctionAngRad == null)
             updatePolyline(
                 polylineToFrontSight,
                 listOf(droneMarker.position, frontSightMarker.position)
