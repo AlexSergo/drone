@@ -7,7 +7,6 @@ import android.content.Context
 import android.graphics.Color
 import android.location.LocationManager
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,7 +31,6 @@ import com.example.dronevision.presentation.ui.find_location.FindGeoPointFragmen
 import com.example.dronevision.presentation.ui.targ.TargetFragment
 import com.example.dronevision.presentation.ui.targ.TargetFragmentCallback
 import com.example.dronevision.utils.*
-import com.example.dronevision.utils.Device.toJson
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
@@ -192,12 +190,10 @@ class OsmdroidFragment : Fragment(), IMap,
     }
     
     private fun correctEndPointByAngRad(endPoint: GeoPoint, correctionAngRad: Double): GeoPoint {
-        val newEndX = endPoint.latitude * cos(correctionAngRad) - endPoint.longitude * sin(
-            correctionAngRad
-        )
-        val newEndY = endPoint.latitude * sin(correctionAngRad) + endPoint.longitude * cos(
-            correctionAngRad
-        )
+        val newEndX =
+            endPoint.latitude * cos(correctionAngRad) - endPoint.longitude * sin(correctionAngRad)
+        val newEndY =
+            endPoint.latitude * sin(correctionAngRad) + endPoint.longitude * cos(correctionAngRad)
         return GeoPoint(newEndX, newEndY)
     }
     
@@ -576,20 +572,20 @@ class OsmdroidFragment : Fragment(), IMap,
         
         // обновили позицию прицела и его полилинии
         val frontSightGeoPoint = GeoPoint(entities[1].lat, entities[1].lon)
-        frontSightMarker.position = frontSightGeoPoint
-        if (correctionAngRad == null)
+        if (correctionAngRad == null) {
+            frontSightMarker.position = frontSightGeoPoint
             updatePolyline(
                 polylineToFrontSight,
                 listOf(droneMarker.position, frontSightMarker.position)
             )
+        }
         else {
-            val endPoint = frontSightMarker.position
-            val endNewPoint = correctEndPointByAngRad(endPoint, correctionAngRad!!)
+            frontSightMarker.position = frontSightGeoPoint
+            polylineToFrontSight.setPoints(listOf(droneMarker.position, frontSightMarker.position))
+            val endNewPoint = correctEndPointByAngRad(frontSightGeoPoint, correctionAngRad!!)
             frontSightMarker.position = endNewPoint
-            updatePolyline(
-                polylineToFrontSight,
-                listOf(droneMarker.position, endNewPoint)
-            )
+            polylineToFrontSight.setPoints(listOf(droneMarker.position, endNewPoint))
+            binding.mapView.invalidate()
         }
         
         showGeoInformation(binding, cameraTarget, droneMarker.position)
