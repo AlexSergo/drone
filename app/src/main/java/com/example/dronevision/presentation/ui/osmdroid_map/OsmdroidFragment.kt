@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.location.LocationManager
 import android.os.Bundle
@@ -46,9 +47,7 @@ import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import javax.inject.Inject
-import kotlin.math.abs
-import kotlin.math.cos
-import kotlin.math.sin
+import kotlin.math.*
 
 
 class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDatabaseHandlerImpl(),
@@ -137,7 +136,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
 
         drawMarker(
             droneMarker, Technic(
-                coordinates = Coordinates(x = 34.0, y = 2.0), technicTypes = TechnicTypes.DRONE
+                coordinates = Coordinates(x = 32.0, y = 0.0), technicTypes = TechnicTypes.DRONE
             )
         )
         drawMarker(
@@ -159,53 +158,16 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
 
     private fun setupCorrectionButton() {
         binding.correctionButton.setOnClickListener {
-            correctionPolyline = Polyline()
+            if (correctionAngRad != null) {
+                correctionAngRad = null
+                it.background.setTint(resources.getColor(R.color.red))
+                return@setOnClickListener
+            }
+            it.background.setTint(resources.getColor(R.color.teal_700))
+             correctionPolyline = Polyline()
             correctionPolyline.setPoints(polylineToCenter.points)
             z()
         }
-    }
-
-    private fun z(){
-        for (i in 0..6) {
-            val polylineToCenterPoints = correctionPolyline.points
-            val polylineToFrontSightPoints = polylineToFrontSight.points
-            val polylineToCenterAzimuth =
-                MapTools.angleBetween(polylineToCenterPoints[0], polylineToCenterPoints[1])
-            val polylineToFrontSightAzimuth = MapTools.angleBetween(
-                polylineToFrontSightPoints[0], polylineToFrontSightPoints[1]
-            )
-            val correctionAngDeg = polylineToCenterAzimuth - polylineToFrontSightAzimuth
-            Math.toRadians(correctionAngDeg).let {
-                if (i == 0)
-                    correctionAngRad = it
-                correctionDistance = correctionPolyline.distance
-                val endPoint = polylineToFrontSightPoints.last()
-                val newEndGeoPoint = correctEndPointByAngRad(endPoint, it, correctionDistance)
-                val correctedPoints = listOf(polylineToFrontSightPoints.first(), newEndGeoPoint)
-
-                frontSightMarker.position = newEndGeoPoint
-                updatePolyline(polylineToFrontSight, correctedPoints)
-            }
-        }
-    }
-
-    private fun correctEndPointByAngRad(
-        endPoint: GeoPoint, correctionAngRad: Double, length: Double
-    ): GeoPoint {
-        var newEndX =
-            (endPoint.latitude - droneMarker.position.latitude) * cos(correctionAngRad) -
-                    (endPoint.longitude - droneMarker.position.longitude) * sin(
-                correctionAngRad
-            )
-        var newEndY =
-            (endPoint.latitude - droneMarker.position.latitude) * sin(correctionAngRad) + (endPoint.longitude - droneMarker.position.longitude) * cos(
-                correctionAngRad
-            )
-        newEndX += droneMarker.position.latitude
-        newEndY += droneMarker.position.longitude
-        newEndX += (newEndX - polylineToFrontSight.points[0].latitude) / polylineToFrontSight.distance * (length - polylineToFrontSight.distance)
-        newEndY += (newEndY - polylineToFrontSight.points[0].longitude) / polylineToFrontSight.distance * (length - polylineToFrontSight.distance)
-        return GeoPoint(newEndX, newEndY)
     }
 
     private fun setupDisruptionButtons() {
@@ -567,22 +529,39 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                 polylineToFrontSight, listOf(droneMarker.position, frontSightMarker.position)
             )
         } else {
-/*                frontSightMarker.position = frontSightGeoPoint
+               frontSightMarker.position = frontSightGeoPoint
                 polylineToFrontSight.setPoints(
                     listOf(
                         droneMarker.position,
                         frontSightMarker.position
                     )
                 )
-                val endNewPoint = correctEndPointByAngRad(
-                    frontSightGeoPoint,
-                    correctionAngRad!!,
-                    correctionDistance
+            updatePolyline(
+                polylineToFrontSight, listOf(droneMarker.position, frontSightMarker.position)
+            )
+            var cashLine = Polyline()
+            cashLine.setPoints(polylineToFrontSight.actualPoints)
+            f(correctionAngRad!!)
+
+            var angleRad = correctionAngRad!!
+            for (i in 0..3) {
+                var cashPolylineAzimuth =
+                    MapTools.angleBetween(
+                        cashLine.actualPoints[0],
+                        cashLine.actualPoints[1]
+                    )
+                var polylineToFrontSightAzimuth = MapTools.angleBetween(
+                    polylineToFrontSight.actualPoints[0], polylineToFrontSight.actualPoints[1]
                 )
-                frontSightMarker.position = endNewPoint
-                polylineToFrontSight.setPoints(listOf(droneMarker.position, endNewPoint))
-                binding.mapView.invalidate()*/
-            z()
+                var correctionAngDeg = cashPolylineAzimuth - polylineToFrontSightAzimuth
+                var rad =  Math.toRadians(correctionAngDeg)
+                if (abs(angleRad - rad) < abs(angleRad))
+                    angleRad -= rad
+                else
+                    angleRad += rad
+                cashLine.setPoints(polylineToFrontSight.actualPoints)
+                f(angleRad)
+            }
         }
 
         showGeoInformation(binding, cameraTarget, droneMarker.position)
@@ -601,6 +580,58 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                 }
             }
         }
+    }
+
+    private fun f(angle: Double){
+        val newEnd = rotate(polylineToFrontSight.actualPoints.last(), angle)
+        var correctedPoints = listOf(polylineToFrontSight.actualPoints.first(), newEnd)
+        frontSightMarker.position = newEnd
+        updatePolyline(polylineToFrontSight, correctedPoints)
+        val newX =
+            polylineToFrontSight.points[1].latitude + (polylineToFrontSight.points[1].latitude - polylineToFrontSight.points[0].latitude) / polylineToFrontSight.distance * (correctionPolyline.distance - polylineToFrontSight.distance)
+        val newY =
+            polylineToFrontSight.points[1].longitude + (polylineToFrontSight.points[1].longitude - polylineToFrontSight.points[0].longitude) / polylineToFrontSight.distance * (correctionPolyline.distance - polylineToFrontSight.distance)
+        correctedPoints =
+            listOf(polylineToFrontSight.actualPoints.first(), GeoPoint(newX, newY))
+        frontSightMarker.position = GeoPoint(newX, newY)
+        updatePolyline(polylineToFrontSight, correctedPoints)
+    }
+
+    private fun z(){
+        for (i in 0..7) {
+            val polylineToCenterAzimuth =
+                MapTools.angleBetween(
+                    correctionPolyline.actualPoints[0],
+                    correctionPolyline.actualPoints[1]
+                )
+            val polylineToFrontSightAzimuth = MapTools.angleBetween(
+                polylineToFrontSight.actualPoints[0], polylineToFrontSight.actualPoints[1]
+            )
+            val correctionAngDeg = polylineToCenterAzimuth - polylineToFrontSightAzimuth
+            if (i == 0)
+                correctionAngRad = Math.toRadians(correctionAngDeg)
+            val newEnd = rotate(polylineToFrontSight.actualPoints.last(), Math.toRadians(correctionAngDeg))
+            val correctedPoints = listOf(polylineToFrontSight.actualPoints.first(), newEnd)
+            frontSightMarker.position = newEnd
+            updatePolyline(polylineToFrontSight, correctedPoints)
+        }
+        val newX = polylineToFrontSight.points[1].latitude + (polylineToFrontSight.points[1].latitude - polylineToFrontSight.points[0].latitude) / polylineToFrontSight.distance * (correctionPolyline.distance - polylineToFrontSight.distance)
+        val newY =polylineToFrontSight.points[1].longitude + (polylineToFrontSight.points[1].longitude - polylineToFrontSight.points[0].longitude) / polylineToFrontSight.distance * (correctionPolyline.distance  - polylineToFrontSight.distance)
+        val correctedPoints = listOf(polylineToFrontSight.actualPoints.first(), GeoPoint(newX, newY))
+        frontSightMarker.position = GeoPoint(newX, newY)
+        updatePolyline(polylineToFrontSight, correctedPoints)
+    }
+
+    private fun rotate(endPoint: GeoPoint, angle: Double): GeoPoint {
+        val rotationMatrix = arrayOf(
+            doubleArrayOf(cos(angle), -sin(angle)),
+            doubleArrayOf(sin(angle), cos(angle))
+        )
+
+        var newX = rotationMatrix[0][0] * (endPoint.latitude - droneMarker.position.latitude) + rotationMatrix[0][1] * (endPoint.longitude - droneMarker.position.longitude)
+        var newY = rotationMatrix[1][0] * (endPoint.latitude - droneMarker.position.latitude) + rotationMatrix[1][1] * (endPoint.longitude - droneMarker.position.longitude)
+
+        return GeoPoint(newX + droneMarker.position.latitude, newY +  droneMarker.position.longitude)
     }
 
     private fun focusCamera(point: GeoPoint) {
