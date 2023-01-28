@@ -17,7 +17,7 @@ import java.io.File
 class DownloadController(private val context: Context) {
 
     companion object {
-        private const val URL = "https://d.apkpure.com/b/APK/com.sec.android.app.popupcalculator?version=latest"
+        private const val URL = "https://d.apkpure.com/b/APK/com.google.android.calculator?version=latest"
         private const val FILE_NAME = "DroneVision.apk"
         private const val FILE_BASE_PATH = "file://"
         private const val MIME_TYPE = "application/vnd.android.package-archive"
@@ -66,7 +66,6 @@ class DownloadController(private val context: Context) {
                 context: Context,
                 intent: Intent
             ) {
-                try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     val contentUri = FileProvider.getUriForFile(
                         context,
@@ -83,7 +82,6 @@ class DownloadController(private val context: Context) {
                     // finish()
                 } else {
                     val install = Intent(Intent.ACTION_VIEW)
-                    install.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                     install.setDataAndType(
                         uri,
                         APP_INSTALL_PATH
@@ -91,9 +89,6 @@ class DownloadController(private val context: Context) {
                     context.startActivity(install)
                     context.unregisterReceiver(this)
                     // finish()
-                }
-                }catch (_: java.lang.RuntimeException){
-
                 }
             }
         }
