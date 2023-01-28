@@ -70,7 +70,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
     private val listOfTechnic = mutableListOf<Overlay>()
     private var locationOverlay: MyLocationNewOverlay? = null
     private var correctionAngRad: Double? = null
-    private var correctionDistance: Double = 0.0
+    private var correctionDistanceRate: Double = 0.0
     private var correctionPolyline = Polyline()
 
 
@@ -562,6 +562,11 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                 cashLine.setPoints(polylineToFrontSight.actualPoints)
                 f(angleRad)
             }
+            val point = increaseSegmentLength(polylineToFrontSight, correctionDistanceRate)
+            val correctedPoints =
+                listOf(polylineToFrontSight.actualPoints.first(), point)
+            frontSightMarker.position = point
+            updatePolyline(polylineToFrontSight, correctedPoints)
         }
 
         showGeoInformation(binding, cameraTarget, droneMarker.position)
@@ -587,14 +592,6 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         var correctedPoints = listOf(polylineToFrontSight.actualPoints.first(), newEnd)
         frontSightMarker.position = newEnd
         updatePolyline(polylineToFrontSight, correctedPoints)
-        val newX =
-            polylineToFrontSight.points[1].latitude + (polylineToFrontSight.points[1].latitude - polylineToFrontSight.points[0].latitude) / polylineToFrontSight.distance * (correctionPolyline.distance - polylineToFrontSight.distance)
-        val newY =
-            polylineToFrontSight.points[1].longitude + (polylineToFrontSight.points[1].longitude - polylineToFrontSight.points[0].longitude) / polylineToFrontSight.distance * (correctionPolyline.distance - polylineToFrontSight.distance)
-        correctedPoints =
-            listOf(polylineToFrontSight.actualPoints.first(), GeoPoint(newX, newY))
-        frontSightMarker.position = GeoPoint(newX, newY)
-        updatePolyline(polylineToFrontSight, correctedPoints)
     }
 
     private fun z(){
@@ -615,12 +612,19 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             frontSightMarker.position = newEnd
             updatePolyline(polylineToFrontSight, correctedPoints)
         }
-        val newX = polylineToFrontSight.points[1].latitude + (polylineToFrontSight.points[1].latitude - polylineToFrontSight.points[0].latitude) / polylineToFrontSight.distance * (correctionPolyline.distance - polylineToFrontSight.distance)
-        val newY =polylineToFrontSight.points[1].longitude + (polylineToFrontSight.points[1].longitude - polylineToFrontSight.points[0].longitude) / polylineToFrontSight.distance * (correctionPolyline.distance  - polylineToFrontSight.distance)
-        val correctedPoints = listOf(polylineToFrontSight.actualPoints.first(), GeoPoint(newX, newY))
-        frontSightMarker.position = GeoPoint(newX, newY)
+        correctionDistanceRate = correctionPolyline.distance / polylineToFrontSight.distance
+        val point = increaseSegmentLength(polylineToFrontSight, correctionDistanceRate)
+        val correctedPoints = listOf(polylineToFrontSight.actualPoints.first(), point)
+        frontSightMarker.position = point
         updatePolyline(polylineToFrontSight, correctedPoints)
     }
+
+    fun increaseSegmentLength(polyline: Polyline, n: Double): GeoPoint {
+        val newX = polyline.actualPoints.first().latitude + n * (polyline.actualPoints.last().latitude - polyline.actualPoints.first().latitude)
+        val newY = polyline.actualPoints.first().longitude + n * (polyline.actualPoints.last().longitude - polyline.actualPoints.first().longitude)
+        return GeoPoint(newX, newY)
+    }
+
 
     private fun rotate(endPoint: GeoPoint, angle: Double): GeoPoint {
         val rotationMatrix = arrayOf(
