@@ -26,6 +26,7 @@ import com.example.dronevision.R
 import com.example.dronevision.databinding.ActivityMainBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
+import com.example.dronevision.presentation.DownloadController
 import com.example.dronevision.presentation.delegates.BluetoothHandler
 import com.example.dronevision.presentation.delegates.BluetoothHandlerImpl
 import com.example.dronevision.presentation.delegates.DivisionHandler
@@ -59,6 +60,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
     private lateinit var map: IMap
     private var dialog: SelectBluetoothFragment? = null
     private lateinit var mainViewModel: MainViewModel
+    private lateinit var downloadController: DownloadController
 
     @Inject
     lateinit var mainViewModelFactory: MainViewModelFactory
@@ -67,6 +69,8 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        downloadController = DownloadController(this)
 
         PermissionTools.checkAndRequestPermissions(this)
         createAppFolder()
@@ -368,9 +372,10 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                     }
                     R.id.updates -> {
                         try {
+                            downloadController.enqueueDownload()
                          //   mainViewModel.updateApp()
                         } catch (_: Exception){
-                           // Toast.makeText(this, "Невозможно подключиться!", Toast.LENGTH_SHORT)
+                            Toast.makeText(applicationContext, "Невозможно подключиться!", Toast.LENGTH_SHORT).show()
                         }
                         return true
                     }
