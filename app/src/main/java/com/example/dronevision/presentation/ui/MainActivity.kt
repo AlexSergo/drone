@@ -23,6 +23,7 @@ import androidx.navigation.ui.navigateUp
 import androidx.preference.PreferenceManager
 import com.example.dronevision.App
 import com.example.dronevision.R
+import com.example.dronevision.data.source.local.prefs.SharedPreferences
 import com.example.dronevision.databinding.ActivityMainBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
@@ -71,7 +72,6 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         setContentView(binding.root)
 
         downloadController = DownloadController(this)
-
         PermissionTools.checkAndRequestPermissions(this)
         createAppFolder()
         initViewModel()

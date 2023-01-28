@@ -27,6 +27,8 @@ import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.delegates.*
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.model.bluetooth.Entity
+import com.example.dronevision.presentation.ui.auth.AuthDialog
+import com.example.dronevision.presentation.ui.auth.AuthDialogCallback
 import com.example.dronevision.presentation.ui.find_location.FindGeoPointCallback
 import com.example.dronevision.presentation.ui.find_location.FindGeoPointFragment
 import com.example.dronevision.presentation.ui.targ.TargetFragment
@@ -101,6 +103,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = FragmentOsmdroidBinding.inflate(inflater, container, false)
+        auth()
         setupOsmdroidMap()
         setupMarkers()
         setupPolylines()
@@ -126,6 +129,16 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
 
             })
         return binding.root
+    }
+    
+    private fun auth() {
+        val authDialog = AuthDialog(object: AuthDialogCallback {
+            override fun applyAuth(login: String, password: String) {
+            
+            }
+        })
+        authDialog.isCancelable = false
+        authDialog.show(parentFragmentManager, "auth")
     }
 
     private fun setupMarkers() {

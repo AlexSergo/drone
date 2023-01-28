@@ -3,7 +3,7 @@ package com.example.dronevision.presentation.delegates
 import android.app.AlertDialog
 import android.content.Context
 import com.example.dronevision.utils.Constants
-import com.example.dronevision.utils.SharedPreferences
+import com.example.dronevision.data.source.local.prefs.SharedPreferences
 
 class DivisionHandlerImpl: DivisionHandler {
     override fun getDivision(context: Context): String? {

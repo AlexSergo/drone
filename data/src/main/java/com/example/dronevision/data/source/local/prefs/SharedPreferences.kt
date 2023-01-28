@@ -1,4 +1,4 @@
-package com.example.dronevision.utils
+package com.example.dronevision.data.source.local.prefs
 
 import android.content.Context
 import android.content.SharedPreferences
