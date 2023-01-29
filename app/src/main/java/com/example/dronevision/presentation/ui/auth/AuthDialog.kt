@@ -38,7 +38,7 @@ class AuthDialog(private val callback: AuthDialogCallback) : DialogFragment() {
         val deviceId = Device.getDeviceId(requireContext())
         val savedDeviceId = sharedPreferences.getValue("AUTH_TOKEN")
         
-        if (savedDeviceId == Hash.md5(savedDeviceId + "крокодил") && savedPassword != null) {
+        if (savedDeviceId == Hash.md5(deviceId + "крокодил") && savedPassword != null) {
             binding.editPasswordConfirm.isVisible = false
             binding.enterBtn.setOnClickListener {
                 val password = binding.editPassword.text.toString()
