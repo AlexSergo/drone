@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
+        Device.getDeviceId(applicationContext)
         auth()
         
         downloadController = DownloadController(this)

@@ -17,7 +17,7 @@ import java.io.File
 class DownloadController(private val context: Context) {
 
     companion object {
-        private const val URL = "https://d.apkpure.com/b/APK/com.google.android.calculator?version=latest"
+        private const val URL = "http://37.29.35.200:8080/api/download/DroneVision"
         private const val FILE_NAME = "DroneVision.apk"
         private const val FILE_BASE_PATH = "file://"
         private const val MIME_TYPE = "application/vnd.android.package-archive"

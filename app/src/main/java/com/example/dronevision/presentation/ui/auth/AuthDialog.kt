@@ -42,7 +42,7 @@ class AuthDialog(private val callback: AuthDialogCallback) : DialogFragment() {
             binding.editPasswordConfirm.isVisible = false
             binding.enterBtn.setOnClickListener {
                 val password = binding.editPassword.text.toString()
-                if (password == savedPassword) dialog?.dismiss()
+                if (Hash.md5(password) == savedPassword) dialog?.dismiss()
                 else makeToastWrongPassword()
             }
         } else {
@@ -54,7 +54,7 @@ class AuthDialog(private val callback: AuthDialogCallback) : DialogFragment() {
                 else if (password.length < 4) makeToastSmallPassword()
                 else if (password.length > 10) makeToastLongPassword()
                 else if (password != passwordConfirm) makeToastPasswordsNotMatch()
-                else callback.checkRegistration(deviceId, password)
+                else callback.checkRegistration(deviceId, Hash.md5(password))
             }
         }
         return binding.root
