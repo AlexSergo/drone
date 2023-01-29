@@ -1,9 +1,10 @@
 package com.example.dronevision.data.mapper
 
 import com.example.dronevision.data.source.remote.model.RequestId
+import com.example.dronevision.domain.model.AuthDto
 
 object IdMapper {
-    fun mapStringIdToRequestObject(androidId: String): RequestId{
-        return RequestId(deviceId = androidId)
+    fun mapAuthDtoToRequest(authDto: AuthDto): RequestId {
+        return RequestId(deviceId = authDto.deviceId, password = authDto.password)
     }
 }

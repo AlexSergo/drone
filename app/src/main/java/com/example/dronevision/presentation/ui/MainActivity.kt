@@ -23,6 +23,7 @@ import androidx.navigation.ui.navigateUp
 import androidx.preference.PreferenceManager
 import com.example.dronevision.App
 import com.example.dronevision.R
+import com.example.dronevision.data.source.local.prefs.PasswordManager
 import com.example.dronevision.data.source.local.prefs.SharedPreferences
 import com.example.dronevision.databinding.ActivityMainBinding
 import com.example.dronevision.domain.model.Coordinates
@@ -35,6 +36,8 @@ import com.example.dronevision.presentation.delegates.DivisionHandlerImpl
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.model.bluetooth.BluetoothListItem
 import com.example.dronevision.presentation.model.bluetooth.Entity
+import com.example.dronevision.presentation.ui.auth.AuthDialog
+import com.example.dronevision.presentation.ui.auth.AuthDialogCallback
 import com.example.dronevision.presentation.ui.bluetooth.BluetoothCallback
 import com.example.dronevision.presentation.ui.bluetooth.SelectBluetoothFragment
 import com.example.dronevision.presentation.ui.osmdroid_map.IMap
@@ -54,28 +57,33 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerImpl(),
     DivisionHandler by DivisionHandlerImpl(),
     NavigationView.OnNavigationItemSelectedListener, MapActivityListener {
-
+    
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private lateinit var map: IMap
     private var dialog: SelectBluetoothFragment? = null
+    private var authDialog: AuthDialog? = null
     private lateinit var mainViewModel: MainViewModel
     private lateinit var downloadController: DownloadController
-
+    
     @Inject
     lateinit var mainViewModelFactory: MainViewModelFactory
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        
+        auth()
+        
         downloadController = DownloadController(this)
         PermissionTools.checkAndRequestPermissions(this)
         createAppFolder()
         initViewModel()
-        checkRegistration()
+        setupOptionsMenu()
+        setupDrawer()
+        setupBluetoothDialog()
         setupOsmdroidConfiguration()
 
 /*        mainViewModel.startServer()
@@ -85,41 +93,34 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                 Coordinates(x = technic.coordinates.x, y = technic.coordinates.y))
         })*/
     }
-
-    private fun initViewModel() {
-        (applicationContext as App).appComponent.inject(this)
-        mainViewModel =
-            ViewModelProvider(this, mainViewModelFactory)[MainViewModel::class.java]
-    }
-
-    private fun checkRegistration() {
-        val sharedPreferences = SharedPreferences(applicationContext)
-        val id = Device.getDeviceId(applicationContext)
-        sharedPreferences.save("AUTH_TOKEN", Hash.md5(id))
-        val hash = sharedPreferences.getValue("AUTH_TOKEN")
-        if (hash == null) {
-            try {
-                mainViewModel.getId(id)
-                mainViewModel.idLiveData.observe(this) {
-                    it?.let { hash ->
-                        if (hash == Hash.md5(id)) {
-                            sharedPreferences.save("AUTH_TOKEN", hash)
-                            setupOptionsMenu()
-                            setupDrawer()
-                            setupBluetoothDialog()
+    
+    private fun auth() {
+        authDialog = AuthDialog(object : AuthDialogCallback {
+            override fun checkRegistration(id: String, password: String) {
+                try {
+                    val sharedPreferences = SharedPreferences(this@MainActivity)
+                    val passwordManager = PasswordManager(this@MainActivity)
+                    mainViewModel.getId(id, password)
+                    mainViewModel.authLiveData.observe(this@MainActivity) {
+                        it?.let { remoteId ->
+                            if (remoteId == Hash.md5(id + "крокодил")) {
+                                sharedPreferences.save("AUTH_TOKEN", remoteId)
+                                passwordManager.addPassword(password)
+                                authDialog?.dismiss()
+                            }
                         }
                     }
+                } catch (_: Exception) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Невозможно подключиться к серверу!",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            } catch (_: Exception) {
-                Toast.makeText(this, "Невозможно подключиться к серверу!", Toast.LENGTH_SHORT)
-                    .show()
             }
-        } else
-            if (hash == Hash.md5(id)) {
-                setupOptionsMenu()
-                setupDrawer()
-                setupBluetoothDialog()
-            }
+        })
+        authDialog?.isCancelable = false
+        authDialog?.show(supportFragmentManager, "auth")
     }
 
     private fun setupBluetoothDialog() {
@@ -128,7 +129,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
             systemService = getSystemService(BLUETOOTH_SERVICE),
             listener = this
         )
-
+        
         dialog = SelectBluetoothFragment(connection.getAdapter(), object : BluetoothCallback {
             override fun onClick(item: BluetoothListItem) {
                 item.let { connection.connect(it.mac) }
@@ -136,13 +137,13 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
             }
         })
     }
-
+    
     override fun showMessage(message: String) {
         runOnUiThread {
             Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
         }
     }
-
+    
     override fun showDroneData(entities: MutableList<Entity>) {
         runOnUiThread {
             if (entities[0].lat.isNaN() || entities[0].lon.isNaN()) {
@@ -152,14 +153,14 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
             map.showDataFromDrone(entities)
         }
     }
-
+    
     override fun receiveDeviceId(id: String) {
         runOnUiThread {
             val subscriberDialogFragment = SubscriberDialogFragment(id)
             subscriberDialogFragment.show(supportFragmentManager, "")
         }
     }
-
+    
     override fun receiveTechnic(technic: Technic) {
         runOnUiThread {
             technic.division?.let {
@@ -171,42 +172,42 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
             }
         }
     }
-
+    
     private fun setupOsmdroidConfiguration() {
         val provider = Configuration.getInstance()
         provider.userAgentValue = BuildConfig.APPLICATION_ID
         provider.osmdroidTileCache = externalCacheDir
         provider.load(this, PreferenceManager.getDefaultSharedPreferences(this))
     }
-
+    
     private fun setupDrawer() {
         setSupportActionBar(binding.appBarMain.toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
-
+        
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
-
+        
         val toggle = ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close)
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
-
+        
         val button = findViewById<ImageButton>(R.id.drawerButton)
         button.setOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
-
+        
         navView.setNavigationItemSelectedListener(this)
         navController = findNavController(R.id.nav_host_fragment_content_main)
         initMap()
     }
-
+    
     private fun initMap() {
         val navFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main)
         val fragment = navFragment?.childFragmentManager?.fragments?.get(0)
         map = fragment as IMap
     }
-
+    
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         if (!checkDivision(this))
             return false
@@ -276,16 +277,16 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
-
+    
     private fun setupOptionsMenu() {
         val menuHost: MenuHost = this
-
+        
         menuHost.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.main, menu)
                 setupMenuState(menu)
             }
-
+            
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
                     R.id.bluetooth -> {
@@ -351,7 +352,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                     }
                     R.id.deviceId -> {
                         val androidIdDialog = AndroidIdFragment()
-
+                        
                         androidIdDialog.show(supportFragmentManager, "id_dialog")
                         true
                     }
@@ -373,9 +374,13 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                     R.id.updates -> {
                         try {
                             downloadController.enqueueDownload()
-                         //   mainViewModel.updateApp()
-                        } catch (_: Exception){
-                            Toast.makeText(applicationContext, "Невозможно подключиться!", Toast.LENGTH_SHORT).show()
+                            //   mainViewModel.updateApp()
+                        } catch (_: Exception) {
+                            Toast.makeText(
+                                applicationContext,
+                                "Невозможно подключиться!",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                         return true
                     }
@@ -384,7 +389,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
             }
         }, this, Lifecycle.State.RESUMED)
     }
-
+    
     private fun setupMenuState(menu: Menu) {
         mainViewModel.getSessionState()
         val mapGridItem = menu.findItem(R.id.mapGridItem)
@@ -392,7 +397,13 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
             mapGridItem.isChecked = sessionState.isGrid
         }
     }
-
+    
+    private fun initViewModel() {
+        (applicationContext as App).appComponent.inject(this)
+        mainViewModel =
+            ViewModelProvider(this, mainViewModelFactory)[MainViewModel::class.java]
+    }
+    
     override fun onSupportNavigateUp(): Boolean =
         navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
 }

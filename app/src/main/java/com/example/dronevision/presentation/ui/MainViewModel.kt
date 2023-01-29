@@ -4,15 +4,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.dronevision.domain.model.AuthDto
 import com.example.dronevision.domain.use_cases.GetIdUseCase
 import com.example.dronevision.domain.use_cases.GetSessionStateUseCase
 import com.example.dronevision.domain.use_cases.SaveSessionStateUseCase
 import com.example.dronevision.domain.use_cases.SocketUseCase
 import com.example.dronevision.presentation.mapper.SessionStateMapperUi
+import com.example.dronevision.presentation.model.AuthUiModel
 import com.example.dronevision.presentation.model.SessionState
-import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.utils.MapType
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.net.ServerSocket
@@ -26,12 +26,12 @@ class MainViewModel(
 ) : ViewModel() {
     private val _sessionStateLiveData = MutableLiveData<SessionState>()
     val sessionStateLiveData: LiveData<SessionState> get() = _sessionStateLiveData
-
+    
     private val _socketLiveData = MutableLiveData<String>()
     val socketLiveData: LiveData<String> get() = _socketLiveData
-
-    private val _idLiveData = MutableLiveData<String>()
-    val idLiveData: LiveData<String> get() = _idLiveData
+    
+    private val _authLiveData = MutableLiveData<String>()
+    val authLiveData: LiveData<String> get() = _authLiveData
     
     fun getSessionState() = viewModelScope.launch(Dispatchers.IO) {
         val sessionStateDto = getSessionStateUseCase.execute()
@@ -55,19 +55,24 @@ class MainViewModel(
         }
     }
     
-    private fun saveSessionState(sessionState: SessionState) = viewModelScope.launch(Dispatchers.IO) {
-        val sessionStateDto = SessionStateMapperUi.mapSessionStateUiToDto(sessionState)
-        saveSessionStateUseCase.execute(sessionStateDto)
+    private fun saveSessionState(sessionState: SessionState) =
+        viewModelScope.launch(Dispatchers.IO) {
+            val sessionStateDto = SessionStateMapperUi.mapSessionStateUiToDto(sessionState)
+            saveSessionStateUseCase.execute(sessionStateDto)
+        }
+    
+    fun getId(deviceId: String, password: String) = viewModelScope.launch(Dispatchers.IO) {
+        val authUiModel = AuthUiModel(
+            deviceId = deviceId,
+            password = password
+        )
+        val authDtoModel = AuthDto(
+            deviceId = authUiModel.deviceId,
+            password = authUiModel.password
+        )
+        _authLiveData.postValue(getIdUseCase.execute(authDtoModel))
     }
-
-     fun getId(androidId: String) = viewModelScope.launch(Dispatchers.IO) {
-         try {
-             _idLiveData.postValue(getIdUseCase.execute(androidId))
-         }catch (_: IllegalArgumentException){
-
-         }
-    }
-
+    
     fun startServer() = viewModelScope.launch(Dispatchers.IO) {
         val server = ServerSocket(8000)
         println("Server running on port ${server.localPort}")
@@ -80,7 +85,7 @@ class MainViewModel(
             result += scanner.nextLine()
         }
         _socketLiveData.postValue(result)
-        val writer =  client.getOutputStream()
+        val writer = client.getOutputStream()
         writer.write(result.toByteArray())
     }
 }

@@ -12,8 +12,8 @@ class PasswordManager(context: Context) {
         const val AUTH_PASSWORD = "my_password"
     }
     
-    fun addPassword(fileName: String) {
-        prefs.edit().putString(AUTH_PASSWORD, fileName).apply()
+    fun addPassword(password: String) {
+        prefs.edit().putString(AUTH_PASSWORD, password).apply()
     }
     
     fun getPassword(): String? = prefs.getString(AUTH_PASSWORD, null)
