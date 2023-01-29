@@ -1,5 +1,5 @@
 package com.example.dronevision.presentation.ui.auth
 
 interface AuthDialogCallback {
-    fun applyAuth(login: String, password: String)
+    fun checkRegistration(id: String, password: String)
 }

@@ -4,5 +4,8 @@ import com.google.gson.annotations.SerializedName
 
 data class RequestId(
     @SerializedName("key")
-    val deviceId: String
+    val deviceId: String,
+    
+    @SerializedName("login")
+    val password: String
 )

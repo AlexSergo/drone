@@ -103,7 +103,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = FragmentOsmdroidBinding.inflate(inflater, container, false)
-        auth()
+        
         setupOsmdroidMap()
         setupMarkers()
         setupPolylines()
@@ -123,22 +123,9 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                     spawnTechnic(
                         TechnicTypes.valueOf(type), Coordinates(x = lat, y = lon), division
                     )
-
-
                 }
-
             })
         return binding.root
-    }
-    
-    private fun auth() {
-        val authDialog = AuthDialog(object: AuthDialogCallback {
-            override fun applyAuth(login: String, password: String) {
-            
-            }
-        })
-        authDialog.isCancelable = false
-        authDialog.show(parentFragmentManager, "auth")
     }
 
     private fun setupMarkers() {
