@@ -30,6 +30,10 @@ class AuthDialog(private val callback: AuthDialogCallback) : DialogFragment() {
             displayMetrics.heightPixels - displayMetrics.heightPixels / 10
         binding.authDialog.minWidth = displayMetrics.widthPixels - displayMetrics.widthPixels / 10
         dialog?.window?.setDimAmount(1f)
+        binding.deviceId.text = Device.getDeviceId(requireContext())
+        binding.deviceId.setOnClickListener {
+            Device.setClipboard(requireContext(), binding.deviceId.text.toString())
+        }
         
         val passwordManager = PasswordManager(requireContext())
         val savedPassword = passwordManager.getPassword()

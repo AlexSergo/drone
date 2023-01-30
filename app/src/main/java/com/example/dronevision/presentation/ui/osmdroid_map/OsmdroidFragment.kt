@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.res.ColorStateList
 import android.graphics.Color
 import android.location.LocationManager
 import android.os.Bundle
@@ -27,8 +26,6 @@ import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.delegates.*
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.model.bluetooth.Entity
-import com.example.dronevision.presentation.ui.auth.AuthDialog
-import com.example.dronevision.presentation.ui.auth.AuthDialogCallback
 import com.example.dronevision.presentation.ui.find_location.FindGeoPointCallback
 import com.example.dronevision.presentation.ui.find_location.FindGeoPointFragment
 import com.example.dronevision.presentation.ui.targ.TargetFragment
@@ -71,9 +68,10 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
     private var polylineToFrontSight: Polyline = Polyline()
     private val listOfTechnic = mutableListOf<Overlay>()
     private var locationOverlay: MyLocationNewOverlay? = null
-    private var correctionAngRad: Double? = null
+    private var correctionAngRad: Double = 0.0
     private var correctionPolyline = Polyline()
 
+    private val getData = GetData()
 
     lateinit var osmdroidViewModel: OsmdroidViewModel
 
@@ -102,7 +100,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = FragmentOsmdroidBinding.inflate(inflater, container, false)
-        
+
         setupOsmdroidMap()
         setupMarkers()
         setupPolylines()
@@ -110,6 +108,8 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         setupLastSessionState()
         setupDisruptionButtons()
         setupCorrectionButton()
+
+        getData.updater()
 
         onDatabaseChangeListener(Device.getDeviceId(requireContext()),
             object : RemoteDatabaseCallback {
@@ -132,6 +132,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         disruptionMarker = Marker(binding.mapView)
         frontSightMarker = Marker(binding.mapView)
         droneMarker = Marker(binding.mapView)
+        droneMarker.isFlat = true
 
         drawMarker(
             droneMarker, Technic(
@@ -157,15 +158,15 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
 
     private fun setupCorrectionButton() {
         binding.correctionButton.setOnClickListener {
-            if (correctionAngRad != null) {
-                correctionAngRad = null
+            if (correctionAngRad != 0.0) {
+                correctionAngRad = 0.0
                 it.background.setTint(resources.getColor(R.color.red))
                 return@setOnClickListener
             }
             it.background.setTint(resources.getColor(R.color.teal_700))
              correctionPolyline = Polyline()
             correctionPolyline.setPoints(polylineToCenter.points)
-            z()
+            findCorrectionAngle()
         }
     }
 
@@ -520,48 +521,13 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             GeoPoint(binding.mapView.mapCenter.latitude, binding.mapView.mapCenter.longitude)
         droneMarker.setVisible(true)
 
-        // обновили позицию прицела и его полилинии
-        val frontSightGeoPoint = GeoPoint(entities[1].lat, entities[1].lon)
-        if (correctionAngRad == null) {
-            frontSightMarker.position = frontSightGeoPoint
-            updatePolyline(
-                polylineToFrontSight, listOf(droneMarker.position, frontSightMarker.position)
-            )
-        } else {
-               frontSightMarker.position = frontSightGeoPoint
-                polylineToFrontSight.setPoints(
-                    listOf(
-                        droneMarker.position,
-                        frontSightMarker.position
-                    )
-                )
-            updatePolyline(
-                polylineToFrontSight, listOf(droneMarker.position, frontSightMarker.position)
-            )
-            var cashLine = Polyline()
-            cashLine.setPoints(polylineToFrontSight.actualPoints)
-            f(correctionAngRad!!)
+        getData.setDroneData(entities[0], Math.toDegrees(correctionAngRad))
 
-            var angleRad = correctionAngRad!!
-            for (i in 0..3) {
-                var cashPolylineAzimuth =
-                    MapTools.angleBetween(
-                        cashLine.actualPoints[0],
-                        cashLine.actualPoints[1]
-                    )
-                var polylineToFrontSightAzimuth = MapTools.angleBetween(
-                    polylineToFrontSight.actualPoints[0], polylineToFrontSight.actualPoints[1]
-                )
-                var correctionAngDeg = cashPolylineAzimuth - polylineToFrontSightAzimuth
-                var rad =  Math.toRadians(correctionAngDeg)
-                if (abs(angleRad - rad) < abs(angleRad))
-                    angleRad -= rad
-                else
-                    angleRad += rad
-                cashLine.setPoints(polylineToFrontSight.actualPoints)
-                f(angleRad)
-            }
-        }
+        val frontSightGeoPoint = GeoPoint(getData.target.lat, getData.target.lon)
+        frontSightMarker.position = frontSightGeoPoint
+        updatePolyline(
+            polylineToFrontSight, listOf(droneMarker.position, frontSightMarker.position)
+        )
 
         showGeoInformation(binding, cameraTarget, droneMarker.position)
 
@@ -581,15 +547,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         }
     }
 
-    private fun f(angle: Double){
-        val newEnd = rotate(polylineToFrontSight.actualPoints.last(), angle)
-        var correctedPoints = listOf(polylineToFrontSight.actualPoints.first(), newEnd)
-        frontSightMarker.position = newEnd
-        updatePolyline(polylineToFrontSight, correctedPoints)
-    }
-
-    private fun z(){
-        for (i in 0..7) {
+    private fun findCorrectionAngle(){
             val polylineToCenterAzimuth =
                 MapTools.angleBetween(
                     correctionPolyline.actualPoints[0],
@@ -599,32 +557,13 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                 polylineToFrontSight.actualPoints[0], polylineToFrontSight.actualPoints[1]
             )
             val correctionAngDeg = polylineToCenterAzimuth - polylineToFrontSightAzimuth
-            if (i == 0) {
                 correctionAngRad = Math.toRadians(correctionAngDeg)
-                Toast.makeText(requireContext(), "Угол коррекции: " + round(correctionAngDeg * 100) / 100.0,Toast.LENGTH_SHORT).show()
-            }
-            val newEnd = rotate(polylineToFrontSight.actualPoints.last(), Math.toRadians(correctionAngDeg))
-            val correctedPoints = listOf(polylineToFrontSight.actualPoints.first(), newEnd)
-            frontSightMarker.position = newEnd
-            updatePolyline(polylineToFrontSight, correctedPoints)
-        }
-/*        correctionDistanceRate = correctionPolyline.distance / polylineToFrontSight.distance
-        val point = increaseSegmentLength(polylineToFrontSight, correctionDistanceRate)
-        val correctedPoints = listOf(polylineToFrontSight.actualPoints.first(), point)
-        frontSightMarker.position = point
-        updatePolyline(polylineToFrontSight, correctedPoints)*/
-    }
-
-    private fun rotate(endPoint: GeoPoint, angle: Double): GeoPoint {
-        val rotationMatrix = arrayOf(
-            doubleArrayOf(cos(angle), -sin(angle)),
-            doubleArrayOf(sin(angle), cos(angle))
-        )
-
-        var newX = rotationMatrix[0][0] * (endPoint.latitude - droneMarker.position.latitude) + rotationMatrix[0][1] * (endPoint.longitude - droneMarker.position.longitude)
-        var newY = rotationMatrix[1][0] * (endPoint.latitude - droneMarker.position.latitude) + rotationMatrix[1][1] * (endPoint.longitude - droneMarker.position.longitude)
-
-        return GeoPoint(newX + droneMarker.position.latitude, newY +  droneMarker.position.longitude)
+                var angle = round(correctionAngDeg * 100) / 100.0
+                if (angle > 180)
+                    angle -= 360
+                if (angle < -180)
+                    angle += 360
+                Toast.makeText(requireContext(), "Угол коррекции: " + angle,Toast.LENGTH_SHORT).show()
     }
 
     private fun focusCamera(point: GeoPoint) {
@@ -680,12 +619,6 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
     override fun onResume() {
         super.onResume()
         binding.mapView.onResume()
-        /*val prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
-        Configuration.getInstance().save(requireContext(), prefs)
-        Configuration.getInstance().load(
-            requireContext(),
-            PreferenceManager.getDefaultSharedPreferences(requireContext())
-        )*/
         locationOverlay?.enableMyLocation()
     }
 
