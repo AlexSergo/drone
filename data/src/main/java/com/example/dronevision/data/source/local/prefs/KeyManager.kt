@@ -21,7 +21,7 @@ class KeyManager(context: Context) {
         _secretLiveData.postValue(key)
     }
 
-    fun getKey(): String? = prefs.getString(SECRET_KEY, null)
+    fun getKey(): String? = prefs.getString(SECRET_KEY, "")
 
     fun deletePassword() {
         prefs.edit().putString(SECRET_KEY, null).apply()

@@ -24,6 +24,7 @@ class AndroidIdFragment : DialogFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val keyPrefs = KeyManager(requireContext())
         binding = FragmentAndroidIdBinding.inflate(layoutInflater)
         binding.androidId.text = Device.id
         binding.androidId.setOnClickListener {
@@ -39,13 +40,16 @@ class AndroidIdFragment : DialogFragment() {
         binding.saveButton.setOnClickListener {
             val sharedPreferences = SharedPreferences(requireContext())
             sharedPreferences.save(Constants.DIVISION_KEY, binding.divisionEditText.text.toString())
-            val keyPrefs = KeyManager(requireContext())
-            keyPrefs.saveKey(binding.secretKeyEditText.text.toString())
-            AESEncyption.secretKey = binding.secretKeyEditText.text.toString()
+            val key = binding.secretKeyEditText.text.toString()
+            if (key != "") {
+                keyPrefs.saveKey(key)
+                AESEncyption.secretKey = key
+            }
             dialog?.dismiss()
         }
         val division = (requireActivity() as DivisionHandler).getDivision(requireContext())
         binding.divisionEditText.setText(division)
+        binding.secretKeyEditText.setText(keyPrefs.getKey())
         return binding.root
     }
 }
