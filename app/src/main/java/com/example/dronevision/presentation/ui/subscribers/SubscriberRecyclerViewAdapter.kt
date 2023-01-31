@@ -43,6 +43,7 @@ class SubscriberRecyclerViewAdapter(private val callback: SubscriberListCallback
             binding.item.setOnClickListener {
                 callback?.select(subscriber)
             }
+
         }
 
         companion object{

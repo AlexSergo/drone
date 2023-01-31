@@ -189,8 +189,8 @@ class TargetFragment(
     private fun checkDivision(): Boolean {
         if (technic.division == null) {
             val builder = AlertDialog.Builder(requireContext())
-            builder.setTitle("Укажите свое подразделение!")
-                .setMessage("Укажите подразделение в настройках! (Пункт: Мои данные)")
+            builder.setTitle("Укажите свой позывной!")
+                .setMessage("Укажите позывной в настройках! (Пункт: Мои данные)")
                 .setPositiveButton("ОК") { dialog, id ->
                     dialog.cancel()
                 }

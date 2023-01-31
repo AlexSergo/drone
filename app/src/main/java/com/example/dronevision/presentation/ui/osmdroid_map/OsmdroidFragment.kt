@@ -31,6 +31,8 @@ import com.example.dronevision.presentation.ui.find_location.FindGeoPointFragmen
 import com.example.dronevision.presentation.ui.targ.TargetFragment
 import com.example.dronevision.presentation.ui.targ.TargetFragmentCallback
 import com.example.dronevision.utils.*
+import com.example.dronevision.utils.AESEncyption.decrypt
+import com.example.dronevision.utils.Device.toTechnic
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
@@ -113,15 +115,19 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
 
         onDatabaseChangeListener(Device.getDeviceId(requireContext()),
             object : RemoteDatabaseCallback {
-                override fun returnMessage(str: List<String>) {
-                    val type = str[1]
-                    val division = str[0].substring(str[0].indexOf("=") + 1)
-                    val lat = str[2].toDouble()
-                    val lon = str[3].substring(0, str[3].length - 1).toDouble()
-
-                    spawnTechnic(
-                        TechnicTypes.valueOf(type), Coordinates(x = lat, y = lon), division
-                    )
+                override fun returnMessage(str: String) {
+                    val s = str.substring(6, str.length - 1)
+                    val decryptMessage = decrypt(s)
+                    decryptMessage?.let {
+                        val technic = it.toTechnic()
+                        technic.division?.let {
+                            spawnTechnic(
+                                type = technic.technicTypes,
+                                coords = Coordinates(technic.coordinates.x, technic.coordinates.y),
+                                division = technic.division
+                            )
+                        }
+                    }
                 }
             })
         return binding.root

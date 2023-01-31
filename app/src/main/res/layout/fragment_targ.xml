@@ -84,7 +84,7 @@
         android:id="@+id/division"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Подразделение:"
+        android:text="Позывной:"
         android:textSize="16dp"
         android:layout_marginTop="10dp"
         app:layout_constraintTop_toBottomOf="@id/heightText"

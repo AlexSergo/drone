@@ -42,15 +42,6 @@
         android:layout_height="wrap_content"
         android:text="qwertytdg445gfgduio"
         android:textSize="18sp" />
-
-        <Button
-            android:id="@+id/idCopyButton"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="10sp"
-            android:text="Скопировать" />
     </LinearLayout>
 
     <LinearLayout
@@ -65,9 +56,9 @@
             android:id="@+id/divisionText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Подразделение: "
+            android:text="Позывной: "
             android:textColor="@color/black"
-            android:textSize="18sp" />
+            android:textSize="16sp" />
 
         <EditText
             android:layout_gravity="center"
@@ -75,7 +66,33 @@
             android:layout_marginEnd="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="18sp" />
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_marginEnd="8dp"
+            android:layout_gravity="center"
+            android:id="@+id/secretKey"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ключ шифрования: "
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <EditText
+            android:layout_gravity="center"
+            android:id="@+id/secretKeyEditText"
+            android:layout_marginEnd="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp" />
 
     </LinearLayout>
 

@@ -33,4 +33,11 @@ object Device {
             .create()
         return gson.toJson(this)
     }
+
+    fun String.toTechnic(): Technic{
+        val gson = GsonBuilder()
+            .setPrettyPrinting()
+            .create()
+        return gson.fromJson(this, Technic::class.java)
+    }
 }

@@ -6,12 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.MutableLiveData
+import com.example.dronevision.data.source.local.prefs.KeyManager
 import com.example.dronevision.databinding.FragmentAndroidIdBinding
 import com.example.dronevision.presentation.delegates.BluetoothHandler
 import com.example.dronevision.presentation.delegates.DivisionHandler
 import com.example.dronevision.utils.Constants
 import com.example.dronevision.utils.Device
 import com.example.dronevision.data.source.local.prefs.SharedPreferences
+import com.example.dronevision.utils.AESEncyption
 
 class AndroidIdFragment : DialogFragment() {
 
@@ -23,7 +26,7 @@ class AndroidIdFragment : DialogFragment() {
     ): View {
         binding = FragmentAndroidIdBinding.inflate(layoutInflater)
         binding.androidId.text = Device.id
-        binding.idCopyButton.setOnClickListener {
+        binding.androidId.setOnClickListener {
            Device.setClipboard(requireContext(), Device.id)
             Toast.makeText(requireContext(), "Скопировано в буфер обмена!", Toast.LENGTH_SHORT)
                 .show()
@@ -36,6 +39,9 @@ class AndroidIdFragment : DialogFragment() {
         binding.saveButton.setOnClickListener {
             val sharedPreferences = SharedPreferences(requireContext())
             sharedPreferences.save(Constants.DIVISION_KEY, binding.divisionEditText.text.toString())
+            val keyPrefs = KeyManager(requireContext())
+            keyPrefs.saveKey(binding.secretKeyEditText.text.toString())
+            AESEncyption.secretKey = binding.secretKeyEditText.text.toString()
             dialog?.dismiss()
         }
         val division = (requireActivity() as DivisionHandler).getDivision(requireContext())
