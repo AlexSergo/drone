@@ -1,5 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TableLayout
+        android:id="@+id/searchTableLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:shrinkColumns="0,3">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="true"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/searchTypeButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:minWidth="170dp"
+                android:text="Широта/долгота (град/мин/сек)" />
+        </TableRow>
+
+        <TableRow>
+
+            <EditText
+                android:id="@+id/bxEditText"
+                android:layout_width="wrap_content"
+                android:hint="Широта, град"
+                android:inputType="none|number|numberSigned|numberDecimal"
+                android:selectAllOnFocus="true"
+                android:singleLine="true"
+                tools:ignore="TouchTargetSizeCheck" />
+
+            <EditText
+                android:id="@+id/bMinutesEditText"
+                android:hint="мин."
+                android:inputType="none|number|numberSigned|numberDecimal"
+                android:maxLength="2"
+                android:selectAllOnFocus="true"
+                android:singleLine="true"
+                tools:ignore="TouchTargetSizeCheck" />
+
+            <EditText
+                android:id="@+id/bSecEditText"
+                android:hint="сек."
+                android:inputType="none|number|numberSigned|numberDecimal"
+                android:maxLength="2"
+                android:selectAllOnFocus="true"
+                android:singleLine="true"
+                tools:ignore="TouchTargetSizeCheck" />
+        </TableRow>
+
+        <TableRow>
+
+            <EditText
+                android:id="@+id/lyEditText"
+                android:layout_width="wrap_content"
+                android:hint="Долгота, град"
+                android:inputType="none|number|numberSigned|numberDecimal"
+                android:selectAllOnFocus="true"
+                android:singleLine="true"
+                tools:ignore="TouchTargetSizeCheck" />
+
+            <EditText
+                android:id="@+id/lMinutesEditText"
+                android:hint="мин."
+                android:inputType="none|number|numberSigned|numberDecimal"
+                android:maxLength="2"
+                android:selectAllOnFocus="true"
+                android:singleLine="true"
+                tools:ignore="TouchTargetSizeCheck" />
+
+            <EditText
+                android:id="@+id/lSecEditText"
+                android:hint="сек."
+                android:inputType="none|number|numberSigned|numberDecimal"
+                android:maxLength="2"
+                android:selectAllOnFocus="true"
+                android:singleLine="true"
+                tools:ignore="TouchTargetSizeCheck" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="true"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/mapSearchButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:minWidth="170dp"
+                android:text="Найти"
+                android:textSize="20dp"
+                android:textStyle="normal|bold|italic" />
+        </TableRow>
+    </TableLayout>
+</androidx.appcompat.widget.LinearLayoutCompat><!--
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -71,4 +177,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-</androidx.appcompat.widget.LinearLayoutCompat>
+</androidx.appcompat.widget.LinearLayoutCompat>-->
+
