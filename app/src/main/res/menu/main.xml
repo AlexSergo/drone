@@ -20,6 +20,9 @@
                 android:id="@+id/mapHybridItem"
                 android:title="Гибрид" />
             <item
+                android:id="@+id/mapNokiaSatItem"
+                android:title="Nokia гибрид" />
+            <item
                 android:id="@+id/mapGridItem"
                 android:checkable="true"
                 android:title="Сетка" />

@@ -73,6 +73,33 @@ object MapTools {
         }
     }
     
+    fun getHereMapTile(context: Context?, mapView: MapView): OnlineTileSourceBase {
+        val url =
+            "http://{s}.aerial.maps.cit.api.here.com/maptile/2.1/maptile/newest/hybrid.day/{z}/{x}/{y}/256/png8?app_id=eAdkWGYRoc4RfxVo0Z4B&app_code=TrLJuXVK62IQk0vuXFzaig&lg=eng"
+        
+        mapView.setUseDataConnection(true)
+        mapView.tileProvider = MapTileProviderBasic(context)
+        return object :
+            OnlineTileSourceBase(
+                "Here hybrid day",
+                0,
+                19,
+                256,
+                ".png",
+                arrayOf(url),
+                "© Here Technologies"
+            ) {
+            override fun getTileURLString(pMapTileIndex: Long): String {
+                val x = MapTileIndex.getX(pMapTileIndex)
+                val y = MapTileIndex.getY(pMapTileIndex)
+                return url.replace("{s}", (Random().nextInt(4) + 1).toString())
+                    .replace("{z}", MapTileIndex.getZoom(pMapTileIndex).toString())
+                    .replace("{x}", x.toString()).replace("{y}", y.toString())
+            }
+    
+        }
+    }
+    
     fun distanceBetween(a: GeoPoint, b: GeoPoint): Double {
         val lat1 = Math.toRadians(a.latitude)
         val lng1 = Math.toRadians(a.longitude)

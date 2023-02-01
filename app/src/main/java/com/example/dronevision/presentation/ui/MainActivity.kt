@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         Device.getDeviceId(applicationContext)
-        auth()
+//        auth()
         
         downloadController = DownloadController(this)
         PermissionTools.checkAndRequestPermissions(this)
@@ -340,6 +340,10 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                     }
                     R.id.mapSatelliteItem -> {
                         map.setMapType(MapType.GOOGLE_SAT.value)
+                        true
+                    }
+                    R.id.mapNokiaSatItem -> {
+                        map.setMapType(MapType.NOKIA_SAT.value)
                         true
                     }
                     R.id.mapCacheDownloadItem -> {

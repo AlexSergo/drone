@@ -5,5 +5,6 @@ enum class MapType(val value: Int) {
     SCHEME_MAP(2),
     GOOGLE_SAT(3),
     GOOGLE_HYB(4),
-    OFFLINE(5)
+    OFFLINE(5),
+    NOKIA_SAT(6)
 }
