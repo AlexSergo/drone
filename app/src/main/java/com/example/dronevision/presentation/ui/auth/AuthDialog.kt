@@ -30,10 +30,6 @@ class AuthDialog(private val callback: AuthDialogCallback) : DialogFragment() {
             displayMetrics.heightPixels - displayMetrics.heightPixels / 10
         binding.authDialog.minWidth = displayMetrics.widthPixels - displayMetrics.widthPixels / 10
         dialog?.window?.setDimAmount(1f)
-        binding.deviceId.text = Device.getDeviceId(requireContext())
-        binding.deviceId.setOnClickListener {
-            Device.setClipboard(requireContext(), binding.deviceId.text.toString())
-        }
         
         val passwordManager = PasswordManager(requireContext())
         val savedPassword = passwordManager.getPassword()
@@ -41,6 +37,11 @@ class AuthDialog(private val callback: AuthDialogCallback) : DialogFragment() {
         val sharedPreferences = SharedPreferences(requireContext())
         val deviceId = Device.getDeviceId(requireContext())
         val savedDeviceId = sharedPreferences.getValue("AUTH_TOKEN")
+    
+        binding.deviceId.text = deviceId
+        binding.deviceId.setOnClickListener {
+            Device.setClipboard(requireContext(), binding.deviceId.text.toString())
+        }
         
         if (savedDeviceId == Hash.md5(deviceId + "крокодил") && savedPassword != null) {
             binding.editPasswordConfirm.isVisible = false
