@@ -14,7 +14,7 @@ class SubscriberRecyclerViewAdapter(private val callback: SubscriberListCallback
 
     private var subscribers = mutableListOf<Subscriber>()
 
-    fun setData(subscribers: List<Subscriber>){
+    fun setData(subscribers: List<Subscriber>){                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
         this.subscribers = subscribers.toMutableList()
         notifyDataSetChanged()
     }

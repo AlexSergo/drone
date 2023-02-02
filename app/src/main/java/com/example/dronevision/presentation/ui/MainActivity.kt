@@ -33,6 +33,7 @@ import com.example.dronevision.presentation.delegates.BluetoothHandler
 import com.example.dronevision.presentation.delegates.BluetoothHandlerImpl
 import com.example.dronevision.presentation.delegates.DivisionHandler
 import com.example.dronevision.presentation.delegates.DivisionHandlerImpl
+import com.example.dronevision.presentation.mapper.TechnicMapperUI
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.model.bluetooth.BluetoothListItem
 import com.example.dronevision.presentation.model.bluetooth.Entity
@@ -364,8 +365,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         val myClipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager?
                         val abc = myClipboard?.primaryClip
                         val item = abc?.getItemAt(0)
-                        val gson = GsonBuilder().create()
-                        val target = gson.fromJson(item?.text.toString(), Technic::class.java)
+                        val target = TechnicMapperUI.mapTextToTechnicUI(item?.text.toString())
                         target.division?.let {
                             map.spawnTechnic(
                                 target.technicTypes,

@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.dronevision.App
 import com.example.dronevision.databinding.FragmentTargBinding
 import com.example.dronevision.presentation.delegates.BluetoothHandler
+import com.example.dronevision.presentation.mapper.TechnicMapperUI.mapTechnicToText
 import com.example.dronevision.presentation.model.Subscriber
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.MainViewModel
@@ -22,7 +23,6 @@ import com.example.dronevision.presentation.ui.subscribers.SubscriberListCallbac
 import com.example.dronevision.presentation.ui.subscribers.SubscriberListDialog
 import com.example.dronevision.presentation.ui.subscribers.SubscribersType
 import com.example.dronevision.utils.Device
-import com.example.dronevision.utils.Device.toJson
 import com.example.dronevision.utils.NGeoCalc
 import javax.inject.Inject
 
@@ -140,7 +140,7 @@ class TargetFragment(
             if (checkDivision()) {
                 val sendIntent = Intent()
                 sendIntent.action = Intent.ACTION_SEND
-                sendIntent.putExtra(Intent.EXTRA_TEXT, technic.toJson())
+                sendIntent.putExtra(Intent.EXTRA_TEXT, mapTechnicToText(technic))
                 sendIntent.type = "text/plain"
                 sendIntent.setPackage("org.telegram.messenger")
                 try {
