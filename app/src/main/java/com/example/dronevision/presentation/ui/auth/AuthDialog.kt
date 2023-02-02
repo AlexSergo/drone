@@ -50,7 +50,12 @@ class AuthDialog(private val callback: AuthDialogCallback) : DialogFragment(), P
         val sharedPreferences = SharedPreferences(requireContext())
         val deviceId = Device.getDeviceId(requireContext())
         val savedDeviceId = sharedPreferences.getValue("AUTH_TOKEN")
-        
+
+        binding.deviceId.text = deviceId
+        binding.deviceId.setOnClickListener {
+            Device.setClipboard(requireContext(), binding.deviceId.text.toString())
+        }
+
         if (savedDeviceId == Hash.md5(deviceId + "крокодил") && savedPassword != null) {
             binding.editPasswordConfirm.isVisible = false
             binding.enterBtn.setOnClickListener {
