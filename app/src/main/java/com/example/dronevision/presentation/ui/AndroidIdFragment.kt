@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.MutableLiveData
+import com.example.dronevision.PasswordChangeDialogFragment
 import com.example.dronevision.data.source.local.prefs.KeyManager
 import com.example.dronevision.databinding.FragmentAndroidIdBinding
 import com.example.dronevision.presentation.delegates.BluetoothHandler
@@ -32,6 +33,12 @@ class AndroidIdFragment : DialogFragment() {
             Toast.makeText(requireContext(), "Скопировано в буфер обмена!", Toast.LENGTH_SHORT)
                 .show()
         }
+        binding.passwordChangeButton.setOnClickListener {
+            val changePasswordDialog = PasswordChangeDialogFragment()
+            val opener = requireActivity() as OpenDialogCallback
+            opener.openDialog(changePasswordDialog)
+        }
+
         val bluetoothHandler = requireActivity() as BluetoothHandler
         bluetoothHandler.acceptBluetoothConnection()
         binding.sendButton.setOnClickListener {

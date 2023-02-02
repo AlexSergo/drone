@@ -2,6 +2,7 @@ package com.example.dronevision.presentation.ui
 
 
 import android.content.ClipboardManager
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -14,6 +15,7 @@ import androidx.core.view.GravityCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -57,7 +59,7 @@ import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerImpl(),
     DivisionHandler by DivisionHandlerImpl(),
-    NavigationView.OnNavigationItemSelectedListener, MapActivityListener {
+    NavigationView.OnNavigationItemSelectedListener, MapActivityListener, OpenDialogCallback {
     
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
@@ -76,7 +78,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         Device.getDeviceId(applicationContext)
-//        auth()
+        auth()
         
         downloadController = DownloadController(this)
         PermissionTools.checkAndRequestPermissions(this)
@@ -410,4 +412,8 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
     
     override fun onSupportNavigateUp(): Boolean =
         navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+
+    override fun openDialog(dialog: DialogFragment) {
+        dialog.show(supportFragmentManager, "")
+    }
 }
