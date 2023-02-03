@@ -8,4 +8,8 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="password_change"><u>Сменить пароль</u></string>
+
+    <!-- Fragment target dialog -->
+    <string name="import_alpine_quest_text">Импорт в AlpineQuest</string>
+    <string name="success_target_save">Файл %1$s сохранен</string>
 </resources>

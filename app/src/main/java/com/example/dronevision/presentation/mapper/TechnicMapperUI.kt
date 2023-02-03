@@ -41,7 +41,7 @@ object TechnicMapperUI {
         val type = text.substring(text.indexOf("Тип") + 13, text.indexOf("Подразделение") - 1)
         val division = text.substring(text.indexOf("Подразделение") + 15, text.length)
         return Technic(
-            coordinates = Coordinates(x = x.toDouble(), y = y.toDouble(), z = z.toDouble()),
+            coordinates = Coordinates(x = x.toDouble(), y = y.toDouble(), h = z.toDouble()),
             technicTypes = TechnicTypes.valueOf(type),
             division = division
         )
@@ -52,7 +52,7 @@ object TechnicMapperUI {
         builder.append("Координаты:\n")
         builder.append("X = " + technic.coordinates.x + "\n")
         builder.append("Y = " + technic.coordinates.y + "\n")
-        builder.append("Высота: " + technic.coordinates.z + "\n")
+        builder.append("Высота: " + technic.coordinates.h + "\n")
         builder.append("Тип техники: " + technic.technicTypes.name + "\n")
         builder.append("Подразделение: " + technic.division + "\n")
         return builder.toString()
