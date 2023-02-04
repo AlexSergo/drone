@@ -69,7 +69,8 @@
         android:id="@+id/deviceId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Id"
+        android:text="Idfbfgbgfnfgbffbd"
+        android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 

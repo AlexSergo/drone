@@ -78,7 +78,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         Device.getDeviceId(applicationContext)
-        auth()
+        //auth()
         
         downloadController = DownloadController(this)
         PermissionTools.checkAndRequestPermissions(this)
@@ -88,13 +88,6 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         setupDrawer()
         setupBluetoothDialog()
         setupOsmdroidConfiguration()
-
-/*        mainViewModel.startServer()
-        mainViewModel.socketLiveData.observe(this, Observer {
-            val technic = Gson().fromJson(it, Technic::class.java)
-            map.spawnTechnic(technic.technicTypes,
-                Coordinates(x = technic.coordinates.x, y = technic.coordinates.y))
-        })*/
     }
     
     private fun auth() {
@@ -150,8 +143,8 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
     override fun showDroneData(entities: MutableList<Entity>) {
         runOnUiThread {
             if (entities[0].lat.isNaN() || entities[0].lon.isNaN()) {
-                entities[0] = Entity(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false)
-                entities[1] = Entity(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, false)
+                entities[0] = Entity(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0)
+                entities[1] = Entity(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0)
             }
             map.showDataFromDrone(entities)
         }
@@ -317,7 +310,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                     }
                     R.id.addHeightMaps -> {
                         //  TODO: Загрузка высотной карты (Москвы) надо будет добавить возможность выбирать регионы
-//                        val hgtLoader = HgtLoader(resources)
+                        val hgtLoader = HgtLoader(resources)
                         true
                     }
                     R.id.mapOfflineItem -> {

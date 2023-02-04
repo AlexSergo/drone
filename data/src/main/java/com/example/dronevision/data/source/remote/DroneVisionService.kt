@@ -9,6 +9,7 @@ interface DroneVisionService {
     @POST("/api/device/check")
     suspend fun checkRegistration(@Body key: RequestId): ResponseId
 
+
 /*    @GET("/")
     suspend fun checkRegistration(): ResponseId*/
 }

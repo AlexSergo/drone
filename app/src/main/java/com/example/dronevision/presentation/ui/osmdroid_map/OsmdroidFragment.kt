@@ -541,10 +541,26 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         val cameraTarget =
             GeoPoint(binding.mapView.mapCenter.latitude, binding.mapView.mapCenter.longitude)
         droneMarker.setVisible(true)
-        
+
         getData.setDroneData(entities[0], Math.toDegrees(correctionAngRad))
-        
+
         val frontSightGeoPoint = GeoPoint(getData.target.lat, getData.target.lon)
+        if (entities[0].calc_target == 2){
+            PointCalibration.rememberPoint(GeoPoint(entities[0].lat, entities[0].lon), -entities[0].asim)
+            Toast.makeText(requireContext(), "Замер принят!", Toast.LENGTH_SHORT).show()
+        }
+        if (entities[0].calc_target == 3){
+            val point = PointCalibration.getAveragePoint()
+            val divisionHandler = requireActivity() as DivisionHandler
+            if (divisionHandler.checkDivision(requireContext())) {
+                val division = divisionHandler.getDivision(requireContext())
+                spawnTechnic(
+                    TechnicTypes.ANOTHER,
+                    Coordinates(x = point.latitude, y = point.longitude),
+                    division!!
+                )
+            }
+        }
         frontSightMarker.position = frontSightGeoPoint
         updatePolyline(
             polylineToFrontSight, listOf(droneMarker.position, frontSightMarker.position)
@@ -552,7 +568,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         
         showGeoInformation(binding, cameraTarget, droneMarker.position)
         
-        if (entities[0].calc_target) {
+        if (entities[0].calc_target == 1) {
             val divisionHandler = requireActivity() as DivisionHandler
             if (divisionHandler.checkDivision(requireContext())) {
                 val division = divisionHandler.getDivision(requireContext())

@@ -8,4 +8,4 @@ class Entity (
     val alt: Double,
     val cam_deflect: Double = 0.0,
     val cam_angle: Double = 0.0,
-    val calc_target: Boolean = false)
+    val calc_target: Int = 0)
