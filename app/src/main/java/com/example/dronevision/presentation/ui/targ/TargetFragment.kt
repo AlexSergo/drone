@@ -15,7 +15,9 @@ import com.example.dronevision.App
 import com.example.dronevision.R
 import com.example.dronevision.databinding.FragmentTargBinding
 import com.example.dronevision.presentation.delegates.BluetoothHandler
+import com.example.dronevision.presentation.mapper.TechnicMapperUI
 import com.example.dronevision.presentation.mapper.TechnicMapperUI.mapTechnicToText
+import com.example.dronevision.presentation.mapper.TechnicMapperUI.mapTechnicToTextForArtgroup
 import com.example.dronevision.presentation.model.Subscriber
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.subscribers.SubscriberListCallback
@@ -56,6 +58,7 @@ class TargetFragment(
         setBroadcastClickListener()
         setTelegramClickListener()
         setDeleteClickListener()
+        setArtgroupBtnOnClickListener()
         setImportAlpineOnClickListener()
         setRadioClickListener()
         initLongClicks()
@@ -222,6 +225,30 @@ class TargetFragment(
             return false
         }
         return true
+    }
+
+    private fun setArtgroupBtnOnClickListener() {
+        binding.artgroupBtn.setOnClickListener {
+            if (checkDivision()) {
+                Device.setClipboard(requireContext(),
+                    TechnicMapperUI.mapTechnicToTextForArtgroup(technic)
+                )
+                val sendIntent = Intent()
+                sendIntent.setPackage("ru.niissu.artgroup")
+                try {
+                    startActivity(sendIntent)
+                } catch (ex: ActivityNotFoundException) {
+                    val builder = AlertDialog.Builder(requireContext())
+                    builder.setTitle("На вашем устройстве нет программы «Артгруппа»!")
+                        .setMessage("Для начала установите программу «Артгруппа»")
+                        .setPositiveButton("ОК") { dialog, id ->
+                            dialog.cancel()
+                        }
+                    builder.create()
+                    builder.show()
+                }
+            }
+        }
     }
 
     private fun initText() {
