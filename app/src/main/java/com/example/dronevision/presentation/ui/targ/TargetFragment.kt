@@ -2,9 +2,9 @@ package com.example.dronevision.presentation.ui.targ
 
 import android.app.AlertDialog
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,18 +12,24 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.dronevision.App
+import com.example.dronevision.R
 import com.example.dronevision.databinding.FragmentTargBinding
 import com.example.dronevision.presentation.delegates.BluetoothHandler
+import com.example.dronevision.presentation.mapper.TechnicMapperUI
 import com.example.dronevision.presentation.mapper.TechnicMapperUI.mapTechnicToText
+import com.example.dronevision.presentation.mapper.TechnicMapperUI.mapTechnicToTextForArtgroup
 import com.example.dronevision.presentation.model.Subscriber
 import com.example.dronevision.presentation.model.Technic
-import com.example.dronevision.presentation.ui.MainViewModel
-import com.example.dronevision.presentation.ui.MainViewModelFactory
 import com.example.dronevision.presentation.ui.subscribers.SubscriberListCallback
 import com.example.dronevision.presentation.ui.subscribers.SubscriberListDialog
 import com.example.dronevision.presentation.ui.subscribers.SubscribersType
 import com.example.dronevision.utils.Device
 import com.example.dronevision.utils.NGeoCalc
+import com.example.dronevision.utils.toFormat
+import org.apache.commons.csv.CSVFormat
+import org.apache.commons.csv.CSVPrinter
+import java.io.File
+import java.util.*
 import javax.inject.Inject
 
 
@@ -52,6 +58,8 @@ class TargetFragment(
         setBroadcastClickListener()
         setTelegramClickListener()
         setDeleteClickListener()
+        setArtgroupBtnOnClickListener()
+        setImportAlpineOnClickListener()
         setRadioClickListener()
         initLongClicks()
 
@@ -186,6 +194,24 @@ class TargetFragment(
         }
     }
 
+    private fun setImportAlpineOnClickListener() {
+        binding.importAlpineQuestBtn.setOnClickListener {
+
+            val date = Calendar.getInstance().toFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+            val absolutePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            val file = File("$absolutePath/${technic.technicTypes.name}.csv")
+
+            val csvPrinter = CSVPrinter(file.bufferedWriter(), CSVFormat.DEFAULT
+                .withHeader("longitude_wgs84(deg)", "latitude_wgs84(deg)", "elevation_egm(m)", "name", "comment", "date"))
+
+            csvPrinter.printRecord("${technic.coordinates.y}", "${technic.coordinates.x}", "${technic.coordinates.h}", technic.technicTypes.name, "", date)
+            csvPrinter.flush()
+            csvPrinter.close()
+            dialog?.dismiss()
+            Toast.makeText(context, getString(R.string.success_target_save, file.absolutePath), Toast.LENGTH_LONG).show()
+        }
+    }
+
     private fun checkDivision(): Boolean {
         if (technic.division == null) {
             val builder = AlertDialog.Builder(requireContext())
@@ -199,6 +225,30 @@ class TargetFragment(
             return false
         }
         return true
+    }
+
+    private fun setArtgroupBtnOnClickListener() {
+        binding.artgroupBtn.setOnClickListener {
+            if (checkDivision()) {
+                Device.setClipboard(requireContext(),
+                    TechnicMapperUI.mapTechnicToTextForArtgroup(technic)
+                )
+                val sendIntent = Intent()
+                sendIntent.setPackage("ru.niissu.artgroup")
+                try {
+                    startActivity(sendIntent)
+                } catch (ex: ActivityNotFoundException) {
+                    val builder = AlertDialog.Builder(requireContext())
+                    builder.setTitle("На вашем устройстве нет программы «Артгруппа»!")
+                        .setMessage("Для начала установите программу «Артгруппа»")
+                        .setPositiveButton("ОК") { dialog, id ->
+                            dialog.cancel()
+                        }
+                    builder.create()
+                    builder.show()
+                }
+            }
+        }
     }
 
     private fun initText() {
