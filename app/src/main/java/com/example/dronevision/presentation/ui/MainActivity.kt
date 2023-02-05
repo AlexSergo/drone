@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         Device.getDeviceId(applicationContext)
-//        auth()
+        auth()
         
         downloadController = DownloadController(this)
         PermissionTools.checkAndRequestPermissions(this)
@@ -187,8 +187,8 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
         
-        val toolbarSubstring = findViewById<TextView>(R.id.toolbarSubstring)
-        toolbarSubstring.text = BuildConfig.VERSION_NAME + "@svohelp2023"
+//        val toolbarSubstring = findViewById<TextView>(R.id.toolbarSubstring)
+//        toolbarSubstring.text = BuildConfig.VERSION_NAME + "@svohelp2023"
         val button = findViewById<ImageButton>(R.id.drawerButton)
         button.setOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
