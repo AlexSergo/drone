@@ -2,12 +2,12 @@ package com.example.dronevision.presentation.ui
 
 
 import android.content.ClipboardManager
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -52,7 +52,6 @@ import com.example.dronevision.utils.*
 import com.example.dronevision.utils.FileTools.createAppFolder
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.components.BuildConfig
-import com.google.gson.GsonBuilder
 import org.osmdroid.config.Configuration
 import javax.inject.Inject
 
@@ -88,6 +87,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         setupDrawer()
         setupBluetoothDialog()
         setupOsmdroidConfiguration()
+        
     }
     
     private fun auth() {
@@ -187,6 +187,8 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
         
+        val toolbarSubstring = findViewById<TextView>(R.id.toolbarSubstring)
+        toolbarSubstring.text = BuildConfig.VERSION_NAME + "@svohelp2023"
         val button = findViewById<ImageButton>(R.id.drawerButton)
         button.setOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
@@ -306,11 +308,6 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                     }
                     R.id.removeAll -> {
                         map.deleteAll()
-                        true
-                    }
-                    R.id.addHeightMaps -> {
-                        //  TODO: Загрузка высотной карты (Москвы) надо будет добавить возможность выбирать регионы
-                        val hgtLoader = HgtLoader(resources)
                         true
                     }
                     R.id.mapOfflineItem -> {

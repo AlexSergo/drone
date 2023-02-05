@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Drone Vision</string>
+    <string name="toolbar_substring">V1.0.4 @svohelp2023</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
     <string name="next">Next</string>

@@ -77,6 +77,8 @@ dependencies {
     kapt  "androidx.room:room-compiler:2.4.3"
     implementation 'androidx.room:room-ktx:2.4.3'
 
+    implementation 'org.apache.commons:commons-csv:1.5'
+
     // vm
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'

@@ -72,11 +72,6 @@
         android:title="Мои данные"
         app:showAsAction="never" />
     <item
-        android:id="@+id/addHeightMaps"
-        android:orderInCategory="108"
-        android:title="Загрузить высоты"
-        app:showAsAction="never" />
-    <item
         android:id="@+id/updates"
         android:orderInCategory="109"
         android:title="Обновление"
