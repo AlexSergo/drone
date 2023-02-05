@@ -141,12 +141,6 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                     }
                 }
             })
-        getElevation(55.4, 37.4).toString()
-        getElevation(55.5, 37.5).toString()
-        getElevation(55.421353234, 37.44353452346).toString()
-        getElevation(55.3333353234, 37.33333).toString()
-        getElevation(55.3, 37.3).toString()
-        getElevation(55.987652, 37.34135264).toString()
         return binding.root
     }
     
