@@ -6,6 +6,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Color
 import android.location.LocationManager
+import android.opengl.Visibility
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -66,6 +67,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
     private lateinit var frontSightMarker: Marker
     private lateinit var aimMarker: Marker
     private lateinit var disruptionMarker: Marker
+    private lateinit var exactTarget: Marker
     private var polylineToCenter: Polyline = Polyline()
     private var polylineToFrontSight: Polyline = Polyline()
     private val listOfTechnic = mutableListOf<Overlay>()
@@ -138,8 +140,15 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         disruptionMarker = Marker(binding.mapView)
         frontSightMarker = Marker(binding.mapView)
         droneMarker = Marker(binding.mapView)
+        exactTarget = Marker(binding.mapView)
+        exactTarget.setVisible(false)
         droneMarker.isFlat = true
-        
+
+        drawMarker(
+            exactTarget, Technic(
+                coordinates = Coordinates(x = 32.0, y = 0.0), technicTypes = TechnicTypes.ANOTHER
+            )
+        )
         drawMarker(
             droneMarker, Technic(
                 coordinates = Coordinates(x = 32.0, y = 0.0), technicTypes = TechnicTypes.DRONE
@@ -227,6 +236,13 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                 "Скопировано ${clipboard.primaryClip?.getItemAt(0)?.text.toString()}",
                 Toast.LENGTH_LONG
             ).show()
+        }
+
+        binding.resetButton.visibility = View.INVISIBLE
+        binding.resetButton.setOnClickListener {
+            PointCalibration.reset()
+            binding.resetButton.visibility = View.INVISIBLE
+            exactTarget.setVisible(false)
         }
     }
     
@@ -519,7 +535,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         return mark
     }
     
-    private fun drawMarker(mark: Marker?, technic: Technic): Marker {
+    private fun drawMarker(mark: Marker? = null, technic: Technic): Marker {
         var marker = mark
         if (marker == null) marker = Marker(binding.mapView)
         marker.position = GeoPoint(technic.coordinates.x, technic.coordinates.y)
@@ -545,26 +561,40 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         getData.setDroneData(entities[0], Math.toDegrees(correctionAngRad))
 
         val frontSightGeoPoint = GeoPoint(getData.target.lat, getData.target.lon)
-        if (entities[0].calc_target == 2){
-            PointCalibration.rememberPoint(GeoPoint(entities[0].lat, entities[0].lon), -entities[0].asim)
-            Toast.makeText(requireContext(), "Замер принят!", Toast.LENGTH_SHORT).show()
-        }
-        if (entities[0].calc_target == 3){
-            val point = PointCalibration.getAveragePoint()
-            val divisionHandler = requireActivity() as DivisionHandler
-            if (divisionHandler.checkDivision(requireContext())) {
-                val division = divisionHandler.getDivision(requireContext())
-                spawnTechnic(
-                    TechnicTypes.ANOTHER,
-                    Coordinates(x = point.latitude, y = point.longitude),
-                    division!!
-                )
-            }
-        }
         frontSightMarker.position = frontSightGeoPoint
         updatePolyline(
             polylineToFrontSight, listOf(droneMarker.position, frontSightMarker.position)
         )
+
+        if (entities[0].calc_target == 4){
+            val point = PointCalibration.rememberPoint(GeoPoint(entities[0].lat, entities[0].lon), -entities[0].asim)
+            Toast.makeText(requireContext(), "Замер принят!", Toast.LENGTH_SHORT).show()
+            if (point != null){
+                binding.resetButton.visibility = View.VISIBLE
+                val divisionHandler = requireActivity() as DivisionHandler
+                if (divisionHandler.checkDivision(requireContext())) {
+                    val division = divisionHandler.getDivision(requireContext())
+                    exactTarget.setVisible(true)
+                    exactTarget.position = point
+                    addClickListenerToMark(exactTarget, TechnicTypes.ANOTHER, division!!)
+                }
+            }
+        }
+        var marker: Marker
+        if (entities[0].calc_target == 2){
+            marker = drawMarker(mark = null,  technic = Technic(
+                coordinates = Coordinates(frontSightGeoPoint.latitude, frontSightGeoPoint.longitude),
+                technicTypes = TechnicTypes.AIM
+            ))
+            listOfTechnic.add(marker)
+        }
+        if (entities[0].calc_target == 3){
+            marker = drawMarker(mark = null,  technic = Technic(
+                coordinates = Coordinates(frontSightGeoPoint.latitude, frontSightGeoPoint.longitude),
+                technicTypes = TechnicTypes.DISRUPTION
+            ))
+            listOfTechnic.add(marker)
+        }
         
         showGeoInformation(binding, cameraTarget, droneMarker.position)
         

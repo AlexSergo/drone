@@ -12,15 +12,19 @@ object PointCalibration {
     private var points = mutableListOf<Point>()
     private val lines = mutableListOf<Line>()
 
-    fun rememberPoint(startPoint: GeoPoint, asim: Double){
+    fun rememberPoint(startPoint: GeoPoint, asim: Double): GeoPoint?{
         var x = doubleArrayOf(0.0)
         var y = doubleArrayOf(0.0)
         NGeoCalc().wgs84ToPlane(x, y,  doubleArrayOf(0.0),
             NGeoCalc.degreesToRadians(startPoint.latitude),
             NGeoCalc.degreesToRadians(startPoint.longitude), 0.0)
-        val p = Point(x[0], y[0])
+
+        val p = Point(y[0], x[0])
         geoPoints[p] = asim
         points.add(p)
+        if (points.size > 1)
+            return getAveragePoint()
+        return null
     }
 
     fun reset(){
@@ -44,9 +48,9 @@ object PointCalibration {
         val midPoint = middlePoint(intersections)
         var x = doubleArrayOf(0.0)
         var y = doubleArrayOf(0.0)
-        NGeoCalc().planeToWgs84(x, y, doubleArrayOf(0.0), midPoint.x, midPoint.y,
+        NGeoCalc().planeToWgs84(x, y, doubleArrayOf(0.0), midPoint.y, midPoint.x,
             0.0)
-        return GeoPoint(midPoint.x, midPoint.y)
+        return GeoPoint(Math.toDegrees(x[0]), Math.toDegrees(y[0]))
     }
 
     private fun findAllIntersections(): List<Point> {
@@ -73,7 +77,7 @@ object PointCalibration {
         val ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denom
         val ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / denom
 
-        if (ua < 0 || ua > 1 || ub < 0 || ub > 1) return null
+        //if (ua < 0 || ua > 1 || ub < 0 || ub > 1) return null
 
         return Point(x1 + ua * (x2 - x1), y1 + ua * (y2 - y1))
     }
