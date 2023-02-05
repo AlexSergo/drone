@@ -141,7 +141,12 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                     }
                 }
             })
-        
+        getElevation(55.4, 37.4).toString()
+        getElevation(55.5, 37.5).toString()
+        getElevation(55.421353234, 37.44353452346).toString()
+        getElevation(55.3333353234, 37.33333).toString()
+        getElevation(55.3, 37.3).toString()
+        getElevation(55.987652, 37.34135264).toString()
         return binding.root
     }
     
@@ -162,15 +167,23 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         val lonIndex = (lon - lonInt)
         val row = 3600 * latIndex
         val col = 3600 * lonIndex
-        val index = round((row * 3600.0 + col) * 2).toInt()
-        val elevation = buffer.getShort(index)
-        buffer.clear()
+        val index = round((round(row) * 3601.0 + round(col)) * 2).toInt()
         Log.d("lat", lat.toString())
         Log.d("lon", lon.toString())
         Log.d("row", row.toString())
         Log.d("col", col.toString())
-        Log.d("elevation", elevation.toString())
-        return elevation
+        Log.d("index", index.toString())
+        return if (index % 2 == 0) {
+            val elevation = buffer.getShort(index)
+            Log.d("elevation", elevation.toString())
+            buffer.clear()
+            elevation
+        } else {
+            val elevation = buffer.getShort(index + 1)
+            Log.d("elevation", elevation.toString())
+            buffer.clear()
+            elevation
+        }
     }
     
     private fun roundToFourDecimalPlaces(value: Double): Double {
