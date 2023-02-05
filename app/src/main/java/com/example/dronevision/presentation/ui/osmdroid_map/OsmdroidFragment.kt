@@ -8,6 +8,8 @@ import android.graphics.Color
 import android.location.LocationManager
 import android.opengl.Visibility
 import android.os.Bundle
+import android.os.Environment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,6 +29,7 @@ import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.delegates.*
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.model.bluetooth.Entity
+import com.example.dronevision.presentation.ui.MainActivity
 import com.example.dronevision.presentation.ui.find_location.FindGeoPointCallback
 import com.example.dronevision.presentation.ui.find_location.FindGeoPointFragment
 import com.example.dronevision.presentation.ui.targ.TargetFragment
@@ -48,6 +51,13 @@ import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.math.RoundingMode
+import java.nio.ByteOrder
+import java.nio.channels.FileChannel
+import java.text.DecimalFormat
 import javax.inject.Inject
 import kotlin.math.*
 
@@ -104,7 +114,6 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = FragmentOsmdroidBinding.inflate(inflater, container, false)
-        
         setupOsmdroidMap()
         setupMarkers()
         setupPolylines()
@@ -132,7 +141,42 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                     }
                 }
             })
+        
         return binding.root
+    }
+    
+    private fun getElevation(lat: Double, lon: Double): Short {
+        PermissionTools.checkAndRequestPermissions(activity as MainActivity)
+        
+        val inputStream = requireContext().assets.open("N55E037.hgt")
+        val file = File.createTempFile("temp", "N55E037.hgt")
+        val outputStream = FileOutputStream(file)
+        inputStream.copyTo(outputStream)
+        val fileChannel = FileInputStream(file).channel
+        val buffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size())
+        buffer.order(ByteOrder.BIG_ENDIAN)
+        
+        val latInt = lat.toInt()
+        val lonInt = lon.toInt()
+        val latIndex = 1 - (lat - latInt)
+        val lonIndex = (lon - lonInt)
+        val row = 3600 * latIndex
+        val col = 3600 * lonIndex
+        val index = round((row * 3600.0 + col) * 2).toInt()
+        val elevation = buffer.getShort(index)
+        buffer.clear()
+        Log.d("lat", lat.toString())
+        Log.d("lon", lon.toString())
+        Log.d("row", row.toString())
+        Log.d("col", col.toString())
+        Log.d("elevation", elevation.toString())
+        return elevation
+    }
+    
+    private fun roundToFourDecimalPlaces(value: Double): Double {
+        val decimalFormat = DecimalFormat("#.####")
+        decimalFormat.roundingMode = RoundingMode.HALF_UP
+        return decimalFormat.format(value).replace(",", ".").toDouble()
     }
     
     private fun setupMarkers() {
@@ -143,7 +187,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         exactTarget = Marker(binding.mapView)
         exactTarget.setVisible(false)
         droneMarker.isFlat = true
-
+        
         drawMarker(
             exactTarget, Technic(
                 coordinates = Coordinates(x = 32.0, y = 0.0), technicTypes = TechnicTypes.ANOTHER
@@ -237,7 +281,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                 Toast.LENGTH_LONG
             ).show()
         }
-
+        
         binding.resetButton.visibility = View.INVISIBLE
         binding.resetButton.setOnClickListener {
             PointCalibration.reset()
@@ -492,7 +536,8 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         )
         mark.setOnMarkerClickListener { marker, mapView ->
             val targetFragment = TargetFragment(
-                technic = technic, object : TargetFragmentCallback {
+                technic = technic,
+                object : TargetFragmentCallback {
                     override fun onBroadcastButtonClick(destinationId: String, technic: Technic) {
                         sendMessage(destinationId, technic)
                     }
@@ -503,7 +548,11 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                         osmdroidViewModel.deleteTechnic(technic)
                         binding.mapView.invalidate()
                     }
-                }, altitude = 0.0
+                },
+                altitude = getElevation(
+                    roundToFourDecimalPlaces(mark.position.altitude),
+                    roundToFourDecimalPlaces(mark.position.longitude)
+                ).toDouble()
             )
             targetFragment.show(parentFragmentManager, "targFragment")
             true
@@ -557,19 +606,22 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         val cameraTarget =
             GeoPoint(binding.mapView.mapCenter.latitude, binding.mapView.mapCenter.longitude)
         droneMarker.setVisible(true)
-
+        
         getData.setDroneData(entities[0], Math.toDegrees(correctionAngRad))
-
+        
         val frontSightGeoPoint = GeoPoint(getData.target.lat, getData.target.lon)
         frontSightMarker.position = frontSightGeoPoint
         updatePolyline(
             polylineToFrontSight, listOf(droneMarker.position, frontSightMarker.position)
         )
-
-        if (entities[0].calc_target == 4){
-            val point = PointCalibration.rememberPoint(GeoPoint(entities[0].lat, entities[0].lon), -entities[0].asim)
+        
+        if (entities[0].calc_target == 4) {
+            val point = PointCalibration.rememberPoint(
+                GeoPoint(entities[0].lat, entities[0].lon),
+                -entities[0].asim
+            )
             Toast.makeText(requireContext(), "Замер принят!", Toast.LENGTH_SHORT).show()
-            if (point != null){
+            if (point != null) {
                 binding.resetButton.visibility = View.VISIBLE
                 val divisionHandler = requireActivity() as DivisionHandler
                 if (divisionHandler.checkDivision(requireContext())) {
@@ -581,18 +633,28 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             }
         }
         var marker: Marker
-        if (entities[0].calc_target == 2){
-            marker = drawMarker(mark = null,  technic = Technic(
-                coordinates = Coordinates(frontSightGeoPoint.latitude, frontSightGeoPoint.longitude),
-                technicTypes = TechnicTypes.AIM
-            ))
+        if (entities[0].calc_target == 2) {
+            marker = drawMarker(
+                mark = null, technic = Technic(
+                    coordinates = Coordinates(
+                        frontSightGeoPoint.latitude,
+                        frontSightGeoPoint.longitude
+                    ),
+                    technicTypes = TechnicTypes.AIM
+                )
+            )
             listOfTechnic.add(marker)
         }
-        if (entities[0].calc_target == 3){
-            marker = drawMarker(mark = null,  technic = Technic(
-                coordinates = Coordinates(frontSightGeoPoint.latitude, frontSightGeoPoint.longitude),
-                technicTypes = TechnicTypes.DISRUPTION
-            ))
+        if (entities[0].calc_target == 3) {
+            marker = drawMarker(
+                mark = null, technic = Technic(
+                    coordinates = Coordinates(
+                        frontSightGeoPoint.latitude,
+                        frontSightGeoPoint.longitude
+                    ),
+                    technicTypes = TechnicTypes.DISRUPTION
+                )
+            )
             listOfTechnic.add(marker)
         }
         
