@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         Device.getDeviceId(applicationContext)
-        auth()
+       // auth()
         
         downloadController = DownloadController(this)
         PermissionTools.checkAndRequestPermissions(this)
@@ -378,6 +378,13 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
+                        return true
+                    }
+                    R.id.azart -> {
+                        Toast.makeText(
+                            applicationContext, "Подключение...",
+                            Toast.LENGTH_SHORT
+                        ).show()
                         return true
                     }
                     else -> false

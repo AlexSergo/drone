@@ -84,6 +84,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
     private var locationOverlay: MyLocationNewOverlay? = null
     private var correctionAngRad: Double = 0.0
     private var correctionPolyline = Polyline()
+    private lateinit var pointCalibration: PointCalibration
     
     private val getData = GetData()
     
@@ -99,6 +100,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         super.onCreate(savedInstanceState)
         inject(this)
         initViewModel()
+        pointCalibration = PointCalibration()
     }
     
     private fun inject(fragment: OsmdroidFragment) {
@@ -241,6 +243,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         var isDisruptionVisible = false
         aimMarker.setVisible(isAimVisible)
         disruptionMarker.setVisible(isDisruptionVisible)
+        binding.intersectionButton.visibility = View.INVISIBLE
         binding.aimButton.setOnClickListener {
             if (isAimVisible) {
                 isAimVisible = false
@@ -291,9 +294,28 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         
         binding.resetButton.visibility = View.INVISIBLE
         binding.resetButton.setOnClickListener {
-            PointCalibration.reset()
+            pointCalibration.reset()
             binding.resetButton.visibility = View.INVISIBLE
             exactTarget.setVisible(false)
+        }
+
+        binding.intersectionButton.setOnClickListener{
+            pointCalibration.start()
+            while (pointCalibration.isAlive)
+            {}
+
+            val res = pointCalibration.resultPoint
+            if (res != null) {
+                binding.resetButton.visibility = View.VISIBLE
+                val divisionHandler = requireActivity() as DivisionHandler
+                if (divisionHandler.checkDivision(requireContext())) {
+                    val division = divisionHandler.getDivision(requireContext())
+                    exactTarget.setVisible(true)
+                    exactTarget.position = res
+                    addClickListenerToMark(exactTarget, TechnicTypes.ANOTHER, division!!)
+                }
+                binding.intersectionButton.visibility = View.INVISIBLE
+            }
         }
     }
     
@@ -623,21 +645,12 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         )
         
         if (entities[0].calc_target == 4) {
-            val point = PointCalibration.rememberPoint(
+            pointCalibration.rememberPoint(
                 GeoPoint(entities[0].lat, entities[0].lon),
                 -entities[0].asim
             )
             Toast.makeText(requireContext(), "Замер принят!", Toast.LENGTH_SHORT).show()
-            if (point != null) {
-                binding.resetButton.visibility = View.VISIBLE
-                val divisionHandler = requireActivity() as DivisionHandler
-                if (divisionHandler.checkDivision(requireContext())) {
-                    val division = divisionHandler.getDivision(requireContext())
-                    exactTarget.setVisible(true)
-                    exactTarget.position = point
-                    addClickListenerToMark(exactTarget, TechnicTypes.ANOTHER, division!!)
-                }
-            }
+            binding.intersectionButton.visibility = View.VISIBLE
         }
         var marker: Marker
         if (entities[0].calc_target == 2) {

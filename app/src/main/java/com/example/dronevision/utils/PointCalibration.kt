@@ -6,25 +6,23 @@ import kotlin.math.sqrt
 
 data class Point(val x: Double, val y: Double)
 
-object PointCalibration {
+class PointCalibration: Thread() {
 
     private val geoPoints = mutableMapOf<Point, Double>()
     private var points = mutableListOf<Point>()
     private val lines = mutableListOf<Line>()
+    public var resultPoint: GeoPoint? = null
 
-    fun rememberPoint(startPoint: GeoPoint, asim: Double): GeoPoint?{
+    fun rememberPoint(startPoint: GeoPoint, asim: Double){
         var x = doubleArrayOf(0.0)
         var y = doubleArrayOf(0.0)
         NGeoCalc().wgs84ToPlane(x, y,  doubleArrayOf(0.0),
             NGeoCalc.degreesToRadians(startPoint.latitude),
             NGeoCalc.degreesToRadians(startPoint.longitude), 0.0)
 
-        val p = Point(y[0], x[0])
+        val p = Point(x[0], y[0])
         geoPoints[p] = asim
         points.add(p)
-        if (points.size > 1)
-            return getAveragePoint()
-        return null
     }
 
     fun reset(){
@@ -32,9 +30,13 @@ object PointCalibration {
         points.clear()
     }
 
-    fun getAveragePoint(): GeoPoint{
-        geoPoints.forEach {
-            val flatTelemetry = FlatTelemetry(it.key.x, it.key.y, it.value)
+    override fun run() {
+        resultPoint = getAveragePoint()
+    }
+
+    fun getAveragePoint(): GeoPoint?{
+        points.forEach {
+            val flatTelemetry = FlatTelemetry(it.x, it.y, geoPoints[it]!!)
             lines.add(Line(flatTelemetry))
         }
         var intersections = findAllIntersections()
@@ -48,8 +50,10 @@ object PointCalibration {
         val midPoint = middlePoint(intersections)
         var x = doubleArrayOf(0.0)
         var y = doubleArrayOf(0.0)
-        NGeoCalc().planeToWgs84(x, y, doubleArrayOf(0.0), midPoint.y, midPoint.x,
+        NGeoCalc().planeToWgs84(x, y, doubleArrayOf(0.0), midPoint.x, midPoint.y,
             0.0)
+        if (x[0].isNaN() || y[0].isNaN())
+            return null
         return GeoPoint(Math.toDegrees(x[0]), Math.toDegrees(y[0]))
     }
 
