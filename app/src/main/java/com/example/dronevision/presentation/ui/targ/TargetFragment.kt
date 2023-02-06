@@ -17,7 +17,6 @@ import com.example.dronevision.databinding.FragmentTargBinding
 import com.example.dronevision.presentation.delegates.BluetoothHandler
 import com.example.dronevision.presentation.mapper.TechnicMapperUI
 import com.example.dronevision.presentation.mapper.TechnicMapperUI.mapTechnicToText
-import com.example.dronevision.presentation.mapper.TechnicMapperUI.mapTechnicToTextForArtgroup
 import com.example.dronevision.presentation.model.Subscriber
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.ui.subscribers.SubscriberListCallback
@@ -35,8 +34,7 @@ import javax.inject.Inject
 
 class TargetFragment(
     private val technic: Technic,
-    private val targetFragmentCallback: TargetFragmentCallback,
-    private val altitude: Double
+    private val targetFragmentCallback: TargetFragmentCallback
 ) : DialogFragment() {
 
     private lateinit var binding: FragmentTargBinding
@@ -204,7 +202,8 @@ class TargetFragment(
             val csvPrinter = CSVPrinter(file.bufferedWriter(), CSVFormat.DEFAULT
                 .withHeader("longitude_wgs84(deg)", "latitude_wgs84(deg)", "elevation_egm(m)", "name", "comment", "date"))
 
-            csvPrinter.printRecord("${technic.coordinates.y}", "${technic.coordinates.x}", "${technic.coordinates.h}", technic.technicTypes.name, "", date)
+            csvPrinter.printRecord("${technic.coordinates.y}", "${technic.coordinates.x}",
+                "${technic.coordinates.h}", technic.technicTypes.name, "", date)
             csvPrinter.flush()
             csvPrinter.close()
             dialog?.dismiss()
@@ -267,7 +266,7 @@ class TargetFragment(
         binding.latitudeValue.text = x[0].toInt().toString()
         binding.longitudeValue.text = y[0].toInt().toString()
         binding.divisionValue.text = technic.division
-        binding.heightValue.text = altitude.toString()
+        binding.heightValue.text = technic.coordinates.h.toString()
 
     }
 
