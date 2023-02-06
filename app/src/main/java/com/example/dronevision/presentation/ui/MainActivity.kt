@@ -2,12 +2,13 @@ package com.example.dronevision.presentation.ui
 
 
 import android.content.ClipboardManager
+import android.content.Context
+import android.hardware.usb.UsbManager
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.ImageButton
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -52,6 +53,9 @@ import com.example.dronevision.utils.*
 import com.example.dronevision.utils.FileTools.createAppFolder
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.components.BuildConfig
+import com.hoho.android.usbserial.driver.UsbSerialPort
+import com.hoho.android.usbserial.driver.UsbSerialProber
+import okio.IOException
 import org.osmdroid.config.Configuration
 import javax.inject.Inject
 
@@ -77,8 +81,8 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         Device.getDeviceId(applicationContext)
-       // auth()
-        
+       auth()
+       // initUsb()
         downloadController = DownloadController(this)
         PermissionTools.checkAndRequestPermissions(this)
         createAppFolder()
@@ -132,6 +136,31 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                 dialog?.dismiss()
             }
         })
+    }
+
+    fun initUsb(){
+        val manager = getSystemService(Context.USB_SERVICE) as UsbManager?
+        val availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager)
+        if (availableDrivers.isEmpty()) {
+            Toast.makeText(applicationContext, "Нет соединения с Р-187-П1", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Open a connection to the first available driver.
+        val driver = availableDrivers[0]
+        val connection = manager!!.openDevice(driver.device)
+        if (connection != null){
+            val port = driver.ports[0] // Most devices have just one port (port 0)
+
+            try {
+                port.open(connection)
+                port.setParameters(921600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
+                port.write("AT\$SERIALMODE=1\r\n".toByteArray(), 300)
+                port.write("request".toByteArray(), 300);
+            }catch (_: IOException){
+
+            }
+        }
     }
     
     override fun showMessage(message: String) {

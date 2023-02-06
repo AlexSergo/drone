@@ -20,7 +20,7 @@ class PointCalibration: Thread() {
             NGeoCalc.degreesToRadians(startPoint.latitude),
             NGeoCalc.degreesToRadians(startPoint.longitude), 0.0)
 
-        val p = Point(x[0], y[0])
+        val p = Point(y[0], x[0])
         geoPoints[p] = asim
         points.add(p)
     }
@@ -50,10 +50,11 @@ class PointCalibration: Thread() {
         val midPoint = middlePoint(intersections)
         var x = doubleArrayOf(0.0)
         var y = doubleArrayOf(0.0)
-        NGeoCalc().planeToWgs84(x, y, doubleArrayOf(0.0), midPoint.x, midPoint.y,
+        NGeoCalc().planeToWgs84(x, y, doubleArrayOf(0.0), midPoint.y, midPoint.x,
             0.0)
         if (x[0].isNaN() || y[0].isNaN())
             return null
+        reset()
         return GeoPoint(Math.toDegrees(x[0]), Math.toDegrees(y[0]))
     }
 

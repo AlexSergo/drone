@@ -9,6 +9,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="password_change"><u>Сменить пароль</u></string>
+    <string name="androidId"><u>ID</u></string>
 
     <!-- Fragment target dialog -->
     <string name="import_alpine_quest_text">Импорт в AlpineQuest</string>

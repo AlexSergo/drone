@@ -5,6 +5,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Color
+import android.hardware.usb.UsbManager
 import android.location.LocationManager
 import android.opengl.Visibility
 import android.os.Bundle
@@ -15,6 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
+import androidx.core.content.ContextCompat
 import androidx.core.util.Pair
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -37,6 +39,8 @@ import com.example.dronevision.presentation.ui.targ.TargetFragmentCallback
 import com.example.dronevision.utils.*
 import com.example.dronevision.utils.AESEncyption.decrypt
 import com.example.dronevision.utils.Device.toTechnic
+import com.hoho.android.usbserial.driver.UsbSerialPort
+import com.hoho.android.usbserial.driver.UsbSerialProber
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
@@ -243,7 +247,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         var isDisruptionVisible = false
         aimMarker.setVisible(isAimVisible)
         disruptionMarker.setVisible(isDisruptionVisible)
-        binding.intersectionButton.visibility = View.INVISIBLE
+
         binding.aimButton.setOnClickListener {
             if (isAimVisible) {
                 isAimVisible = false
@@ -299,6 +303,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             exactTarget.setVisible(false)
         }
 
+        binding.intersectionButton.visibility = View.VISIBLE
         binding.intersectionButton.setOnClickListener{
             pointCalibration.start()
             while (pointCalibration.isAlive)
@@ -647,7 +652,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         if (entities[0].calc_target == 4) {
             pointCalibration.rememberPoint(
                 GeoPoint(entities[0].lat, entities[0].lon),
-                -entities[0].asim
+                entities[0].asim
             )
             Toast.makeText(requireContext(), "Замер принят!", Toast.LENGTH_SHORT).show()
             binding.intersectionButton.visibility = View.VISIBLE

@@ -54,6 +54,7 @@ class AuthDialog(private val callback: AuthDialogCallback) : DialogFragment(), P
         binding.deviceId.text = deviceId
         binding.deviceId.setOnClickListener {
             Device.setClipboard(requireContext(), binding.deviceId.text.toString())
+            Toast.makeText(requireContext(), "Ваш ID скопирован!", Toast.LENGTH_SHORT).show()
         }
 
         if (savedDeviceId == Hash.md5(deviceId + "крокодил") && savedPassword != null) {
