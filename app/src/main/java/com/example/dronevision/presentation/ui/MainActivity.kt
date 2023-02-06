@@ -364,10 +364,10 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
                         map.setMapType(MapType.GOOGLE_SAT.value)
                         true
                     }
-                   /* R.id.mapNokiaSatItem -> {
+                    R.id.mapNokiaSatItem -> {
                         map.setMapType(MapType.NOKIA_SAT.value)
                         true
-                    }*/
+                    }
                     R.id.mapCacheDownloadItem -> {
                         map.cacheMap()
                         true

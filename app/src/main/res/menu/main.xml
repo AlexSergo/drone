@@ -19,9 +19,9 @@
             <item
                 android:id="@+id/mapHybridItem"
                 android:title="Гибрид" />
-            <!--<item
+            <item
                 android:id="@+id/mapNokiaSatItem"
-                android:title="Nokia гибрид" />-->
+                android:title="Nokia гибрид" />
             <item
                 android:id="@+id/mapGridItem"
                 android:checkable="true"
