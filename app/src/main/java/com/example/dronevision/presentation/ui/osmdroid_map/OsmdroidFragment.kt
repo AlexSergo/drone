@@ -5,18 +5,14 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Color
-import android.hardware.usb.UsbManager
 import android.location.LocationManager
-import android.opengl.Visibility
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
-import androidx.core.content.ContextCompat
 import androidx.core.util.Pair
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -39,8 +35,6 @@ import com.example.dronevision.presentation.ui.targ.TargetFragmentCallback
 import com.example.dronevision.utils.*
 import com.example.dronevision.utils.AESEncyption.decrypt
 import com.example.dronevision.utils.Device.toTechnic
-import com.hoho.android.usbserial.driver.UsbSerialPort
-import com.hoho.android.usbserial.driver.UsbSerialProber
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
@@ -72,10 +66,10 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
     LocationDialogHandler by LocationDialogHandlerImpl(),
     ManipulatorSetuper by ManipulatorSetuperImpl(), GpsHandler by GpsHandlerImpl(),
     MapCachingHandler by MapCachingHandlerImpl() {
-    
+
     private lateinit var binding: FragmentOsmdroidBinding
     private lateinit var rotationGestureOverlay: RotationGestureOverlay
-    
+
     private val overlayGrid = LatLonGridlineOverlay2()
     private lateinit var droneMarker: Marker
     private lateinit var frontSightMarker: Marker
@@ -89,33 +83,33 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
     private var correctionAngRad: Double = 0.0
     private var correctionPolyline = Polyline()
     private lateinit var pointCalibration: PointCalibration
-    
+
     private val getData = GetData()
-    
+
     lateinit var osmdroidViewModel: OsmdroidViewModel
-    
+
     @Inject
     lateinit var osmdroidViewModelFactory: OsmdroidViewModelFactory
-    
+
     @Inject
     lateinit var offlineOpenFileManager: OfflineOpenFileManager
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         inject(this)
         initViewModel()
         pointCalibration = PointCalibration()
     }
-    
+
     private fun inject(fragment: OsmdroidFragment) {
         (requireContext().applicationContext as App).appComponent.inject(fragment)
     }
-    
+
     private fun initViewModel() {
         osmdroidViewModel =
             ViewModelProvider(this, osmdroidViewModelFactory)[OsmdroidViewModel::class.java]
     }
-    
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -127,9 +121,9 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         setupLastSessionState()
         setupDisruptionButtons()
         setupCorrectionButton()
-        
+
         getData.updater()
-        
+
         onDatabaseChangeListener(Device.getDeviceId(requireContext()),
             object : RemoteDatabaseCallback {
                 override fun returnMessage(str: String) {
@@ -149,10 +143,10 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             })
         return binding.root
     }
-    
+
     private fun getElevation(lat: Double, lon: Double): Short {
         PermissionTools.checkAndRequestPermissions(activity as MainActivity)
-        
+
         val inputStream = requireContext().assets.open("N55E037.hgt")
         val file = File.createTempFile("temp", "N55E037.hgt")
         val outputStream = FileOutputStream(file)
@@ -160,7 +154,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         val fileChannel = FileInputStream(file).channel
         val buffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size())
         buffer.order(ByteOrder.BIG_ENDIAN)
-        
+
         val latInt = lat.toInt()
         val lonInt = lon.toInt()
         val latIndex = 1 - (lat - latInt)
@@ -185,13 +179,13 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             elevation
         }
     }
-    
+
     private fun roundToFourDecimalPlaces(value: Double): Double {
         val decimalFormat = DecimalFormat("#.####")
         decimalFormat.roundingMode = RoundingMode.HALF_UP
         return decimalFormat.format(value).replace(",", ".").toDouble()
     }
-    
+
     private fun setupMarkers() {
         aimMarker = Marker(binding.mapView)
         disruptionMarker = Marker(binding.mapView)
@@ -200,7 +194,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         exactTarget = Marker(binding.mapView)
         exactTarget.setVisible(false)
         droneMarker.isFlat = true
-        
+
         drawMarker(
             exactTarget, Technic(
                 coordinates = Coordinates(x = 32.0, y = 0.0), technicTypes = TechnicTypes.ANOTHER
@@ -227,7 +221,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             )
         )
     }
-    
+
     private fun setupCorrectionButton() {
         binding.correctionButton.setOnClickListener {
             if (correctionAngRad != 0.0) {
@@ -241,7 +235,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             findCorrectionAngle()
         }
     }
-    
+
     private fun setupDisruptionButtons() {
         var isAimVisible = false
         var isDisruptionVisible = false
@@ -263,7 +257,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             }
             showDisruptionInf(isAimVisible, isDisruptionVisible)
         }
-        
+
         binding.disruptionButton.setOnClickListener {
             if (isDisruptionVisible) {
                 isDisruptionVisible = false
@@ -279,7 +273,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             }
             showDisruptionInf(isAimVisible, isDisruptionVisible)
         }
-        
+
         binding.sightingCard.setOnClickListener {
             val clipboard: ClipboardManager =
                 requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -288,14 +282,14 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             val copiedText = "$horizontalSighting, $verticalSighting"
             val clip = ClipData.newPlainText("sighting", copiedText)
             clipboard.setPrimaryClip(clip)
-            
+
             Toast.makeText(
                 requireContext(),
                 "Скопировано ${clipboard.primaryClip?.getItemAt(0)?.text.toString()}",
                 Toast.LENGTH_LONG
             ).show()
         }
-        
+
         binding.resetButton.visibility = View.INVISIBLE
         binding.resetButton.setOnClickListener {
             pointCalibration.reset()
@@ -317,13 +311,18 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                     val division = divisionHandler.getDivision(requireContext())
                     exactTarget.setVisible(true)
                     exactTarget.position = res
-                    addClickListenerToMark(exactTarget, TechnicTypes.ANOTHER, division!!)
+                    val technic = Technic(
+                        coordinates = Coordinates(
+                            x = exactTarget.position.latitude, y = exactTarget.position.longitude
+                        ), technicTypes = TechnicTypes.ANOTHER, division = division
+                    )
+                    addClickListenerToMark(exactTarget, technic)
                 }
                 binding.intersectionButton.visibility = View.INVISIBLE
             }
         }
     }
-    
+
     @SuppressLint("SetTextI18n")
     private fun showDisruptionInf(isAimVisible: Boolean, isDisruptionVisible: Boolean) {
         if (isAimVisible && isDisruptionVisible) {
@@ -331,7 +330,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             val yOfAim = doubleArrayOf(0.0)
             val xOfDisruption = doubleArrayOf(0.0)
             val yOfDisruption = doubleArrayOf(0.0)
-            
+
             NGeoCalc().wgs84ToPlane(
                 xOfAim,
                 yOfAim,
@@ -340,7 +339,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                 NGeoCalc.degreesToRadians(aimMarker.position.longitude),
                 0.0
             )
-            
+
             NGeoCalc().wgs84ToPlane(
                 xOfDisruption,
                 yOfDisruption,
@@ -349,26 +348,26 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                 NGeoCalc.degreesToRadians(disruptionMarker.position.longitude),
                 0.0
             )
-            
+
             val xOfAimResult = Integer.valueOf(xOfAim[0].toInt())
             val yOfAimResult = Integer.valueOf(yOfAim[0].toInt())
-            
+
             val xOfDisruptionResult = Integer.valueOf(xOfDisruption[0].toInt())
             val yOfDisruptionResult = Integer.valueOf(yOfDisruption[0].toInt())
-            
+
             val horizontal = abs(xOfAimResult) - abs(xOfDisruptionResult)
             val vertical = abs(yOfAimResult) - abs(yOfDisruptionResult)
-            
+
             if (horizontal > 0) binding.sightingHorizontal.text = "Юг ${abs(horizontal)}m"
             else binding.sightingHorizontal.text = "Север ${abs(horizontal)}m"
-            
+
             if (vertical > 0) binding.sightingVertical.text = "Запад ${abs(vertical)}m"
             else binding.sightingVertical.text = "Восток ${abs(vertical)}m"
-            
+
             binding.sightingCard.isVisible = true
         } else binding.sightingCard.isGone = true
     }
-    
+
     private fun setupLastSessionState() {
         osmdroidViewModel.getSessionState()
         
@@ -527,7 +526,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                     
                     listOfTechnic.add(mark)
                     technic.division?.let {
-                        addClickListenerToMark(mark, technic.technicTypes, technic.division)
+                        addClickListenerToMark(mark, technic)
                     }
                 }
             }
@@ -550,24 +549,24 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             count = technicList.size + 1
             val mark: Marker = if (coords != null) setMark(coords.x, coords.y, type)
             else setMark(cameraPosition.latitude, cameraPosition.longitude, type)
-            
-            addClickListenerToMark(mark, type, division)
-            osmdroidViewModel.saveTechnic(
-                Technic(
-                    id = count, technicTypes = type, coordinates = Coordinates(
-                        x = mark.position.latitude, y = mark.position.longitude
-                    ), division = division
-                )
+
+            val elevation = getElevation(
+                roundToFourDecimalPlaces(mark.position.altitude),
+                roundToFourDecimalPlaces(mark.position.longitude)
+            ).toDouble()
+
+            val technic = Technic(
+                id = count, technicTypes = type, coordinates = Coordinates(
+                    x = mark.position.latitude, y = mark.position.longitude, h = elevation
+                ), division = division
             )
+
+            addClickListenerToMark(mark, technic)
+            osmdroidViewModel.saveTechnic(technic)
         }
     }
     
-    private fun addClickListenerToMark(mark: Marker, type: TechnicTypes, division: String) {
-        val technic = Technic(
-            coordinates = Coordinates(
-                x = mark.position.latitude, y = mark.position.longitude
-            ), technicTypes = type, division = division
-        )
+    private fun addClickListenerToMark(mark: Marker, technic: Technic) {
         mark.setOnMarkerClickListener { marker, mapView ->
             val targetFragment = TargetFragment(
                 technic = technic,
@@ -575,24 +574,20 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
                     override fun onBroadcastButtonClick(destinationId: String, technic: Technic) {
                         sendMessage(destinationId, technic)
                     }
-                    
+
                     override fun deleteTechnic() {
                         binding.mapView.overlays.remove(mark)
                         listOfTechnic.remove(mark)
                         osmdroidViewModel.deleteTechnic(technic)
                         binding.mapView.invalidate()
                     }
-                },
-                altitude = getElevation(
-                    roundToFourDecimalPlaces(mark.position.altitude),
-                    roundToFourDecimalPlaces(mark.position.longitude)
-                ).toDouble()
+                }
             )
             targetFragment.show(parentFragmentManager, "targFragment")
             true
         }
     }
-    
+
     override fun findGeoPoint() {
         val findGeoPointFragment = FindGeoPointFragment(object : FindGeoPointCallback {
             override fun findGeoPoint(geoPoint: GeoPoint) {
@@ -601,10 +596,10 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         })
         findGeoPointFragment.show(parentFragmentManager, "findGeoPointFragment")
     }
-    
+
     override fun showAllTargets() { // TODO:
     }
-    
+
     private fun setMark(
         latitude: Double, longitude: Double, type: TechnicTypes
     ): Marker {
@@ -617,7 +612,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         listOfTechnic.add(mark)
         return mark
     }
-    
+
     private fun drawMarker(mark: Marker? = null, technic: Technic): Marker {
         var marker = mark
         if (marker == null) marker = Marker(binding.mapView)
@@ -626,10 +621,10 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         binding.mapView.overlays.add(marker)
         marker.icon = getDrawable(requireContext(), ImageTypes.imageMap[technic.technicTypes]!!)
         binding.mapView.invalidate()
-        
+
         return marker
     }
-    
+
     override fun showDataFromDrone(entities: List<Entity>) {
         droneMarker.rotation = -entities[0].asim.toFloat()
         if (entities[0].lat.isNaN() && entities[0].lon.isNaN()) {
@@ -640,15 +635,15 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         val cameraTarget =
             GeoPoint(binding.mapView.mapCenter.latitude, binding.mapView.mapCenter.longitude)
         droneMarker.setVisible(true)
-        
+
         getData.setDroneData(entities[0], Math.toDegrees(correctionAngRad))
-        
+
         val frontSightGeoPoint = GeoPoint(getData.target.lat, getData.target.lon)
         frontSightMarker.position = frontSightGeoPoint
         updatePolyline(
             polylineToFrontSight, listOf(droneMarker.position, frontSightMarker.position)
         )
-        
+
         if (entities[0].calc_target == 4) {
             pointCalibration.rememberPoint(
                 GeoPoint(entities[0].lat, entities[0].lon),
@@ -682,9 +677,9 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             )
             listOfTechnic.add(marker)
         }
-        
+
         showGeoInformation(binding, cameraTarget, droneMarker.position)
-        
+
         if (entities[0].calc_target == 1) {
             val divisionHandler = requireActivity() as DivisionHandler
             if (divisionHandler.checkDivision(requireContext())) {
@@ -700,7 +695,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             }
         }
     }
-    
+
     private fun findCorrectionAngle() {
         val polylineToCenterAzimuth =
             MapTools.angleBetween(
@@ -719,18 +714,18 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             angle += 360
         Toast.makeText(requireContext(), "Угол коррекции: " + angle, Toast.LENGTH_SHORT).show()
     }
-    
+
     private fun focusCamera(point: GeoPoint) {
         binding.mapView.controller.animateTo(point)
         binding.mapView.controller.zoomIn()
     }
-    
+
     override fun showLocationDialog() {
         showLocationDialog(requireContext(), object : LocationDialogCallback {
             override fun focusCamera() {
                 focusCamera(frontSightMarker.position)
             }
-            
+
             override fun findMyLocation() {
                 if (checkGPS(requireActivity())) locationOverlay?.let {
                     if (it.myLocation != null) focusCamera(it.myLocation)
@@ -738,7 +733,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
             }
         })
     }
-    
+
     private fun initMyLocation() {
         val provider = GpsMyLocationProvider(requireContext())
         provider.addLocationSource(LocationManager.GPS_PROVIDER)
@@ -746,7 +741,7 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         locationOverlay?.enableMyLocation()
         binding.mapView.overlayManager.add(locationOverlay)
     }
-    
+
     override fun deleteAll() = binding.run {
         mapView.overlays.removeAll(listOfTechnic)
         osmdroidViewModel.deleteAll()
@@ -754,11 +749,11 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         binding.mapView.invalidate()
         return@run
     }
-    
+
     override fun offlineMode() {
         offlineMode(binding.mapView, requireContext())
     }
-    
+
     override fun changeGridState(isGrid: Boolean) {
         if (isGrid) {
             binding.mapView.overlays.add(overlayGrid)
@@ -769,24 +764,24 @@ class OsmdroidFragment : Fragment(), IMap, RemoteDatabaseHandler by RemoteDataba
         }
         binding.mapView.invalidate()
     }
-    
+
     override fun onResume() {
         super.onResume()
         binding.mapView.onResume()
         locationOverlay?.enableMyLocation()
     }
-    
+
     override fun onPause() {
         super.onPause()
         binding.mapView.onPause()
         locationOverlay?.disableMyLocation()
     }
-    
+
     override fun onDetach() {
         super.onDetach()
         binding.mapView.onDetach()
     }
-    
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         osmdroidViewModel.onSaveInstanceState(

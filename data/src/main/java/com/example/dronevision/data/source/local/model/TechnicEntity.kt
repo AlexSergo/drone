@@ -10,5 +10,6 @@ data class TechnicEntity(
     val type: String,
     val x: Double,
     val y: Double,
+    val h: Double = 0.0,
     val division: String? = null
 )
