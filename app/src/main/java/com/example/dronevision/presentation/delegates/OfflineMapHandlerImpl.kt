@@ -14,7 +14,8 @@ import java.io.File
 
 class OfflineMapHandlerImpl: OfflineMapHandler {
     private val rootDirName = Environment.getExternalStorageDirectory().path
-    private val dirName = "$rootDirName/Drone Vision/"
+
+    private lateinit var dirName: String
     
     override fun offlineMode(mapView: MapView, context: Context) {
         createAppFolder()
@@ -22,6 +23,7 @@ class OfflineMapHandlerImpl: OfflineMapHandler {
     }
     
     private fun chooseFileName(mapView: MapView, context: Context) {
+        dirName = "${context.applicationInfo.dataDir}/files/"
         val folder = File(dirName)
         val listOfFiles = folder.listFiles()!!
         
@@ -58,9 +60,7 @@ class OfflineMapHandlerImpl: OfflineMapHandler {
     
     override fun openFile(fileName: String, mapView: MapView, context: Context) {
         OfflineOpenFileManager(context).addFileName(fileName)
-        val path =
-            Environment.getExternalStorageDirectory().path + "/Drone Vision/" + fileName
-        val exitFile = File(path)
+        val exitFile = File(dirName)
         try {
             mapView.tileProvider = OfflineTileProvider(
                 SimpleRegisterReceiver(context),
