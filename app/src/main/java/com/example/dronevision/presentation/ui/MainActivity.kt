@@ -32,10 +32,7 @@ import com.example.dronevision.databinding.ActivityMainBinding
 import com.example.dronevision.domain.model.Coordinates
 import com.example.dronevision.domain.model.TechnicTypes
 import com.example.dronevision.presentation.DownloadController
-import com.example.dronevision.presentation.delegates.BluetoothHandler
-import com.example.dronevision.presentation.delegates.BluetoothHandlerImpl
-import com.example.dronevision.presentation.delegates.DivisionHandler
-import com.example.dronevision.presentation.delegates.DivisionHandlerImpl
+import com.example.dronevision.presentation.delegates.*
 import com.example.dronevision.presentation.mapper.TechnicMapperUI
 import com.example.dronevision.presentation.model.Technic
 import com.example.dronevision.presentation.model.bluetooth.BluetoothListItem
@@ -62,7 +59,8 @@ import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerImpl(),
     DivisionHandler by DivisionHandlerImpl(),
-    NavigationView.OnNavigationItemSelectedListener, MapActivityListener, OpenDialogCallback {
+    NavigationView.OnNavigationItemSelectedListener, MapActivityListener, OpenDialogCallback,
+    UsbHandler by UsbHandlerImpl(){
     
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
@@ -82,7 +80,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
         setContentView(binding.root)
         Device.getDeviceId(applicationContext)
        auth()
-       // initUsb()
+        initUsb()
         downloadController = DownloadController(this)
         PermissionTools.checkAndRequestPermissions(this)
         createAppFolder()
@@ -139,28 +137,7 @@ class MainActivity : AppCompatActivity(), BluetoothHandler by BluetoothHandlerIm
     }
 
     fun initUsb(){
-        val manager = getSystemService(Context.USB_SERVICE) as UsbManager?
-        val availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager)
-        if (availableDrivers.isEmpty()) {
-            Toast.makeText(applicationContext, "Нет соединения с Р-187-П1", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // Open a connection to the first available driver.
-        val driver = availableDrivers[0]
-        val connection = manager!!.openDevice(driver.device)
-        if (connection != null){
-            val port = driver.ports[0] // Most devices have just one port (port 0)
-
-            try {
-                port.open(connection)
-                port.setParameters(921600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
-                port.write("AT\$SERIALMODE=1\r\n".toByteArray(), 300)
-                port.write("request".toByteArray(), 300);
-            }catch (_: IOException){
-
-            }
-        }
+        setupUsbConnection(context = this, usbManager = getSystemService(Context.USB_SERVICE) as UsbManager?)
     }
     
     override fun showMessage(message: String) {
